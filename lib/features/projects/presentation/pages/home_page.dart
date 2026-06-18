@@ -14,7 +14,6 @@ final _mockProjects = [
     workType: WorkType.floor,
     city: 'CDMX',
     status: ProjectStatus.completed,
-    scannedAreaM2: 18.5,
     createdAt: DateTime.now().subtract(const Duration(days: 2)),
     estimateId: 'est_001',
   ),
@@ -23,8 +22,7 @@ final _mockProjects = [
     name: 'Cocina - Polanco',
     workType: WorkType.wall,
     city: 'CDMX',
-    status: ProjectStatus.processing,
-    scannedAreaM2: 32.0,
+    status: ProjectStatus.active,
     createdAt: DateTime.now().subtract(const Duration(hours: 4)),
   ),
   Project(
@@ -32,7 +30,7 @@ final _mockProjects = [
     name: 'Terraza - Guadalajara',
     workType: WorkType.ceiling,
     city: 'Guadalajara',
-    status: ProjectStatus.scanning,
+    status: ProjectStatus.active,
     createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
   ),
 ];
@@ -149,8 +147,9 @@ class _HomePageState extends State<HomePage> {
                       context.push(
                           '${AppRoutes.budget}?projectId=${_mockProjects[i].id}');
                     } else {
+                      // Simula ir al detalle o crear presupuesto
                       context.push(
-                          '${AppRoutes.scanner}?projectId=${_mockProjects[i].id}');
+                          '${AppRoutes.budget}?projectId=${_mockProjects[i].id}');
                     }
                   },
                 ),
@@ -184,13 +183,13 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
 
-      // FAB — Escanear
+      // FAB — Nuevo Proyecto
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(AppRoutes.scanner),
+        onPressed: () => context.push(AppRoutes.createProject),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
-        icon: const Icon(Icons.view_in_ar),
-        label: const Text('Escanear'),
+        icon: const Icon(Icons.add),
+        label: const Text('Nuevo Proyecto'),
         elevation: 0,
       ),
       floatingActionButtonLocation:
@@ -274,7 +273,7 @@ class _CreateProjectButton extends StatelessWidget {
                 Text('Nuevo Proyecto',
                     style: AppTypography.textTheme.titleLarge),
                 Text(
-                  'Escanea una superficie y presupuesta',
+                  'Crea un nuevo proyecto y presupuesto',
                   style: AppTypography.textTheme.bodySmall,
                 ),
               ],
@@ -299,10 +298,8 @@ class _ProjectCard extends StatelessWidget {
     switch (project.status) {
       case ProjectStatus.completed:
         return AppColors.success;
-      case ProjectStatus.processing:
+      case ProjectStatus.active:
         return AppColors.accent;
-      case ProjectStatus.scanning:
-        return AppColors.warning;
       case ProjectStatus.archived:
         return AppColors.textHint;
     }
@@ -352,14 +349,6 @@ class _ProjectCard extends StatelessWidget {
                       const SizedBox(width: 3),
                       Text(project.city,
                           style: AppTypography.textTheme.bodySmall),
-                      if (project.scannedAreaM2 != null) ...[
-                        const SizedBox(width: 10),
-                        Text(
-                          project.scannedAreaM2!.toM2,
-                          style: AppTypography.textTheme.bodySmall
-                              ?.copyWith(color: AppColors.primary),
-                        ),
-                      ],
                     ],
                   ),
                 ],
