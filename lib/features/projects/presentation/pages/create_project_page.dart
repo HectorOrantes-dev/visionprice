@@ -33,7 +33,7 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
   void _create() {
     if (!_formKey.currentState!.validate()) return;
     // TODO: Disparar CreateProjectUseCase
-    context.go(AppRoutes.scanner);
+    context.pop();
   }
 
   @override
@@ -62,7 +62,7 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Solo 3 datos y comenzamos el escaneo',
+                  'Solo 3 datos para comenzar',
                   style: AppTypography.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 36),
@@ -128,17 +128,8 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
                 // CTA
                 ElevatedButton.icon(
                   onPressed: _create,
-                  icon: const Icon(Icons.view_in_ar, size: 22),
-                  label: const Text('Iniciar Escaneo'),
-                ),
-
-                const SizedBox(height: 12),
-                Center(
-                  child: Text(
-                    'El escaneo AR tomará aproximadamente 30 segundos',
-                    style: AppTypography.textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
+                  icon: const Icon(Icons.check, size: 22),
+                  label: const Text('Crear Proyecto'),
                 ),
               ],
             ),
