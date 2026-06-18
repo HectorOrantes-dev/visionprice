@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 /// Jerarquía de Failures para la capa Domain
 /// Uso con dartz Either<Failure, T>
 sealed class Failure extends Equatable {
-  const Failure({this.message = 'Error desconocido'});
+  const Failure([this.message = 'Error desconocido']);
   final String message;
 
   @override
@@ -12,17 +12,17 @@ sealed class Failure extends Equatable {
 
 /// Error de red (sin conexión, timeout)
 final class NetworkFailure extends Failure {
-  const NetworkFailure({super.message = 'Sin conexión a internet'});
+  const NetworkFailure([super.message = 'Sin conexión a internet']);
 }
 
 /// Error de autenticación (JWT expirado, no autorizado)
 final class AuthFailure extends Failure {
-  const AuthFailure({super.message = 'Sesión expirada. Inicia sesión nuevamente'});
+  const AuthFailure([super.message = 'Sesión expirada. Inicia sesión nuevamente']);
 }
 
 /// Error del servidor (500, 503)
 final class ServerFailure extends Failure {
-  const ServerFailure({required super.message, this.statusCode});
+  const ServerFailure(super.message, [this.statusCode]);
   final int? statusCode;
 
   @override
@@ -31,20 +31,20 @@ final class ServerFailure extends Failure {
 
 /// Recurso no encontrado (404)
 final class NotFoundFailure extends Failure {
-  const NotFoundFailure({super.message = 'Recurso no encontrado'});
+  const NotFoundFailure([super.message = 'Recurso no encontrado']);
 }
 
 /// Error de validación / entrada de datos
 final class ValidationFailure extends Failure {
-  const ValidationFailure({required super.message});
+  const ValidationFailure(super.message);
 }
 
 /// Error de caché local (Hive)
 final class CacheFailure extends Failure {
-  const CacheFailure({super.message = 'Error al leer datos locales'});
+  const CacheFailure([super.message = 'Error al leer datos locales']);
 }
 
 /// Error al exportar PDF
 final class ExportFailure extends Failure {
-  const ExportFailure({super.message = 'Error al generar el PDF'});
+  const ExportFailure([super.message = 'Error al generar el PDF']);
 }
