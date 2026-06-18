@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Línea individual de material en el presupuesto
-final class EstimateLine extends Equatable {
+class EstimateLine extends Equatable {
   const EstimateLine({
     required this.id,
     required this.materialId,
@@ -77,7 +77,7 @@ final class EstimateLine extends Equatable {
 }
 
 /// Presupuesto completo de un proyecto
-final class Estimate extends Equatable {
+class Estimate extends Equatable {
   const Estimate({
     required this.id,
     required this.projectId,

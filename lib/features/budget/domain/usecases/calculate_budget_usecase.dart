@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/estimate.dart';
 import '../repositories/budget_repository.dart';
 
-/// Caso de uso: Obtener presupuesto de un proyecto
-/// Responsabilidad única: delegar al repositorio y devolver el resultado
+/// Caso de uso: Obtener presupuesto de un proyecto.
+@injectable
 final class GetBudgetUseCase {
   const GetBudgetUseCase(this._repository);
 
@@ -15,7 +16,8 @@ final class GetBudgetUseCase {
   }
 }
 
-/// Caso de uso: Exportar presupuesto a PDF
+/// Caso de uso: Exportar presupuesto a PDF.
+@injectable
 final class ExportPdfUseCase {
   const ExportPdfUseCase(this._repository);
 
@@ -26,8 +28,8 @@ final class ExportPdfUseCase {
   }
 }
 
-/// Caso de uso: Calcular presupuesto en tiempo real
-/// (Actualizar contingencia)
+/// Caso de uso: Actualizar el porcentaje de contingencia.
+@injectable
 final class UpdateContingencyUseCase {
   const UpdateContingencyUseCase(this._repository);
 

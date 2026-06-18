@@ -1,8 +1,8 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:equatable/equatable.dart';
 
-/// Entidad User — capa Domain
-final class User {
+/// Entidad User — capa Domain.
+/// No depende de ningún framework externo.
+class User extends Equatable {
   const User({
     required this.id,
     required this.name,
@@ -32,26 +32,7 @@ final class User {
       isBiometricEnabled: isBiometricEnabled ?? this.isBiometricEnabled,
     );
   }
-}
 
-/// Contrato de repositorio de autenticación
-abstract interface class AuthRepository {
-  Future<Either<Failure, User>> login({
-    required String email,
-    required String password,
-  });
-
-  Future<Either<Failure, User>> register({
-    required String name,
-    required String email,
-    required String password,
-  });
-
-  Future<Either<Failure, User>> loginWithBiometrics();
-
-  Future<Either<Failure, void>> logout();
-
-  Future<Either<Failure, bool>> enableBiometrics();
-
-  Future<User?> getCurrentUser();
+  @override
+  List<Object?> get props => [id, name, email, avatarUrl, isBiometricEnabled];
 }
