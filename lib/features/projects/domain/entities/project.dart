@@ -14,8 +14,7 @@ enum WorkType {
 
 /// Estado del proyecto
 enum ProjectStatus {
-  scanning('Escaneando'),
-  processing('Procesando'),
+  active('Activo'),
   completed('Completado'),
   archived('Archivado');
 
@@ -25,7 +24,7 @@ enum ProjectStatus {
 
 /// Entidad pura Project — capa Domain
 /// No depende de ningún framework externo
-final class Project extends Equatable {
+class Project extends Equatable {
   const Project({
     required this.id,
     required this.name,
@@ -33,8 +32,6 @@ final class Project extends Equatable {
     required this.city,
     required this.status,
     required this.createdAt,
-    this.scannedAreaM2,
-    this.meshUrl,
     this.updatedAt,
     this.estimateId,
   });
@@ -44,14 +41,9 @@ final class Project extends Equatable {
   final WorkType workType;
   final String city;
   final ProjectStatus status;
-  final double? scannedAreaM2;
-  final String? meshUrl;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final String? estimateId;
-
-  /// ¿Tiene malla 3D disponible?
-  bool get hasMesh => meshUrl != null && meshUrl!.isNotEmpty;
 
   /// ¿Tiene presupuesto generado?
   bool get hasEstimate => estimateId != null;
@@ -59,9 +51,7 @@ final class Project extends Equatable {
   /// Porcentaje de progreso del flujo (0.0 a 1.0)
   double get completionProgress {
     switch (status) {
-      case ProjectStatus.scanning:
-        return 0.25;
-      case ProjectStatus.processing:
+      case ProjectStatus.active:
         return 0.5;
       case ProjectStatus.completed:
         return 1.0;
@@ -76,8 +66,6 @@ final class Project extends Equatable {
     WorkType? workType,
     String? city,
     ProjectStatus? status,
-    double? scannedAreaM2,
-    String? meshUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? estimateId,
@@ -88,8 +76,6 @@ final class Project extends Equatable {
       workType: workType ?? this.workType,
       city: city ?? this.city,
       status: status ?? this.status,
-      scannedAreaM2: scannedAreaM2 ?? this.scannedAreaM2,
-      meshUrl: meshUrl ?? this.meshUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       estimateId: estimateId ?? this.estimateId,
@@ -103,8 +89,6 @@ final class Project extends Equatable {
         workType,
         city,
         status,
-        scannedAreaM2,
-        meshUrl,
         createdAt,
         updatedAt,
         estimateId,

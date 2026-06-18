@@ -1,15 +1,23 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
-/// Instancia global de GetIt
+import 'injection.config.dart';
+
+/// Instancia global de GetIt — accesible desde cualquier capa.
+///
+/// Uso en ViewModels:
+/// ```dart
+/// GetProjectsUseCase get _getProjects => getIt<GetProjectsUseCase>();
+/// ```
 final getIt = GetIt.instance;
 
-/// Configura todas las dependencias de la app
-/// Llamar desde main() antes de runApp()
+/// Inicializa todas las dependencias de la app.
+/// Debe llamarse en [main()] antes de [runApp()].
 ///
-/// Uso:
-/// ```dart
-/// await configureDependencies();
+/// El archivo [injection.config.dart] es generado automáticamente por
+/// `injectable_generator` al ejecutar:
+/// ```bash
+/// dart run build_runner build --delete-conflicting-outputs
 /// ```
 @InjectableInit(
   initializerName: 'init',

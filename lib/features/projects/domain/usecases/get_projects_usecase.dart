@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/project.dart';
 import '../repositories/project_repository.dart';
 
-/// Caso de uso: Obtener lista de proyectos
+/// Caso de uso: Obtener lista de proyectos.
+@injectable
 final class GetProjectsUseCase {
   const GetProjectsUseCase(this._repository);
 
@@ -14,7 +16,7 @@ final class GetProjectsUseCase {
   }
 }
 
-/// Parámetros para creación de proyecto
+/// Parámetros para creación de proyecto.
 final class CreateProjectParams {
   const CreateProjectParams({
     required this.name,
@@ -27,7 +29,8 @@ final class CreateProjectParams {
   final String city;
 }
 
-/// Caso de uso: Crear proyecto nuevo
+/// Caso de uso: Crear proyecto nuevo.
+@injectable
 final class CreateProjectUseCase {
   const CreateProjectUseCase(this._repository);
 
