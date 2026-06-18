@@ -28,3 +28,10 @@ class CacheException implements Exception {
   const CacheException([this.message = 'Error de caché local']);
   final String message;
 }
+
+class AuthException implements Exception {
+  const AuthException([this.message = 'Error de autenticación']);
+  final String message;
+  @override
+  String toString() => 'AuthException: $message';
+}

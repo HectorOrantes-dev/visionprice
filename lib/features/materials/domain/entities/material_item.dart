@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Precio de un proveedor para un material
-final class SupplierPrice extends Equatable {
+class SupplierPrice extends Equatable {
   const SupplierPrice({
     required this.supplier,
     required this.pricePerUnit,
@@ -30,7 +30,7 @@ final class SupplierPrice extends Equatable {
 }
 
 /// Material con precios de múltiples proveedores
-final class MaterialItem extends Equatable {
+class MaterialItem extends Equatable {
   const MaterialItem({
     required this.id,
     required this.name,
