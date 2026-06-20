@@ -55,6 +55,11 @@ dependencies:
   json_annotation: ^4.9.0
   uuid: ^4.4.0
 
+  # Security (RASP + Fake GPS)
+  safe_device: ^1.3.10
+  geolocator: ^14.0.2
+  permission_handler: ^12.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
