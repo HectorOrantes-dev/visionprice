@@ -13,6 +13,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // Requerido por flutter_local_notifications (APIs Java 8+ en minSdk bajos).
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -31,10 +33,27 @@ android {
         release {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+
+            // ─── Ofuscación y minimización del código nativo (R8/ProGuard) ───
+            // isMinifyEnabled  → activa R8: renombra clases/métodos y elimina
+            //                    código no usado (shrinking + obfuscation).
+            // isShrinkResources→ elimina recursos no referenciados.
+            // proguardFiles    → reglas por defecto optimizadas + reglas propias.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Soporte de desugaring para flutter_local_notifications.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
