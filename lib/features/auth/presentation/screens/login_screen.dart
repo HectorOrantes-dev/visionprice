@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../security/services/notification_service.dart';
 import '../providers/login_provider.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 
@@ -14,6 +15,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController(text: 'miguel.angel@obra.mx');
   final _passwordController = TextEditingController(text: '••••••••••');
+
+  @override
+  void initState() {
+    super.initState();
+    // Obtiene el token FCM del dispositivo (null si Firebase no está configurado).
+    NotificationService.getToken();
+  }
 
   @override
   void dispose() {
