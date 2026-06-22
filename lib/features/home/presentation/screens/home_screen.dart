@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
 import '../../../sync/presentation/screens/sync_queue_screen.dart';
+import '../../../security/presentation/screens/inactivity_detector.dart';
+import '../../../security/presentation/screens/sensitive_data_screen.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,17 +20,35 @@ class _HomeScreenState extends State<HomeScreen> {
     _DashboardTab(),
     _MisObrasTab(),
     SyncQueueScreen(),
-    _PerfilTab(),
+    SizedBox.shrink(), // index 3 (Perfil) se construye con onLogout en build()
   ];
+
+  /// Cierra la sesión y regresa al login limpiando la pila de navegación.
+  void _logout({String? reason}) {
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+    if (reason != null) {
+      messenger.showSnackBar(SnackBar(content: Text(reason)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: _pages[_currentIndex],
-      bottomNavigationBar: _BottomNav(
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+    // Toda la zona autenticada queda protegida por el detector de inactividad.
+    return InactivityDetector(
+      onTimeout: () => _logout(reason: 'Sesión cerrada por inactividad.'),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: _currentIndex == 3
+            ? _PerfilTab(onLogout: () => _logout())
+            : _pages[_currentIndex],
+        bottomNavigationBar: _BottomNav(
+          currentIndex: _currentIndex,
+          onTap: (i) => setState(() => _currentIndex = i),
+        ),
       ),
     );
   }
@@ -417,18 +438,102 @@ class _MisObrasTab extends StatelessWidget {
 }
 
 class _PerfilTab extends StatelessWidget {
-  const _PerfilTab();
+  final VoidCallback onLogout;
+
+  const _PerfilTab({required this.onLogout});
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
-      child: Center(
-        child: Text(
-          'Perfil',
-          style: TextStyle(
-            fontSize: 18,
-            color: AppColors.textSecondary,
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const SizedBox(height: 8),
+          Center(
+            child: CircleAvatar(
+              radius: 36,
+              backgroundColor: AppColors.primaryLight,
+              child: const Icon(Icons.person,
+                  size: 40, color: AppColors.primary),
+            ),
           ),
+          const SizedBox(height: 12),
+          const Center(
+            child: Text(
+              'Roberto Maestro',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          const Center(
+            child: Text(
+              'miguel.angel@obra.mx',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+          ),
+          const SizedBox(height: 28),
+          _ProfileItem(
+            icon: Icons.shield_outlined,
+            label: 'Datos sensibles',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SensitiveDataScreen()),
+            ),
+          ),
+          const SizedBox(height: 10),
+          _ProfileItem(
+            icon: Icons.logout,
+            label: 'Cerrar sesión',
+            danger: true,
+            onTap: onLogout,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool danger;
+
+  const _ProfileItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.danger = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = danger ? AppColors.error : AppColors.textPrimary;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: color),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.w600, color: color),
+            ),
+            const Spacer(),
+            Icon(Icons.chevron_right, size: 20, color: AppColors.textHint),
+          ],
         ),
       ),
     );
