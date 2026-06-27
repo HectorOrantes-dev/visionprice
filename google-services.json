@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "799934887493",
+    "project_id": "visionprice-33a3e",
+    "storage_bucket": "visionprice-33a3e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799934887493:android:f3d55162a0161dfa60952c",
+        "android_client_info": {
+          "package_name": "com.visionprice.vision_price"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnj8qWW-UOdv5PFz3X4rhNqK4IUmh9IXE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
