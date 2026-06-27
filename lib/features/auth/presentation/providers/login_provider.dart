@@ -1,21 +1,50 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
-enum LoginState { idle, loading, success, error }
+import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/validation_mixin.dart';
+import '../../domain/usecases/auth_usecases.dart';
 
-class LoginViewModel extends ChangeNotifier {
+/// Flujo del login:
+/// - [idle] → estado inicial.
+/// - [loading] → petición en curso.
+/// - [codeSent] → el back-end mandó el código 2FA al correo (paso 1 ok).
+/// - [success] → 2FA verificado, token guardado.
+/// - [error] → ver [errorMessage].
+enum LoginState { idle, loading, codeSent, success, error }
+
+/// ViewModel del login. `@injectable` (factory): `getIt<LoginViewModel>()`
+/// crea una instancia nueva por pantalla, con sus use cases ya inyectados.
+///
+/// Usa [ValidationMixin] para la validación de formularios (sin duplicar).
+@injectable
+class LoginViewModel extends ChangeNotifier with ValidationMixin {
+  final LoginUseCase _loginUseCase;
+  final VerifyTwoFactorUseCase _verifyUseCase;
+  final GoogleLoginUseCase _googleLoginUseCase;
+
+  LoginViewModel(
+    this._loginUseCase,
+    this._verifyUseCase,
+    this._googleLoginUseCase,
+  );
+
   LoginState _state = LoginState.idle;
   String? _errorMessage;
+  String _correo = '';
   bool _keepSession = true;
   bool _obscurePassword = true;
 
   String? emailError;
   String? passwordError;
+  String? codeError;
 
   LoginState get state => _state;
   String? get errorMessage => _errorMessage;
   bool get keepSession => _keepSession;
   bool get obscurePassword => _obscurePassword;
   bool get isLoading => _state == LoginState.loading;
+  bool get requiresTwoFactor => _state == LoginState.codeSent;
 
   void toggleKeepSession() {
     _keepSession = !_keepSession;
@@ -27,54 +56,85 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void validateEmail(String value) {
-    if (value.isEmpty) {
-      emailError = null;
-    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-      emailError = 'Ingresa un correo válido';
-    } else {
-      emailError = null;
-    }
+  void onEmailChanged(String value) {
+    emailError = value.isEmpty ? null : validateEmail(value);
     notifyListeners();
   }
 
-  void validatePassword(String value) {
-    if (value.isEmpty) {
-      passwordError = null;
-    } else if (value.length < 8) {
-      passwordError = 'Mínimo 8 caracteres';
-    } else {
-      passwordError = null;
-    }
+  void onPasswordChanged(String value) {
+    passwordError = value.isEmpty ? null : validatePassword(value);
     notifyListeners();
   }
 
+  /// Paso 1: valida y dispara el envío del código 2FA al correo.
   Future<void> login({
     required String email,
     required String password,
+  }) async {
+    emailError = validateEmail(email);
+    passwordError = validatePassword(password);
+    if (emailError != null || passwordError != null) {
+      notifyListeners();
+      return;
+    }
+
+    _correo = email;
+    _setLoading();
+    try {
+      await _loginUseCase(correo: email, contrasena: password);
+      _state = LoginState.codeSent;
+      notifyListeners();
+    } catch (e) {
+      _fail(e);
+    }
+  }
+
+  /// Paso 2: verifica el código y, si es correcto, deja la sesión lista.
+  Future<void> verifyCode({
+    required String code,
     required VoidCallback onSuccess,
   }) async {
-    if (email.isEmpty) {
-      emailError = 'El correo es obligatorio';
+    codeError = validateCode(code);
+    if (codeError != null) {
       notifyListeners();
       return;
     }
-    if (password.isEmpty) {
-      passwordError = 'La contraseña es obligatoria';
+
+    _setLoading();
+    try {
+      await _verifyUseCase(correo: _correo, code: code);
+      _state = LoginState.success;
       notifyListeners();
-      return;
+      onSuccess();
+    } catch (e) {
+      _fail(e);
     }
-    if (emailError != null || passwordError != null) return;
+  }
 
-    _state = LoginState.loading;
-    _errorMessage = null;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 1));
-
-    _state = LoginState.success;
-    notifyListeners();
-    onSuccess();
+  /// Login con Google. Lanza al callback [onNeedsRegister] si el back-end
+  /// responde 404 (usuario no registrado con Google).
+  Future<void> loginWithGoogle({
+    required String idToken,
+    required VoidCallback onSuccess,
+    required VoidCallback onNeedsRegister,
+  }) async {
+    _setLoading();
+    try {
+      await _googleLoginUseCase(idToken: idToken);
+      _state = LoginState.success;
+      notifyListeners();
+      onSuccess();
+    } on ApiException catch (e) {
+      if (e.isNotFound) {
+        _state = LoginState.idle;
+        notifyListeners();
+        onNeedsRegister();
+      } else {
+        _fail(e);
+      }
+    } catch (e) {
+      _fail(e);
+    }
   }
 
   void reset() {
@@ -82,6 +142,20 @@ class LoginViewModel extends ChangeNotifier {
     _errorMessage = null;
     emailError = null;
     passwordError = null;
+    codeError = null;
+    notifyListeners();
+  }
+
+  void _setLoading() {
+    _state = LoginState.loading;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  void _fail(Object error) {
+    _state = LoginState.error;
+    _errorMessage =
+        error is ApiException ? error.message : 'Ocurrió un error inesperado';
     notifyListeners();
   }
 }
