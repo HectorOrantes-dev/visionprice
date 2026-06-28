@@ -16,6 +16,7 @@ class LoginViewModel extends ChangeNotifier {
   bool get keepSession => _keepSession;
   bool get obscurePassword => _obscurePassword;
   bool get isLoading => _state == LoginState.loading;
+  String currentUserRole = 'maestro_obra';
 
   void toggleKeepSession() {
     _keepSession = !_keepSession;
@@ -71,6 +72,17 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(const Duration(seconds: 1));
+
+    // Determinar rol simulado por correo
+    if (email.contains('arquitecto')) {
+      currentUserRole = 'arquitecto';
+    } else if (email.contains('contratista')) {
+      currentUserRole = 'contratista';
+    } else if (email.contains('ingeniero')) {
+      currentUserRole = 'ingeniero_civil';
+    } else {
+      currentUserRole = 'maestro_obra';
+    }
 
     _state = LoginState.success;
     notifyListeners();

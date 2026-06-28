@@ -43,6 +43,11 @@ class NotificationService {
   /// Inicializa Firebase + notificaciones locales + listeners. Nunca lanza.
   static Future<void> init() async {
     try {
+      if (kIsWeb) {
+        debugPrint('⚠️ Firebase omitido en Web por falta de opciones (FirebaseOptions).');
+        _firebaseReady = false;
+        return; // Evita el AssertionError en Chrome.
+      }
       await Firebase.initializeApp();
       _firebaseReady = true;
     } catch (e) {
@@ -57,7 +62,7 @@ class NotificationService {
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const InitializationSettings initSettings =
         InitializationSettings(android: initAndroid);
-    await flutterLocalNotificationsPlugin.initialize(initSettings);
+    await flutterLocalNotificationsPlugin.initialize(settings: initSettings);
 
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -98,17 +103,16 @@ class NotificationService {
       final notification = message.notification;
       if (notification != null) {
         flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          NotificationDetails(
+          id: notification.hashCode,
+          title: notification.title,
+          body: notification.body,
+          notificationDetails: const NotificationDetails(
             android: AndroidNotificationDetails(
-              kHighImportanceChannel.id,
-              kHighImportanceChannel.name,
-              channelDescription: kHighImportanceChannel.description,
+              'high_importance_channel',
+              'Notificaciones Importantes',
+              channelDescription: 'Canal usado para las notificaciones importantes.',
               importance: Importance.high,
               priority: Priority.high,
-              icon: '@mipmap/ic_launcher',
             ),
           ),
         );

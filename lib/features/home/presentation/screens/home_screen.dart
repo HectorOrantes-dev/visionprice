@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
 import '../../../sync/presentation/screens/sync_queue_screen.dart';
+import '../../../budget/presentation/screens/budget_result_screen.dart';
 import '../../../security/presentation/screens/inactivity_detector.dart';
 import '../../../security/presentation/screens/sensitive_data_screen.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../auth/presentation/providers/login_provider.dart';
+
+// Import the specific views for each role
+import '../../../roles/presentation/pages/arquitecto/gestion_proyectos_page.dart';
+import '../../../roles/presentation/pages/arquitecto/historial_presupuestos_page.dart';
+import '../../../roles/presentation/pages/ingeniero/anomalias_tecnicas_page.dart';
+import '../../../roles/presentation/pages/ingeniero/proyectos_auditados_page.dart';
+import '../../../roles/presentation/pages/ingeniero/historial_auditoria_page.dart';
+import '../../../roles/presentation/pages/ingeniero/control_acceso_page.dart';
+import '../../../roles/presentation/pages/ingeniero/procesando_hallazgo_page.dart';
+import '../../../roles/presentation/pages/ingeniero/revision_parametros_page.dart';
+import '../../../roles/presentation/pages/ingeniero/proveedores_verificados_page.dart';
+import '../../../roles/presentation/pages/ingeniero/costo_correccion_page.dart';
+import '../../../roles/presentation/pages/ingeniero/reporte_auditoria_page.dart';
+import '../../../roles/presentation/pages/arquitecto/parametros_tecnicos_page.dart';
+import '../../../roles/presentation/pages/contratista/cuadrilla_page.dart';
+import '../../../projects/presentation/pages/home_page.dart' as projects;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,13 +36,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-
-  final List<Widget> _pages = const [
-    _DashboardTab(),
-    _MisObrasTab(),
-    SyncQueueScreen(),
-    SizedBox.shrink(), // index 3 (Perfil) se construye con onLogout en build()
-  ];
 
   /// Cierra la sesión y regresa al login limpiando la pila de navegación.
   void _logout({String? reason}) {
@@ -35,74 +49,170 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Toda la zona autenticada queda protegida por el detector de inactividad.
-    return InactivityDetector(
-      onTimeout: () => _logout(reason: 'Sesión cerrada por inactividad.'),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: _currentIndex == 3
-            ? _PerfilTab(onLogout: () => _logout())
-            : _pages[_currentIndex],
-        bottomNavigationBar: _BottomNav(
-          currentIndex: _currentIndex,
-          onTap: (i) => setState(() => _currentIndex = i),
+  List<Widget> _getPagesForRole(String role) {
+    if (role == 'arquitecto') {
+      return [
+        projects.HomePage(
+          onProjectsTap: () => setState(() => _currentIndex = 1),
+          onReportsTap: () => setState(() => _currentIndex = 3),
+        ), // Inicio
+        ArquitectoGestionProyectosPage(onBack: () => setState(() => _currentIndex = 0)), // Proyectos
+        ArquitectoParametrosTecnicosPage(onBack: () => setState(() => _currentIndex = 0)), // Validar
+        ArquitectoHistorialPresupuestosPage(onBack: () => setState(() => _currentIndex = 0)), // Reportes
+        _PerfilTab(onLogout: () => _logout()), // Perfil
+      ];
+    } else if (role == 'ingeniero_civil') {
+      return [
+        const _IngenieroAuditoriaTab(), // 0 - Inicio (Auditoría)
+        IngenieroProyectosAuditadosPage(onBack: () => setState(() => _currentIndex = 0)), // 1 - Proyectos
+        IngenieroAnomaliasTecnicasPage(onBack: () => setState(() => _currentIndex = 0)),  // 2 - Anomalías
+        IngenieroControlAccesoPage(onBack: () => setState(() => _currentIndex = 0)),      // 3 - RBAC
+        IngenieroHistorialAuditoriaPage(onBack: () => setState(() => _currentIndex = 0)), // 4 - Historial
+        _PerfilTab(onLogout: () => _logout()), // Perfil
+      ];
+    } else if (role == 'contratista') {
+      return [
+        projects.HomePage(
+          onProjectsTap: () => setState(() => _currentIndex = 1),
+        ), // Inicio
+        ArquitectoGestionProyectosPage(onBack: () => setState(() => _currentIndex = 0)), // Proyectos
+        ContratistaCuadrillaPage(onBack: () => setState(() => _currentIndex = 0)), // Cuadrilla
+        ArquitectoHistorialPresupuestosPage(onBack: () => setState(() => _currentIndex = 0)), // Historial
+        _PerfilTab(onLogout: () => _logout()), // Perfil
+      ];
+    } else {
+      // Maestro de Obra
+      return [
+        const _DashboardTab(),
+        projects.HomePage(
+          onProjectsTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Viendo proyectos activos')),
+            );
+          },
         ),
-      ),
-    );
+        const SyncQueueScreen(),
+        _PerfilTab(onLogout: () => _logout()),
+      ];
+    }
   }
-}
 
-class _BottomNav extends StatelessWidget {
-  final int currentIndex;
-  final ValueChanged<int> onTap;
-
-  const _BottomNav({required this.currentIndex, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
-      items: [
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
-          label: 'Inicio',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.description_outlined),
-          activeIcon: Icon(Icons.description),
-          label: 'Mis Obras',
-        ),
+  List<BottomNavigationBarItem> _getNavItemsForRole(String role) {
+    if (role == 'arquitecto') {
+      return [
+        const BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Inicio'),
+        const BottomNavigationBarItem(icon: Icon(Icons.folder_outlined), activeIcon: Icon(Icons.folder), label: 'Proyectos'),
+        const BottomNavigationBarItem(icon: Icon(Icons.fact_check_outlined), activeIcon: Icon(Icons.fact_check), label: 'Validar'),
+        const BottomNavigationBarItem(icon: Icon(Icons.bar_chart_outlined), activeIcon: Icon(Icons.bar_chart), label: 'Reportes'),
+        const BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Perfil'),
+      ];
+    } else if (role == 'contratista') {
+      return [
+        const BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Inicio'),
+        const BottomNavigationBarItem(icon: Icon(Icons.folder_outlined), activeIcon: Icon(Icons.folder), label: 'Proyectos'),
+        const BottomNavigationBarItem(icon: Icon(Icons.group_outlined), activeIcon: Icon(Icons.group), label: 'Cuadrilla'),
+        const BottomNavigationBarItem(icon: Icon(Icons.history_outlined), activeIcon: Icon(Icons.history), label: 'Historial'),
+        const BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Perfil'),
+      ];
+    } else if (role == 'ingeniero_civil') {
+      return [
+        const BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Inicio'),
+        const BottomNavigationBarItem(icon: Icon(Icons.folder_outlined), activeIcon: Icon(Icons.folder), label: 'Proyectos'),
+        const BottomNavigationBarItem(icon: Icon(Icons.warning_amber_outlined), activeIcon: Icon(Icons.warning), label: 'Anomalías'),
+        const BottomNavigationBarItem(icon: Icon(Icons.shield_outlined), activeIcon: Icon(Icons.shield), label: 'RBAC'),
+        const BottomNavigationBarItem(icon: Icon(Icons.history_outlined), activeIcon: Icon(Icons.history), label: 'Historial'),
+        const BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Perfil'),
+      ];
+    } else {
+      // Maestro de Obra
+      return [
+        const BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Inicio'),
+        const BottomNavigationBarItem(icon: Icon(Icons.description_outlined), activeIcon: Icon(Icons.description), label: 'Mis Obras'),
         BottomNavigationBarItem(
           icon: Stack(
             children: [
               const Icon(Icons.sync_outlined),
               Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.error,
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                right: 0, top: 0,
+                child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle)),
               ),
             ],
           ),
-          activeIcon: const Icon(Icons.sync),
-          label: 'Sync',
+          activeIcon: const Icon(Icons.sync), label: 'Sync',
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
-          label: 'Perfil',
+        const BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Perfil'),
+      ];
+    }
+  }
+
+  Widget? _buildDrawer(String role) {
+    if (role == 'contratista' || role == 'arquitecto') {
+      return Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(color: AppColors.primary),
+              child: Text('Menú ${role.toUpperCase()}', style: const TextStyle(color: Colors.white, fontSize: 24)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Mi Perfil'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Configuración'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
         ),
-      ],
+      );
+    } else if (role == 'ingeniero_civil') {
+      return Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: AppColors.primary),
+              child: Text('Menú Ingeniero', style: TextStyle(color: Colors.white, fontSize: 24)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.shield),
+              title: const Text('Control RBAC'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final role = context.watch<LoginViewModel>().currentUserRole;
+    final pages = _getPagesForRole(role);
+    final navItems = _getNavItemsForRole(role);
+    
+    // Safety check in case of changing roles
+    if (_currentIndex >= pages.length) {
+      _currentIndex = 0;
+    }
+
+    return InactivityDetector(
+      onTimeout: () => _logout(reason: 'Sesión cerrada por inactividad.'),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        drawer: _buildDrawer(role),
+        body: pages[_currentIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (i) => setState(() => _currentIndex = i),
+          type: BottomNavigationBarType.fixed,
+          items: navItems,
+        ),
+      ),
     );
   }
 }
@@ -143,6 +253,7 @@ class _DashboardTab extends StatelessWidget {
                   subtitle: 'Col. Del Valle · hace 2 h',
                   status: 'En proceso',
                   statusColor: AppColors.warning,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BudgetResultScreen())),
                 ),
                 const SizedBox(height: 8),
                 _BudgetItem(
@@ -151,6 +262,9 @@ class _DashboardTab extends StatelessWidget {
                   subtitle: 'Iztapalapa · ayer',
                   status: 'Borrador',
                   statusColor: AppColors.textSecondary,
+                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Abriendo borrador...')),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 _BudgetItem(
@@ -159,6 +273,7 @@ class _DashboardTab extends StatelessWidget {
                   subtitle: 'Xochimilco · hace 3 días',
                   status: 'Completado',
                   statusColor: AppColors.success,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BudgetResultScreen())),
                 ),
                 const SizedBox(height: 24),
               ]),
@@ -254,10 +369,7 @@ Widget _newBudgetButton(BuildContext context) {
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const RecordingScreen()),
-        ),
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RecordingScreen())),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -341,6 +453,7 @@ class _BudgetItem extends StatelessWidget {
   final String subtitle;
   final String status;
   final Color statusColor;
+  final VoidCallback? onTap;
 
   const _BudgetItem({
     required this.icon,
@@ -348,69 +461,73 @@ class _BudgetItem extends StatelessWidget {
     required this.subtitle,
     required this.status,
     required this.statusColor,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(8),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, size: 18, color: AppColors.textSecondary),
             ),
-            child: Icon(icon, size: 18, color: AppColors.textSecondary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: statusColor,
+                ],
               ),
             ),
-          ),
-        ],
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                status,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: statusColor,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -533,6 +650,403 @@ class _ProfileItem extends StatelessWidget {
             ),
             const Spacer(),
             Icon(Icons.chevron_right, size: 20, color: AppColors.textHint),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Ingeniero Civil Dashboard Tab ───────────────────────────────────────────
+
+class _IngenieroAuditoriaTab extends StatelessWidget {
+  const _IngenieroAuditoriaTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.shield,
+                            color: AppColors.primary, size: 20),
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'VisionPrice Ingeniería',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            'Hola, Ing. Flores 🔬',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Icon(Icons.notifications_outlined,
+                          color: AppColors.textSecondary, size: 24),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Stats row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _AuditStatCard(
+                          label: 'Proyectos auditados',
+                          value: '12',
+                          icon: Icons.business_center,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _AuditStatCard(
+                          label: 'Anomalías activas',
+                          value: '3',
+                          icon: Icons.warning_amber_rounded,
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _AuditStatCard(
+                          label: 'Reportes este mes',
+                          value: '8',
+                          icon: Icons.description_outlined,
+                          color: AppColors.success,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _AuditStatCard(
+                          label: 'Sin procesar',
+                          value: '2',
+                          icon: Icons.pending_outlined,
+                          color: AppColors.warning,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Botón principal — Nueva Auditoría por grabación
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const RecordingScreen()),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.mic, size: 20),
+                          SizedBox(width: 10),
+                          Text('Nueva auditoría por voz'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Flujo de auditoría — accesos directos
+                  const Text(
+                    'FLUJO DE AUDITORÍA',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textSecondary,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _AuditFlowItem(
+                    icon: Icons.settings_outlined,
+                    title: 'Procesando hallazgo',
+                    subtitle: 'LLM analizando descripción de anomalía',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const _ProcessingPlaceholderIng()),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _AuditFlowItem(
+                    icon: Icons.edit_note_outlined,
+                    title: 'Revisión de parámetros',
+                    subtitle: 'Confirma los datos detectados',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const _RevisionPlaceholderIng()),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _AuditFlowItem(
+                    icon: Icons.store_outlined,
+                    title: 'Proveedores verificados',
+                    subtitle: 'Ferreterías con stock validado',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const _ProveedoresPlaceholderIng()),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _AuditFlowItem(
+                    icon: Icons.calculate_outlined,
+                    title: 'Costo de corrección',
+                    subtitle: 'Presupuesto de corrección estimado',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const _CostoPlaceholderIng()),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _AuditFlowItem(
+                    icon: Icons.summarize_outlined,
+                    title: 'Reporte de auditoría',
+                    subtitle: 'Genera y exporta el reporte final',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const _ReportePlaceholderIng()),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Placeholders del flujo Ingeniero (páginas específicas) ──────────────────
+
+class _ProcessingPlaceholderIng extends StatelessWidget {
+  const _ProcessingPlaceholderIng();
+  @override
+  Widget build(BuildContext context) {
+    return const IngenieroProcesandoHallazgoPage();
+  }
+}
+
+class _RevisionPlaceholderIng extends StatelessWidget {
+  const _RevisionPlaceholderIng();
+  @override
+  Widget build(BuildContext context) {
+    return const IngenieroRevisionParametrosPage();
+  }
+}
+
+class _ProveedoresPlaceholderIng extends StatelessWidget {
+  const _ProveedoresPlaceholderIng();
+  @override
+  Widget build(BuildContext context) {
+    return const IngenieroProveedoresVerificadosPage();
+  }
+}
+
+class _CostoPlaceholderIng extends StatelessWidget {
+  const _CostoPlaceholderIng();
+  @override
+  Widget build(BuildContext context) {
+    return const IngenieroCostoCorreccionPage();
+  }
+}
+
+class _ReportePlaceholderIng extends StatelessWidget {
+  const _ReportePlaceholderIng();
+  @override
+  Widget build(BuildContext context) {
+    return const IngenieroReporteAuditoriaPage();
+  }
+}
+
+class _IngenieroFlowWrapper extends StatelessWidget {
+  final Widget child;
+  const _IngenieroFlowWrapper({required this.child});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios,
+              size: 18, color: AppColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: child,
+    );
+  }
+}
+
+// ─── Widgets auxiliares del Ingeniero Dashboard ───────────────────────────────
+
+class _AuditStatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _AuditStatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AuditFlowItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _AuditFlowItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, size: 18, color: AppColors.primary),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right,
+                size: 18, color: AppColors.textHint),
           ],
         ),
       ),

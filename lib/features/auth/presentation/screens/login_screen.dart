@@ -32,41 +32,40 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => LoginViewModel(),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 32),
-                _Logo(),
-                const SizedBox(height: 40),
-                _Header(),
-                const SizedBox(height: 32),
-                _Form(
-                  emailController: _emailController,
-                  passwordController: _passwordController,
-                ),
-                const SizedBox(height: 24),
-                _KeepSessionRow(),
-                const SizedBox(height: 24),
-                _ContinueButton(
-                  emailController: _emailController,
-                  passwordController: _passwordController,
-                ),
-                const SizedBox(height: 24),
-                _OrDivider(),
-                const SizedBox(height: 16),
-                _SocialButtons(),
-                const SizedBox(height: 32),
-                _RegisterRow(),
-                const SizedBox(height: 24),
-              ],
-            ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 32),
+              _Logo(),
+              const SizedBox(height: 40),
+              _Header(),
+              const SizedBox(height: 32),
+              _Form(
+                emailController: _emailController,
+                passwordController: _passwordController,
+              ),
+              const SizedBox(height: 24),
+              _KeepSessionRow(),
+              const SizedBox(height: 24),
+              _ContinueButton(
+                emailController: _emailController,
+                passwordController: _passwordController,
+              ),
+              const SizedBox(height: 24),
+              _OrDivider(),
+              const SizedBox(height: 16),
+              _SocialButtons(),
+              const SizedBox(height: 32),
+              _RegisterRow(),
+              const SizedBox(height: 16),
+              _RoleSwitcher(emailController: _emailController),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),
@@ -420,6 +419,58 @@ class _RegisterRow extends StatelessWidget {
               color: AppColors.primary,
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RoleSwitcher extends StatelessWidget {
+  final TextEditingController emailController;
+
+  const _RoleSwitcher({required this.emailController});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          '⚡ Cambio Rápido de Rol (Demo):',
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: [
+            ActionChip(
+              backgroundColor: AppColors.surface,
+              label: const Text('Maestro', style: TextStyle(fontSize: 12)),
+              onPressed: () => emailController.text = 'miguel.angel@obra.mx',
+            ),
+            ActionChip(
+              backgroundColor: AppColors.surface,
+              label: const Text('Contratista', style: TextStyle(fontSize: 12)),
+              onPressed: () => emailController.text = 'contratista@obra.mx',
+            ),
+            ActionChip(
+              backgroundColor: AppColors.surface,
+              label: const Text('Arquitecto', style: TextStyle(fontSize: 12)),
+              onPressed: () => emailController.text = 'arquitecto@obra.mx',
+            ),
+            ActionChip(
+              backgroundColor: AppColors.surface,
+              label: const Text('Ingeniero', style: TextStyle(fontSize: 12)),
+              onPressed: () => emailController.text = 'ingeniero@obra.mx',
+            ),
+          ],
         ),
       ],
     );
