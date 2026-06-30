@@ -29,7 +29,10 @@ class _SecurityGatewayState extends State<SecurityGateway>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _runRaspCheck());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _runRaspCheck();
+      SecurityChecker.enableScreenProtection();
+    });
     _runSecurityCheck();
   }
 

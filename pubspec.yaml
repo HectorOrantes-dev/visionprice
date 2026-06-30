@@ -29,7 +29,10 @@ dependencies:
   # record 7.x usa la generación 2.x de implementaciones (record_linux 2.x sí
   # implementa la interfaz); las 5.x arrastraban record_linux 0.7.2, incompatible
   # con la interfaz nueva, y rompían el compilado en máquinas Linux.
-  record: ^7.0.0
+  record: ^6.2.1
+
+  # Seguridad de pantalla (Anti-screenshot y grabación)
+  screen_protector: ^1.5.2
 
   # UI
   google_fonts: ^6.2.1
