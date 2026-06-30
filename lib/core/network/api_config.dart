@@ -20,7 +20,15 @@ class ApiConfig {
   static const String googleLogin = '$apiPrefix/auth/google/login';
   static const String googleRegister = '$apiPrefix/auth/google/register';
 
+  // Salud del back-end (raíz, sin prefijo) — para verificar conectividad real.
+  static const String health = '/health';
+
   // --- Catálogos / cuenta ---
   static const String roles = '$apiPrefix/roles';
   static const String me = '$apiPrefix/me';
+
+  // --- Grabaciones (flujo de audio del maestro de obra) ---
+  static const String grabaciones = '$apiPrefix/grabaciones';
+  static String grabacion(int id) => '$apiPrefix/grabaciones/$id';
+  static const String cotizacionesCalculo = '$apiPrefix/cotizaciones/calculo';
 }

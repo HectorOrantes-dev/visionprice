@@ -23,7 +23,24 @@ import '../../features/auth/presentation/providers/login_provider.dart'
     as _i1005;
 import '../../features/auth/presentation/providers/register_provider.dart'
     as _i74;
+import '../../features/recording/data/datasources/grabacion_remote_datasource.dart'
+    as _i667;
+import '../../features/recording/data/repositories/grabacion_repository_impl.dart'
+    as _i520;
+import '../../features/recording/data/services/audio_recorder_service.dart'
+    as _i695;
+import '../../features/recording/domain/repositories/grabacion_repository.dart'
+    as _i85;
+import '../../features/recording/domain/usecases/grabacion_usecases.dart'
+    as _i540;
+import '../../features/recording/presentation/providers/parameters_provider.dart'
+    as _i407;
+import '../../features/recording/presentation/providers/processing_provider.dart'
+    as _i354;
+import '../../features/recording/presentation/providers/recording_provider.dart'
+    as _i719;
 import '../network/api_client.dart' as _i557;
+import '../network/connectivity_service.dart' as _i491;
 import '../storage/token_storage.dart' as _i973;
 import 'register_module.dart' as _i291;
 
@@ -44,18 +61,28 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.lazySingleton<_i519.Client>(() => registerModule.httpClient);
+    gh.lazySingleton<_i695.AudioRecorderService>(
+      () => _i695.AudioRecorderService(),
+      dispose: (i) => i.dispose(),
+    );
     gh.lazySingleton<_i973.TokenStorage>(
         () => _i973.TokenStorage(gh<_i460.SharedPreferences>()));
     gh.lazySingleton<_i557.ApiClient>(() => _i557.ApiClient(
           gh<_i519.Client>(),
           gh<_i973.TokenStorage>(),
         ));
+    gh.lazySingleton<_i491.ConnectivityService>(
+        () => _i491.ConnectivityService(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i161.AuthRemoteDataSource>(
         () => _i161.AuthRemoteDataSourceImpl(gh<_i557.ApiClient>()));
+    gh.lazySingleton<_i667.GrabacionRemoteDataSource>(
+        () => _i667.GrabacionRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i787.AuthRepository>(() => _i153.AuthRepositoryImpl(
           gh<_i161.AuthRemoteDataSource>(),
           gh<_i973.TokenStorage>(),
         ));
+    gh.lazySingleton<_i85.GrabacionRepository>(() =>
+        _i520.GrabacionRepositoryImpl(gh<_i667.GrabacionRemoteDataSource>()));
     gh.factory<_i46.LoginUseCase>(
         () => _i46.LoginUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.VerifyTwoFactorUseCase>(
@@ -70,16 +97,35 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i46.GoogleRegisterUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.LogoutUseCase>(
         () => _i46.LogoutUseCase(gh<_i787.AuthRepository>()));
-    gh.factory<_i1005.LoginViewModel>(() => _i1005.LoginViewModel(
-          gh<_i46.LoginUseCase>(),
-          gh<_i46.VerifyTwoFactorUseCase>(),
-          gh<_i46.GoogleLoginUseCase>(),
-        ));
     gh.factory<_i74.RegisterViewModel>(() => _i74.RegisterViewModel(
           gh<_i46.RegisterUseCase>(),
           gh<_i46.VerifyTwoFactorUseCase>(),
           gh<_i46.GetRolesUseCase>(),
         ));
+    gh.factory<_i540.SubirGrabacionUseCase>(
+        () => _i540.SubirGrabacionUseCase(gh<_i85.GrabacionRepository>()));
+    gh.factory<_i540.ObtenerGrabacionUseCase>(
+        () => _i540.ObtenerGrabacionUseCase(gh<_i85.GrabacionRepository>()));
+    gh.factory<_i540.ObtenerHistorialUseCase>(
+        () => _i540.ObtenerHistorialUseCase(gh<_i85.GrabacionRepository>()));
+    gh.factory<_i540.CalcularMetrosUseCase>(
+        () => _i540.CalcularMetrosUseCase(gh<_i85.GrabacionRepository>()));
+    gh.factory<_i407.ParametersViewModel>(() => _i407.ParametersViewModel(
+          gh<_i540.ObtenerGrabacionUseCase>(),
+          gh<_i540.CalcularMetrosUseCase>(),
+        ));
+    gh.factory<_i1005.LoginViewModel>(() => _i1005.LoginViewModel(
+          gh<_i46.LoginUseCase>(),
+          gh<_i46.VerifyTwoFactorUseCase>(),
+          gh<_i46.GoogleLoginUseCase>(),
+        ));
+    gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
+          gh<_i695.AudioRecorderService>(),
+          gh<_i540.SubirGrabacionUseCase>(),
+          gh<_i491.ConnectivityService>(),
+        ));
+    gh.factory<_i354.ProcessingViewModel>(
+        () => _i354.ProcessingViewModel(gh<_i540.ObtenerGrabacionUseCase>()));
     return this;
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
-import 'processing_screen.dart';
 
 class SyncQueueScreen extends StatelessWidget {
   const SyncQueueScreen({super.key});
@@ -44,11 +43,6 @@ class SyncQueueScreen extends StatelessWidget {
                       date: '10 jun',
                       time: '11:03',
                       status: _SyncStatus.ready,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const ProcessingScreen()),
-                      ),
                     ),
                     const SizedBox(height: 8),
                     _SyncItem(
@@ -171,7 +165,6 @@ class _SyncItem extends StatelessWidget {
   final String time;
   final _SyncStatus status;
   final double? progress;
-  final VoidCallback? onTap;
 
   const _SyncItem({
     required this.name,
@@ -180,13 +173,11 @@ class _SyncItem extends StatelessWidget {
     required this.time,
     required this.status,
     this.progress,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(

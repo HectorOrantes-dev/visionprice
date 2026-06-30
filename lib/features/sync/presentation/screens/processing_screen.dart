@@ -1,19 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../recording/presentation/providers/processing_provider.dart';
 import '../../../budget/presentation/screens/parameters_review_screen.dart';
 
 class ProcessingScreen extends StatelessWidget {
-  const ProcessingScreen({super.key});
+  final int grabacionId;
+  const ProcessingScreen({super.key, required this.grabacionId});
 
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => getIt<ProcessingViewModel>()..start(grabacionId),
+      child: _ProcessingView(grabacionId: grabacionId),
+    );
+  }
+}
+
+class _ProcessingView extends StatelessWidget {
+  final int grabacionId;
+  const _ProcessingView({required this.grabacionId});
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.watch<ProcessingViewModel>();
+    final transcripcion = vm.grabacion?.transcripcion;
+    final tieneTranscripcion = vm.grabacion?.tieneTranscripcion ?? false;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _ProcessingAppBar(),
+            _ProcessingAppBar(hasError: vm.hasError, isDone: vm.isDone),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -21,54 +42,88 @@ class ProcessingScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 8),
-                    _TranscriptionCard(),
+                    _TranscriptionCard(
+                      transcripcion: transcripcion,
+                      loading: !tieneTranscripcion && !vm.hasError,
+                    ),
                     const SizedBox(height: 20),
                     _SectionLabel('PASOS DE PROCESAMIENTO'),
                     const SizedBox(height: 12),
                     _ProcessStep(
                       icon: Icons.check_circle,
                       title: 'Transcribiendo audio',
-                      subtitle: 'Completado · 0:32 procesados',
-                      state: _StepState.done,
+                      subtitle: tieneTranscripcion
+                          ? 'Completado'
+                          : 'Transcribiendo el audio...',
+                      state: tieneTranscripcion
+                          ? _StepState.done
+                          : _StepState.inProgress,
                     ),
                     const SizedBox(height: 8),
                     _ProcessStep(
                       icon: Icons.settings,
                       title: 'Interpretando descripción',
-                      subtitle: 'LLM extrayendo entidades constructivas...',
-                      state: _StepState.inProgress,
+                      subtitle: vm.isDone
+                          ? 'Completado'
+                          : (tieneTranscripcion
+                              ? 'Extrayendo entidades constructivas...'
+                              : 'En espera'),
+                      state: vm.isDone
+                          ? _StepState.done
+                          : (tieneTranscripcion
+                              ? _StepState.inProgress
+                              : _StepState.waiting),
                     ),
                     const SizedBox(height: 8),
                     _ProcessStep(
                       icon: Icons.calculate_outlined,
-                      title: 'Calculando materiales',
-                      subtitle: 'En espera',
-                      state: _StepState.waiting,
+                      title: 'Listo para calcular',
+                      subtitle: vm.isDone ? 'Completado' : 'En espera',
+                      state:
+                          vm.isDone ? _StepState.done : _StepState.waiting,
                     ),
                     const SizedBox(height: 24),
-                    _TimeEstimateCard(),
+                    if (vm.hasError)
+                      _ErrorCard()
+                    else
+                      _StatusCard(isDone: vm.isDone, confianza: vm.grabacion?.confianza),
                     const SizedBox(height: 16),
-                    Center(
-                      child: Text(
-                        'Puedes cerrar esta pantalla · notificación al completar',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
+                    if (!vm.isDone && !vm.hasError)
+                      Center(
+                        child: Text(
+                          'Sondeando cada 4 s · puedes esperar aquí',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const ParametersReviewScreen()),
+                    if (vm.hasError)
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Reintentar grabación'),
                         ),
-                        child: const Text('Ver resultados (demo)'),
+                      )
+                    else
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: vm.isDone
+                              ? () => Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ParametersReviewScreen(
+                                        grabacionId: grabacionId,
+                                      ),
+                                    ),
+                                  )
+                              : null,
+                          child: const Text('Ver resultados'),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -81,8 +136,15 @@ class ProcessingScreen extends StatelessWidget {
 }
 
 class _ProcessingAppBar extends StatelessWidget {
+  final bool hasError;
+  final bool isDone;
+  const _ProcessingAppBar({required this.hasError, required this.isDone});
+
   @override
   Widget build(BuildContext context) {
+    final subtitle = hasError
+        ? 'Ocurrió un error'
+        : (isDone ? 'Análisis completado' : 'Análisis de tu descripción');
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
       child: Row(
@@ -102,10 +164,10 @@ class _ProcessingAppBar extends StatelessWidget {
             child: const Icon(Icons.settings, color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 10),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Procesando',
                 style: TextStyle(
                   fontSize: 17,
@@ -114,7 +176,7 @@ class _ProcessingAppBar extends StatelessWidget {
                 ),
               ),
               Text(
-                'Análisis de tu descripción',
+                subtitle,
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,
@@ -147,6 +209,10 @@ class _SectionLabel extends StatelessWidget {
 }
 
 class _TranscriptionCard extends StatelessWidget {
+  final String? transcripcion;
+  final bool loading;
+  const _TranscriptionCard({this.transcripcion, required this.loading});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -161,14 +227,36 @@ class _TranscriptionCard extends StatelessWidget {
         children: [
           _SectionLabel('TRANSCRIPCIÓN DEL AUDIO'),
           const SizedBox(height: 12),
-          const Text(
-            '"Necesito tirar firme en una bodega de diez por ocho metros, aproximadamente, y también revoque en las cuatro paredes. Ah, y seis castillos de amarre."',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textPrimary,
-              height: 1.6,
+          if (loading)
+            Row(
+              children: [
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: AppColors.primary),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Esperando transcripción...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            )
+          else
+            Text(
+              transcripcion == null || transcripcion!.isEmpty
+                  ? 'Sin transcripción'
+                  : '"$transcripcion"',
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textPrimary,
+                height: 1.6,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -272,9 +360,14 @@ class _ProcessStep extends StatelessWidget {
   }
 }
 
-class _TimeEstimateCard extends StatelessWidget {
+class _StatusCard extends StatelessWidget {
+  final bool isDone;
+  final double? confianza;
+  const _StatusCard({required this.isDone, this.confianza});
+
   @override
   Widget build(BuildContext context) {
+    final pct = confianza != null ? '${(confianza! * 100).round()}%' : null;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -286,19 +379,45 @@ class _TimeEstimateCard extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Tiempo estimado restante',
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-            ),
+            isDone ? 'Estado' : 'Procesando',
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 4),
-          const Text(
-            '~25 segundos',
+          Text(
+            isDone
+                ? (pct != null ? 'Listo · confianza $pct' : 'Sincronizado')
+                : '~ unos segundos',
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: isDone ? AppColors.success : AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.errorLight,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'El procesamiento falló. Vuelve a intentar la grabación.',
+              style: TextStyle(fontSize: 13, color: AppColors.error),
             ),
           ),
         ],
