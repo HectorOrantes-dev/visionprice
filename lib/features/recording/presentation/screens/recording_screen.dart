@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/recording_provider.dart';
 import '../../../sync/presentation/screens/processing_screen.dart';
@@ -10,7 +11,7 @@ class RecordingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => RecordingViewModel(),
+      create: (_) => getIt<RecordingViewModel>(),
       child: const _RecordingView(),
     );
   }
@@ -54,12 +55,31 @@ class _RecordingView extends StatelessWidget {
                   _TimerDisplay(elapsed: vm.elapsedFormatted),
                   const SizedBox(height: 12),
                   if (vm.isRecording) _RecordingIndicator(),
+                  if (vm.hasRecording)
+                    const Text(
+                      'Grabación lista para subir',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.success,
+                      ),
+                    ),
+                  if (vm.errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 8),
+                      child: Text(
+                        vm.errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                      ),
+                    ),
                 ],
               ),
             ),
             _BottomActions(vm: vm),
             const SizedBox(height: 16),
-            _OfflineChip(),
+            _ConnectivityChip(vm: vm),
             const SizedBox(height: 24),
           ],
         ),
@@ -126,9 +146,7 @@ class _WaveformWidget extends StatelessWidget {
             width: 3,
             height: heights[i],
             decoration: BoxDecoration(
-              color: isRecording
-                  ? AppColors.primary
-                  : AppColors.textHint,
+              color: isRecording ? AppColors.primary : AppColors.textHint,
               borderRadius: BorderRadius.circular(2),
             ),
           );
@@ -145,13 +163,15 @@ class _MicButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        if (vm.isRecording) {
-          vm.stopRecording();
-        } else {
-          vm.startRecording();
-        }
-      },
+      onTap: vm.isUploading
+          ? null
+          : () {
+              if (vm.isRecording) {
+                vm.stopRecording();
+              } else if (!vm.hasRecording) {
+                vm.startRecording();
+              }
+            },
       child: Container(
         width: 88,
         height: 88,
@@ -168,7 +188,7 @@ class _MicButton extends StatelessWidget {
           ],
         ),
         child: Icon(
-          Icons.mic,
+          vm.isRecording ? Icons.stop : Icons.mic,
           color: Colors.white,
           size: 36,
         ),
@@ -184,7 +204,7 @@ class _TimerDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      '00:$elapsed',
+      elapsed,
       style: const TextStyle(
         fontSize: 40,
         fontWeight: FontWeight.w700,
@@ -233,85 +253,142 @@ class _BottomActions extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.recordingRed,
-              ),
-              onPressed: vm.isRecording
-                  ? () {
-                      vm.stopRecording();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const ProcessingScreen()),
-                      );
-                    }
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const ProcessingScreen()),
-                      );
-                    },
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.stop, size: 18),
-                  SizedBox(width: 8),
-                  Text('Detener grabación'),
-                ],
+          if (vm.isRecording)
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.recordingRed,
+                ),
+                onPressed: vm.stopRecording,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.stop, size: 18),
+                    SizedBox(width: 8),
+                    Text('Detener grabación'),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton(
-              onPressed: vm.retryRecording,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.replay, size: 18),
-                  SizedBox(width: 8),
-                  Text('Reintentar grabación'),
-                ],
+          if (vm.hasRecording || vm.isUploading) ...[
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: vm.isUploading
+                    ? null
+                    : () => vm.upload(
+                          onUploaded: (id) => Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ProcessingScreen(grabacionId: id),
+                            ),
+                          ),
+                        ),
+                child: vm.isUploading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.cloud_upload_outlined, size: 18),
+                          SizedBox(width: 8),
+                          Text('Subir y procesar'),
+                        ],
+                      ),
               ),
             ),
-          ),
+            const SizedBox(height: 10),
+          ],
+          if (!vm.isRecording && !vm.isUploading)
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton(
+                onPressed: vm.retry,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.replay, size: 18),
+                    SizedBox(width: 8),
+                    Text('Reintentar grabación'),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 }
 
-class _OfflineChip extends StatelessWidget {
+/// Chip que refleja la conectividad REAL (ping al back-end):
+/// - verificando → gris neutro
+/// - en línea → verde "Conectado"
+/// - offline → naranja "Sin internet · audio guardado localmente"
+class _ConnectivityChip extends StatelessWidget {
+  final RecordingViewModel vm;
+  const _ConnectivityChip({required this.vm});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.warningLight,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.wifi_off, size: 14, color: AppColors.warning),
-          const SizedBox(width: 8),
-          Text(
-            'Sin internet · audio guardado localmente',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.warning,
-              fontWeight: FontWeight.w500,
+    final online = vm.online;
+
+    late final Color bg;
+    late final Color fg;
+    late final IconData icon;
+    late final String label;
+
+    if (online == null) {
+      bg = AppColors.surfaceVariant;
+      fg = AppColors.textSecondary;
+      icon = Icons.wifi_find_outlined;
+      label = 'Verificando conexión...';
+    } else if (online) {
+      bg = AppColors.successLight;
+      fg = AppColors.success;
+      icon = Icons.wifi;
+      label = 'Conectado · listo para subir';
+    } else {
+      bg = AppColors.warningLight;
+      fg = AppColors.warning;
+      icon = Icons.wifi_off;
+      label = 'Sin internet · audio guardado localmente';
+    }
+
+    return GestureDetector(
+      onTap: vm.checkConnectivity,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: fg),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: fg,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

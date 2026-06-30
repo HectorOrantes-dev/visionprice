@@ -58,6 +58,31 @@ class ApiClient {
     return data is Map<String, dynamic> ? data : <String, dynamic>{};
   }
 
+  /// Sube un archivo con `multipart/form-data` (p. ej. el audio de una
+  /// grabación). [fields] son campos de texto adicionales del formulario.
+  /// Usa un timeout mayor porque subir audio puede tardar más.
+  Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required String filePath,
+    String fileField = 'audio',
+    Map<String, String>? fields,
+    bool auth = true,
+  }) async {
+    final data = await _send(
+      () async {
+        final req = http.MultipartRequest('POST', _uri(path));
+        // El propio MultipartRequest fija el Content-Type con su boundary.
+        req.headers.addAll(_headers(auth: auth)..remove('Content-Type'));
+        if (fields != null) req.fields.addAll(fields);
+        req.files.add(await http.MultipartFile.fromPath(fileField, filePath));
+        final streamed = await req.send();
+        return http.Response.fromStream(streamed);
+      },
+      timeout: const Duration(seconds: 60),
+    );
+    return data is Map<String, dynamic> ? data : <String, dynamic>{};
+  }
+
   /// Para endpoints que devuelven un arreglo JSON (p. ej. `GET /roles`).
   Future<List<dynamic>> getJsonList(
     String path, {
@@ -68,13 +93,29 @@ class ApiClient {
     return data is List ? data : const [];
   }
 
+  /// Verificación rápida de conectividad real: intenta `GET /health` con un
+  /// timeout corto. Devuelve `true` solo si el back-end respondió.
+  Future<bool> ping() async {
+    try {
+      final res = await _client
+          .get(_uri(ApiConfig.health))
+          .timeout(const Duration(seconds: 6));
+      return res.statusCode >= 200 && res.statusCode < 500;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Ejecuta la petición, normaliza errores de red y descarga el parseo del
   /// cuerpo a un isolate cuando es grande (ver [decodeJson]). Devuelve el JSON
   /// decodificado (`Map` o `List`) o lanza [ApiException] en error.
-  Future<dynamic> _send(Future<http.Response> Function() request) async {
+  Future<dynamic> _send(
+    Future<http.Response> Function() request, {
+    Duration? timeout,
+  }) async {
     http.Response res;
     try {
-      res = await request().timeout(_timeout);
+      res = await request().timeout(timeout ?? _timeout);
     } on TimeoutException {
       throw ApiException.network('La solicitud tardó demasiado.');
     } catch (_) {

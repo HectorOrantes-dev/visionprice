@@ -2,6 +2,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Grabación de audio del maestro de obra -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- Notificaciones push (FCM) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
