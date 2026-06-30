@@ -1,24 +1,40 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// Persistencia del `access_token` JWT.
+/// Almacén del `access_token` JWT con **persistencia segura**
+/// (`flutter_secure_storage` → Keystore en Android / Keychain en iOS).
 ///
-/// Registrado como `@lazySingleton`: se crea la primera vez que alguien lo
-/// pide y se reutiliza durante toda la vida de la app (mantiene estado → es
-/// un buen candidato a singleton, según la guía de Injectable).
+/// La sesión **sobrevive al cierre de la app**: al volver a abrir, si hay un
+/// token guardado se entra directo sin pedir login otra vez. Para cerrar
+/// sesión se usa [clear] (borra el token del almacenamiento seguro).
 ///
-/// Recibe [SharedPreferences] por inyección; esa instancia la provee
-/// `RegisterModule` con `@preResolve` (resuelta antes de `runApp`).
+/// Mantiene además una copia en memoria ([_token]) para acceso síncrono desde
+/// el [ApiClient] al construir el header `Authorization`.
 @lazySingleton
 class TokenStorage {
-  static const _kTokenKey = 'access_token';
+  static const _kKey = 'access_token';
+  static const _storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
-  final SharedPreferences _prefs;
-  TokenStorage(this._prefs);
+  String? _token;
 
-  String? get token => _prefs.getString(_kTokenKey);
-  bool get hasToken => (token ?? '').isNotEmpty;
+  String? get token => _token;
+  bool get hasToken => (_token ?? '').isNotEmpty;
 
-  Future<void> saveToken(String token) => _prefs.setString(_kTokenKey, token);
-  Future<void> clear() => _prefs.remove(_kTokenKey);
+  /// Carga el token persistido a memoria. Llamar una vez al arrancar la app
+  /// (antes de decidir si mostrar login o home).
+  Future<void> load() async {
+    _token = await _storage.read(key: _kKey);
+  }
+
+  Future<void> saveToken(String token) async {
+    _token = token;
+    await _storage.write(key: _kKey, value: token);
+  }
+
+  Future<void> clear() async {
+    _token = null;
+    await _storage.delete(key: _kKey);
+  }
 }

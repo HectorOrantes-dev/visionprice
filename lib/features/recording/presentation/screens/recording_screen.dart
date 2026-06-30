@@ -30,6 +30,7 @@ class _RecordingView extends StatelessWidget {
         child: Column(
           children: [
             _RecordingAppBar(),
+            _ProjectSelector(vm: vm),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -279,7 +280,12 @@ class _BottomActions extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: vm.isUploading
                     ? null
-                    : () => vm.upload(
+                    : () {
+                        if (vm.selectedProyecto == null) {
+                          showProjectSheet(context, vm);
+                          return;
+                        }
+                        vm.upload(
                           onUploaded: (id) => Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -287,7 +293,8 @@ class _BottomActions extends StatelessWidget {
                                   ProcessingScreen(grabacionId: id),
                             ),
                           ),
-                        ),
+                        );
+                      },
                 child: vm.isUploading
                     ? const SizedBox(
                         width: 20,
@@ -325,6 +332,248 @@ class _BottomActions extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Selector de proyecto (obligatorio): muestra el proyecto elegido y abre el
+/// bottom sheet para elegir/crear.
+class _ProjectSelector extends StatelessWidget {
+  final RecordingViewModel vm;
+  const _ProjectSelector({required this.vm});
+
+  @override
+  Widget build(BuildContext context) {
+    final proyecto = vm.selectedProyecto;
+    final tieneProyecto = proyecto != null;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: GestureDetector(
+        onTap: () => showProjectSheet(context, vm),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: tieneProyecto ? AppColors.border : AppColors.warning,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.folder_outlined,
+                  size: 20,
+                  color: tieneProyecto
+                      ? AppColors.primary
+                      : AppColors.warning),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'PROYECTO',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      vm.loadingProyectos
+                          ? 'Cargando proyectos...'
+                          : (proyecto?.nombre ?? 'Selecciona un proyecto'),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: tieneProyecto
+                            ? AppColors.textPrimary
+                            : AppColors.warning,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.unfold_more,
+                  size: 18, color: AppColors.textSecondary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Abre el bottom sheet para elegir un proyecto existente o crear uno nuevo.
+void showProjectSheet(BuildContext context, RecordingViewModel vm) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => ListenableBuilder(
+      listenable: vm,
+      builder: (ctx, _) => _ProjectSheet(vm: vm),
+    ),
+  );
+}
+
+class _ProjectSheet extends StatefulWidget {
+  final RecordingViewModel vm;
+  const _ProjectSheet({required this.vm});
+
+  @override
+  State<_ProjectSheet> createState() => _ProjectSheetState();
+}
+
+class _ProjectSheetState extends State<_ProjectSheet> {
+  final _nombreController = TextEditingController();
+  bool _creating = false;
+  String? _createError;
+
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _crear() async {
+    final nombre = _nombreController.text.trim();
+    if (nombre.length < 2) {
+      setState(() => _createError = 'Escribe un nombre (mín. 2 caracteres)');
+      return;
+    }
+    setState(() {
+      _creating = true;
+      _createError = null;
+    });
+    try {
+      await widget.vm.crearProyecto(nombre);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      setState(() => _createError = 'No se pudo crear el proyecto.');
+    } finally {
+      if (mounted) setState(() => _creating = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = widget.vm;
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Elige un proyecto',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (vm.loadingProyectos)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (vm.proyectos.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'No tienes proyectos. Crea uno abajo.',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            )
+          else
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 260),
+              child: ListView(
+                shrinkWrap: true,
+                children: vm.proyectos.map((p) {
+                  final selected = vm.selectedProyecto?.id == p.id;
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      selected
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      color: selected
+                          ? AppColors.primary
+                          : AppColors.textHint,
+                    ),
+                    title: Text(p.nombre),
+                    subtitle: p.direccion != null ? Text(p.direccion!) : null,
+                    onTap: () {
+                      vm.selectProyecto(p);
+                      Navigator.pop(context);
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          const Divider(height: 24),
+          const Text(
+            'NUEVO PROYECTO',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _nombreController,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              hintText: 'Ej. Casa Polanco',
+              prefixIcon: const Icon(Icons.create_new_folder_outlined,
+                  size: 20, color: AppColors.textSecondary),
+              errorText: _createError,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: _creating ? null : _crear,
+              child: _creating
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Crear y seleccionar'),
+            ),
+          ),
         ],
       ),
     );

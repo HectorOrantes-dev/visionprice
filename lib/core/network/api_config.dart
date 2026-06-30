@@ -27,6 +27,9 @@ class ApiConfig {
   static const String roles = '$apiPrefix/roles';
   static const String me = '$apiPrefix/me';
 
+  // --- Proyectos ---
+  static const String proyectos = '$apiPrefix/proyectos';
+
   // --- Grabaciones (flujo de audio del maestro de obra) ---
   static const String grabaciones = '$apiPrefix/grabaciones';
   static String grabacion(int id) => '$apiPrefix/grabaciones/$id';
