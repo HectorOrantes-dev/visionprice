@@ -23,6 +23,13 @@ import '../../features/auth/presentation/providers/login_provider.dart'
     as _i1005;
 import '../../features/auth/presentation/providers/register_provider.dart'
     as _i74;
+import '../../features/project/data/datasources/proyecto_remote_datasource.dart'
+    as _i1054;
+import '../../features/project/data/repositories/proyecto_repository_impl.dart'
+    as _i893;
+import '../../features/project/domain/repositories/proyecto_repository.dart'
+    as _i901;
+import '../../features/project/domain/usecases/proyecto_usecases.dart' as _i836;
 import '../../features/recording/data/datasources/grabacion_remote_datasource.dart'
     as _i667;
 import '../../features/recording/data/repositories/grabacion_repository_impl.dart'
@@ -61,12 +68,11 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.lazySingleton<_i519.Client>(() => registerModule.httpClient);
+    gh.lazySingleton<_i973.TokenStorage>(() => _i973.TokenStorage());
     gh.lazySingleton<_i695.AudioRecorderService>(
       () => _i695.AudioRecorderService(),
       dispose: (i) => i.dispose(),
     );
-    gh.lazySingleton<_i973.TokenStorage>(
-        () => _i973.TokenStorage(gh<_i460.SharedPreferences>()));
     gh.lazySingleton<_i557.ApiClient>(() => _i557.ApiClient(
           gh<_i519.Client>(),
           gh<_i973.TokenStorage>(),
@@ -77,6 +83,14 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i161.AuthRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i667.GrabacionRemoteDataSource>(
         () => _i667.GrabacionRemoteDataSourceImpl(gh<_i557.ApiClient>()));
+    gh.lazySingleton<_i1054.ProyectoRemoteDataSource>(
+        () => _i1054.ProyectoRemoteDataSourceImpl(gh<_i557.ApiClient>()));
+    gh.lazySingleton<_i901.ProyectoRepository>(() =>
+        _i893.ProyectoRepositoryImpl(gh<_i1054.ProyectoRemoteDataSource>()));
+    gh.factory<_i836.ObtenerProyectosUseCase>(
+        () => _i836.ObtenerProyectosUseCase(gh<_i901.ProyectoRepository>()));
+    gh.factory<_i836.CrearProyectoUseCase>(
+        () => _i836.CrearProyectoUseCase(gh<_i901.ProyectoRepository>()));
     gh.lazySingleton<_i787.AuthRepository>(() => _i153.AuthRepositoryImpl(
           gh<_i161.AuthRemoteDataSource>(),
           gh<_i973.TokenStorage>(),
@@ -119,13 +133,15 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i46.VerifyTwoFactorUseCase>(),
           gh<_i46.GoogleLoginUseCase>(),
         ));
+    gh.factory<_i354.ProcessingViewModel>(
+        () => _i354.ProcessingViewModel(gh<_i540.ObtenerGrabacionUseCase>()));
     gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
           gh<_i695.AudioRecorderService>(),
           gh<_i540.SubirGrabacionUseCase>(),
           gh<_i491.ConnectivityService>(),
+          gh<_i836.ObtenerProyectosUseCase>(),
+          gh<_i836.CrearProyectoUseCase>(),
         ));
-    gh.factory<_i354.ProcessingViewModel>(
-        () => _i354.ProcessingViewModel(gh<_i540.ObtenerGrabacionUseCase>()));
     return this;
   }
 }

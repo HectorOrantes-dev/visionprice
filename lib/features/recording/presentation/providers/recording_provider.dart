@@ -5,6 +5,8 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/connectivity_service.dart';
+import '../../../project/domain/entities/proyecto_entity.dart';
+import '../../../project/domain/usecases/proyecto_usecases.dart';
 import '../../data/services/audio_recorder_service.dart';
 import '../../domain/usecases/grabacion_usecases.dart';
 
@@ -23,9 +25,18 @@ class RecordingViewModel extends ChangeNotifier {
   final AudioRecorderService _recorder;
   final SubirGrabacionUseCase _subir;
   final ConnectivityService _connectivity;
+  final ObtenerProyectosUseCase _obtenerProyectos;
+  final CrearProyectoUseCase _crearProyecto;
 
-  RecordingViewModel(this._recorder, this._subir, this._connectivity) {
+  RecordingViewModel(
+    this._recorder,
+    this._subir,
+    this._connectivity,
+    this._obtenerProyectos,
+    this._crearProyecto,
+  ) {
     checkConnectivity();
+    cargarProyectos();
   }
 
   RecordState _state = RecordState.idle;
@@ -35,12 +46,23 @@ class RecordingViewModel extends ChangeNotifier {
   String? _errorMessage;
   bool? _online; // null = verificando
 
+  List<ProyectoEntity> _proyectos = const [];
+  ProyectoEntity? _selectedProyecto;
+  bool _loadingProyectos = false;
+
   RecordState get state => _state;
   Duration get elapsed => _elapsed;
   bool get isRecording => _state == RecordState.recording;
   bool get isUploading => _state == RecordState.uploading;
   bool get hasRecording => _state == RecordState.recorded;
   String? get errorMessage => _errorMessage;
+
+  List<ProyectoEntity> get proyectos => _proyectos;
+  ProyectoEntity? get selectedProyecto => _selectedProyecto;
+  bool get loadingProyectos => _loadingProyectos;
+
+  /// Solo se puede subir si hay grabación Y un proyecto elegido (obligatorio).
+  bool get canUpload => hasRecording && _selectedProyecto != null;
 
   /// `null` mientras verifica, luego `true`/`false` según conectividad real.
   bool? get online => _online;
@@ -49,6 +71,34 @@ class RecordingViewModel extends ChangeNotifier {
   /// Verifica conexión real (ping al back-end) y actualiza el estado.
   Future<void> checkConnectivity() async {
     _online = await _connectivity.isOnline();
+    notifyListeners();
+  }
+
+  /// Carga los proyectos del usuario (para elegir a cuál asociar el audio).
+  Future<void> cargarProyectos() async {
+    _loadingProyectos = true;
+    notifyListeners();
+    try {
+      _proyectos = await _obtenerProyectos();
+      _selectedProyecto ??= _proyectos.isNotEmpty ? _proyectos.first : null;
+    } catch (_) {
+      // Sin proyectos disponibles: el usuario podrá crear uno.
+    } finally {
+      _loadingProyectos = false;
+      notifyListeners();
+    }
+  }
+
+  void selectProyecto(ProyectoEntity? proyecto) {
+    _selectedProyecto = proyecto;
+    notifyListeners();
+  }
+
+  /// Crea un proyecto nuevo y lo deja seleccionado.
+  Future<void> crearProyecto(String nombre) async {
+    final proyecto = await _crearProyecto(nombre: nombre);
+    _proyectos = [proyecto, ..._proyectos];
+    _selectedProyecto = proyecto;
     notifyListeners();
   }
 
@@ -88,6 +138,12 @@ class RecordingViewModel extends ChangeNotifier {
   /// (estado "procesando") para pasar a la pantalla de procesamiento.
   Future<void> upload({required void Function(int grabacionId) onUploaded}) async {
     if (_audioPath == null) return;
+    if (_selectedProyecto == null) {
+      _state = RecordState.error;
+      _errorMessage = 'Elige un proyecto antes de subir la grabación.';
+      notifyListeners();
+      return;
+    }
     _state = RecordState.uploading;
     _errorMessage = null;
     notifyListeners();
@@ -95,6 +151,7 @@ class RecordingViewModel extends ChangeNotifier {
       final grabacion = await _subir(
         audioPath: _audioPath!,
         duracionSegundos: _elapsed.inSeconds,
+        proyectoId: _selectedProyecto!.id,
       );
       onUploaded(grabacion.id);
     } catch (e) {
