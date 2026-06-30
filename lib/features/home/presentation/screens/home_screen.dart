@@ -129,7 +129,7 @@ class _DashboardTab extends StatelessWidget {
                 _PendingSyncChip(),
                 const SizedBox(height: 24),
                 _SectionTitle('PRESUPUESTOS RECIENTES'),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -144,7 +144,7 @@ class _DashboardTab extends StatelessWidget {
                   status: 'En proceso',
                   statusColor: AppColors.warning,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 _BudgetItem(
                   icon: Icons.description_outlined,
                   title: 'Ampliación Cuarto',
@@ -152,7 +152,7 @@ class _DashboardTab extends StatelessWidget {
                   status: 'Borrador',
                   statusColor: AppColors.textSecondary,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 _BudgetItem(
                   icon: Icons.description_outlined,
                   title: 'Bardeo Perimetral',
@@ -177,42 +177,58 @@ class _AppBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Center(
-              child: Icon(Icons.home_outlined,
-                  color: AppColors.primary, size: 20),
-            ),
-          ),
-          const SizedBox(width: 10),
+          Icon(Icons.home_outlined, color: AppColors.primary, size: 28),
+          const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'VisionPrice',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
               ),
-              Text(
-                'Buenos días, Roberto 👋',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                  children: [
+                    const TextSpan(text: 'Buenos días, '),
+                    TextSpan(
+                      text: 'Roberto 👋',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
           const Spacer(),
-          Icon(Icons.notifications_outlined,
-              color: AppColors.textSecondary, size: 24),
+          Stack(
+            children: [
+              Icon(Icons.notifications_outlined,
+                  color: AppColors.textSecondary, size: 26),
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.error,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -223,28 +239,81 @@ class _OfflineBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.warningLight,
+        color: AppColors.warningLight.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          Icon(Icons.wifi_off, size: 16, color: AppColors.warning),
-          const SizedBox(width: 8),
-          Text(
-            'Sin conexión — los audios se guardan localmente',
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColors.warning,
-              fontWeight: FontWeight.w500,
+          Icon(Icons.wifi_off_rounded, size: 18, color: AppColors.warning),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Sin conexión — los audios se guardan localmente',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.warning,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
+          const _HazardStripes(),
         ],
       ),
     );
   }
+}
+
+class _HazardStripes extends StatelessWidget {
+  const _HazardStripes();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 24,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: CustomPaint(
+        painter: _StripesPainter(),
+      ),
+    );
+  }
+}
+
+class _StripesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+    const stripeWidth = 8.0;
+
+    for (double i = -size.height; i < size.width; i += stripeWidth * 2) {
+      paint.color = Colors.black.withValues(alpha: 0.8);
+      final path = Path()
+        ..moveTo(i, 0)
+        ..lineTo(i + stripeWidth, 0)
+        ..lineTo(i + stripeWidth + size.height, size.height)
+        ..lineTo(i + size.height, size.height)
+        ..close();
+      canvas.drawPath(path, paint);
+
+      paint.color = Colors.yellow.withValues(alpha: 0.8);
+      final path2 = Path()
+        ..moveTo(i + stripeWidth, 0)
+        ..lineTo(i + stripeWidth * 2, 0)
+        ..lineTo(i + stripeWidth * 2 + size.height, size.height)
+        ..lineTo(i + stripeWidth + size.height, size.height)
+        ..close();
+      canvas.drawPath(path2, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 Widget _newBudgetButton(BuildContext context) {
@@ -252,18 +321,33 @@ Widget _newBudgetButton(BuildContext context) {
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 56,
       child: ElevatedButton(
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const RecordingScreen()),
         ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 2,
+          shadowColor: AppColors.primary.withValues(alpha: 0.4),
+        ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.mic, size: 20),
-            SizedBox(width: 10),
-            Text('Nuevo presupuesto por voz'),
+            const Icon(Icons.mic_rounded, size: 22, color: Colors.white),
+            SizedBox(width: 12),
+            Text(
+              'Nuevo presupuesto por voz',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
           ],
         ),
       ),
@@ -277,22 +361,29 @@ class _PendingSyncChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_upload_outlined,
-                size: 16, color: AppColors.primary),
-            const SizedBox(width: 8),
+            const Icon(Icons.cloud_done_outlined,
+                size: 20, color: AppColors.primary),
+            const SizedBox(width: 10),
             RichText(
               text: const TextSpan(
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: AppColors.textPrimary,
                 ),
                 children: [
@@ -300,7 +391,7 @@ class _PendingSyncChip extends StatelessWidget {
                     text: '2 audios',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   TextSpan(text: ' pendientes de sincronizar'),
