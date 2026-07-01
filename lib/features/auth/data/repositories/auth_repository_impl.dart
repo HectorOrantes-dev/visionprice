@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/storage/token_storage.dart';
 import '../../domain/entities/auth_session_entity.dart';
+import '../../domain/entities/perfil_entity.dart';
 import '../../domain/entities/register_result_entity.dart';
 import '../../domain/entities/role_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -70,6 +71,9 @@ class AuthRepositoryImpl implements AuthRepository {
     await _tokenStorage.saveToken(session.accessToken);
     return session;
   }
+
+  @override
+  Future<PerfilEntity> getPerfil() => _remote.getPerfil();
 
   @override
   Future<void> logout() => _tokenStorage.clear();

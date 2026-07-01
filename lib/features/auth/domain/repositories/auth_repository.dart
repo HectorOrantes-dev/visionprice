@@ -1,4 +1,5 @@
 import '../entities/auth_session_entity.dart';
+import '../entities/perfil_entity.dart';
 import '../entities/register_result_entity.dart';
 import '../entities/role_entity.dart';
 
@@ -38,6 +39,10 @@ abstract class AuthRepository {
     required String idToken,
     required String rol,
   });
+
+  /// Perfil completo del usuario autenticado (`GET /api/v1/me/perfil`),
+  /// para la pantalla de "Perfil / Mi cuenta". Requiere token válido.
+  Future<PerfilEntity> getPerfil();
 
   /// Cierra la sesión local (borra el token).
   Future<void> logout();

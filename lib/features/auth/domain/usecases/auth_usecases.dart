@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 
 import '../entities/auth_session_entity.dart';
+import '../entities/perfil_entity.dart';
 import '../entities/register_result_entity.dart';
 import '../entities/role_entity.dart';
 import '../repositories/auth_repository.dart';
@@ -79,6 +80,14 @@ class GoogleRegisterUseCase {
     required String rol,
   }) =>
       _repo.googleRegister(idToken: idToken, rol: rol);
+}
+
+@injectable
+class GetPerfilUseCase {
+  final AuthRepository _repo;
+  GetPerfilUseCase(this._repo);
+
+  Future<PerfilEntity> call() => _repo.getPerfil();
 }
 
 @injectable

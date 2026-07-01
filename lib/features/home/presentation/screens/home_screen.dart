@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
 import '../../../sync/presentation/screens/sync_queue_screen.dart';
 import '../../../security/presentation/screens/inactivity_detector.dart';
 import '../../../security/presentation/screens/sensitive_data_screen.dart';
+import '../../../auth/domain/entities/perfil_entity.dart';
+import '../../../auth/presentation/providers/perfil_provider.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -129,7 +134,7 @@ class _DashboardTab extends StatelessWidget {
                 _PendingSyncChip(),
                 const SizedBox(height: 24),
                 _SectionTitle('PRESUPUESTOS RECIENTES'),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -144,7 +149,7 @@ class _DashboardTab extends StatelessWidget {
                   status: 'En proceso',
                   statusColor: AppColors.warning,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 _BudgetItem(
                   icon: Icons.description_outlined,
                   title: 'Ampliación Cuarto',
@@ -152,7 +157,7 @@ class _DashboardTab extends StatelessWidget {
                   status: 'Borrador',
                   statusColor: AppColors.textSecondary,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 _BudgetItem(
                   icon: Icons.description_outlined,
                   title: 'Bardeo Perimetral',
@@ -177,42 +182,58 @@ class _AppBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Center(
-              child: Icon(Icons.home_outlined,
-                  color: AppColors.primary, size: 20),
-            ),
-          ),
-          const SizedBox(width: 10),
+          Icon(Icons.home_outlined, color: AppColors.primary, size: 28),
+          const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'VisionPrice',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
               ),
-              Text(
-                'Buenos días, Roberto 👋',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                  children: [
+                    const TextSpan(text: 'Buenos días, '),
+                    TextSpan(
+                      text: 'Roberto 👋',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
           const Spacer(),
-          Icon(Icons.notifications_outlined,
-              color: AppColors.textSecondary, size: 24),
+          Stack(
+            children: [
+              Icon(Icons.notifications_outlined,
+                  color: AppColors.textSecondary, size: 26),
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.error,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -223,28 +244,81 @@ class _OfflineBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.warningLight,
+        color: AppColors.warningLight.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          Icon(Icons.wifi_off, size: 16, color: AppColors.warning),
-          const SizedBox(width: 8),
-          Text(
-            'Sin conexión — los audios se guardan localmente',
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColors.warning,
-              fontWeight: FontWeight.w500,
+          Icon(Icons.wifi_off_rounded, size: 18, color: AppColors.warning),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Sin conexión — los audios se guardan localmente',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.warning,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
+          const _HazardStripes(),
         ],
       ),
     );
   }
+}
+
+class _HazardStripes extends StatelessWidget {
+  const _HazardStripes();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 24,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: CustomPaint(
+        painter: _StripesPainter(),
+      ),
+    );
+  }
+}
+
+class _StripesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+    const stripeWidth = 8.0;
+
+    for (double i = -size.height; i < size.width; i += stripeWidth * 2) {
+      paint.color = Colors.black.withValues(alpha: 0.8);
+      final path = Path()
+        ..moveTo(i, 0)
+        ..lineTo(i + stripeWidth, 0)
+        ..lineTo(i + stripeWidth + size.height, size.height)
+        ..lineTo(i + size.height, size.height)
+        ..close();
+      canvas.drawPath(path, paint);
+
+      paint.color = Colors.yellow.withValues(alpha: 0.8);
+      final path2 = Path()
+        ..moveTo(i + stripeWidth, 0)
+        ..lineTo(i + stripeWidth * 2, 0)
+        ..lineTo(i + stripeWidth * 2 + size.height, size.height)
+        ..lineTo(i + stripeWidth + size.height, size.height)
+        ..close();
+      canvas.drawPath(path2, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 Widget _newBudgetButton(BuildContext context) {
@@ -252,18 +326,33 @@ Widget _newBudgetButton(BuildContext context) {
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 56,
       child: ElevatedButton(
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const RecordingScreen()),
         ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 2,
+          shadowColor: AppColors.primary.withValues(alpha: 0.4),
+        ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.mic, size: 20),
-            SizedBox(width: 10),
-            Text('Nuevo presupuesto por voz'),
+            const Icon(Icons.mic_rounded, size: 22, color: Colors.white),
+            SizedBox(width: 12),
+            Text(
+              'Nuevo presupuesto por voz',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
           ],
         ),
       ),
@@ -277,22 +366,29 @@ class _PendingSyncChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_upload_outlined,
-                size: 16, color: AppColors.primary),
-            const SizedBox(width: 8),
+            const Icon(Icons.cloud_done_outlined,
+                size: 20, color: AppColors.primary),
+            const SizedBox(width: 10),
             RichText(
               text: const TextSpan(
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: AppColors.textPrimary,
                 ),
                 children: [
@@ -300,7 +396,7 @@ class _PendingSyncChip extends StatelessWidget {
                     text: '2 audios',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   TextSpan(text: ' pendientes de sincronizar'),
@@ -444,51 +540,229 @@ class _PerfilTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(16),
+    // El perfil se carga desde `GET /api/v1/me/perfil` a través del ViewModel
+    // (resuelto por getIt). Una instancia nueva por entrada a la pestaña.
+    return ChangeNotifierProvider(
+      create: (_) => getIt<PerfilViewModel>(),
+      child: Consumer<PerfilViewModel>(
+        builder: (context, vm, _) {
+          final perfil = vm.perfil;
+          return SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                const SizedBox(height: 8),
+                Center(
+                  child: CircleAvatar(
+                    radius: 36,
+                    backgroundColor: AppColors.primaryLight,
+                    child: const Icon(Icons.person,
+                        size: 40, color: AppColors.primary),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Text(
+                    perfil?.nombre.isNotEmpty == true
+                        ? perfil!.nombre
+                        : (vm.isLoading ? 'Cargando…' : 'Mi perfil'),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (perfil?.correo.isNotEmpty == true)
+                  Center(
+                    child: Text(
+                      perfil!.correo,
+                      style: const TextStyle(
+                          fontSize: 13, color: AppColors.textSecondary),
+                    ),
+                  ),
+                const SizedBox(height: 28),
+                if (vm.isLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (vm.state == PerfilState.error)
+                  _PerfilError(
+                    message: vm.errorMessage ?? 'No se pudo cargar el perfil',
+                    onRetry: vm.load,
+                  )
+                else if (perfil != null)
+                  _PerfilInfoCard(perfil: perfil),
+                const SizedBox(height: 20),
+                _ProfileItem(
+                  icon: Icons.shield_outlined,
+                  label: 'Datos sensibles',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const SensitiveDataScreen()),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _ProfileItem(
+                  icon: Icons.logout,
+                  label: 'Cerrar sesión',
+                  danger: true,
+                  onTap: onLogout,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Tarjeta con los datos de la cuenta que devuelve `/me/perfil`.
+class _PerfilInfoCard extends StatelessWidget {
+  final PerfilEntity perfil;
+
+  const _PerfilInfoCard({required this.perfil});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
         children: [
-          const SizedBox(height: 8),
-          Center(
-            child: CircleAvatar(
-              radius: 36,
-              backgroundColor: AppColors.primaryLight,
-              child: const Icon(Icons.person,
-                  size: 40, color: AppColors.primary),
-            ),
+          _InfoRow(
+            icon: Icons.badge_outlined,
+            label: 'Rol',
+            value: _capitalize(perfil.rol.replaceAll('_', ' ')),
           ),
-          const SizedBox(height: 12),
-          const Center(
-            child: Text(
-              'Roberto Maestro',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+          if (perfil.telefono.isNotEmpty)
+            _InfoRow(
+              icon: Icons.phone_outlined,
+              label: 'Teléfono',
+              value: perfil.telefono,
+            ),
+          _InfoRow(
+            icon: Icons.workspace_premium_outlined,
+            label: 'Plan',
+            value: perfil.tienePlan ? perfil.planActivo! : 'Sin plan activo',
+            valueColor:
+                perfil.tienePlan ? AppColors.primary : AppColors.textSecondary,
+          ),
+          if (perfil.vigenciaHasta != null)
+            _InfoRow(
+              icon: Icons.event_available_outlined,
+              label: 'Vigencia',
+              value: _fmtDate(perfil.vigenciaHasta!),
+            ),
+          _InfoRow(
+            icon: Icons.lock_outline,
+            label: 'Inicio de sesión',
+            value: perfil.proveedorAuth == 'google'
+                ? 'Google'
+                : 'Correo y contraseña',
+          ),
+          if (perfil.fechaRegistro != null)
+            _InfoRow(
+              icon: Icons.calendar_today_outlined,
+              label: 'Miembro desde',
+              value: _fmtDate(perfil.fechaRegistro!),
+              showDivider: false,
+            ),
+        ],
+      ),
+    );
+  }
+
+  static String _fmtDate(DateTime d) => DateFormat('dd/MM/yyyy').format(d);
+
+  static String _capitalize(String s) =>
+      s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final bool showDivider;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.showDivider = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: AppColors.textSecondary),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: const TextStyle(
+                    fontSize: 13, color: AppColors.textSecondary),
               ),
-            ),
+              const Spacer(),
+              Flexible(
+                child: Text(
+                  value,
+                  textAlign: TextAlign.right,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: valueColor ?? AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const Center(
-            child: Text(
-              'miguel.angel@obra.mx',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            ),
+        ),
+        if (showDivider)
+          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.6)),
+      ],
+    );
+  }
+}
+
+class _PerfilError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _PerfilError({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.errorLight,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13, color: AppColors.error),
           ),
-          const SizedBox(height: 28),
-          _ProfileItem(
-            icon: Icons.shield_outlined,
-            label: 'Datos sensibles',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SensitiveDataScreen()),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _ProfileItem(
-            icon: Icons.logout,
-            label: 'Cerrar sesión',
-            danger: true,
-            onTap: onLogout,
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: onRetry,
+            child: const Text('Reintentar'),
           ),
         ],
       ),
