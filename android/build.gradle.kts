@@ -19,22 +19,13 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// Fuerza el MISMO objetivo JVM (17) para Java y Kotlin en TODOS los módulos,
-// incluidos los plugins de terceros. Sin esto, cada plugin usa su propio nivel
-// (unos Java 11, otros Kotlin al JDK del sistema 21…) y Gradle aborta con
-// "Inconsistent JVM-target compatibility detected".
+// Fija el objetivo JVM de Kotlin a 17 en TODOS los módulos (incluidos plugins).
+// No configuramos Java aquí con afterEvaluate porque choca con el
+// evaluationDependsOn(":app") de arriba ("Cannot run afterEvaluate when the
+// project is already evaluated"). La convivencia de módulos con Java 11 y
+// Kotlin 17 se permite vía kotlin.jvm.target.validation.mode=warning
+// (ver android/gradle.properties) — es seguro para el APK (minSdk 24 + D8).
 subprojects {
-    // Java: nivela source/target a 17 en cualquier módulo Android (app o library).
-    afterEvaluate {
-        val androidExt = extensions.findByName("android")
-        if (androidExt is com.android.build.gradle.BaseExtension) {
-            androidExt.compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_17
-                targetCompatibility = JavaVersion.VERSION_17
-            }
-        }
-    }
-    // Kotlin: mismo objetivo (17) para que coincida con Java.
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
