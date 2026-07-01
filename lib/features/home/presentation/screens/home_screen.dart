@@ -10,6 +10,8 @@ import '../../../security/presentation/screens/sensitive_data_screen.dart';
 import '../../../auth/domain/entities/perfil_entity.dart';
 import '../../../auth/presentation/providers/perfil_provider.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../project/domain/entities/proyecto_entity.dart';
+import '../providers/home_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -119,55 +121,132 @@ class _DashboardTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // El Dashboard resuelve su ViewModel desde getIt: carga proyectos del
+    // back-end y la conectividad real al construirse.
+    return ChangeNotifierProvider(
+      create: (_) => getIt<HomeViewModel>(),
+      child: const _DashboardView(),
+    );
+  }
+}
+
+class _DashboardView extends StatelessWidget {
+  const _DashboardView();
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.watch<HomeViewModel>();
     return SafeArea(
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _AppBar(),
-                _OfflineBanner(),
-                const SizedBox(height: 16),
-                _newBudgetButton(context),
-                const SizedBox(height: 12),
-                _PendingSyncChip(),
-                const SizedBox(height: 24),
-                _SectionTitle('PRESUPUESTOS RECIENTES'),
-                const SizedBox(height: 12),
-              ],
+      child: RefreshIndicator(
+        onRefresh: vm.refresh,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _AppBar(),
+                  // Banner de conectividad REAL: solo aparece si estás offline.
+                  if (vm.isOffline) _OfflineBanner(),
+                  const SizedBox(height: 16),
+                  _newBudgetButton(context),
+                  const SizedBox(height: 12),
+                  _createProjectButton(context, vm),
+                  const SizedBox(height: 24),
+                  _SectionTitle('MIS PROYECTOS'),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+            _ProjectsSliver(vm: vm),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Lista de proyectos del usuario (desde el back-end) con sus estados de
+/// carga / error / vacío.
+class _ProjectsSliver extends StatelessWidget {
+  final HomeViewModel vm;
+  const _ProjectsSliver({required this.vm});
+
+  @override
+  Widget build(BuildContext context) {
+    if (vm.loading && vm.proyectos.isEmpty) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    if (vm.error != null && vm.proyectos.isEmpty) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              Text(
+                vm.error!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 13, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: vm.cargarProyectos,
+                child: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (vm.proyectos.isEmpty) {
+      return const SliverToBoxAdapter(child: _EmptyProjects());
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      sliver: SliverList.separated(
+        itemCount: vm.proyectos.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        itemBuilder: (_, i) => _ProjectCard(proyecto: vm.proyectos[i]),
+      ),
+    );
+  }
+}
+
+class _EmptyProjects extends StatelessWidget {
+  const _EmptyProjects();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      child: Column(
+        children: [
+          Icon(Icons.folder_open_outlined,
+              size: 40, color: AppColors.textHint),
+          const SizedBox(height: 12),
+          const Text(
+            'Aún no tienes proyectos',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                _BudgetItem(
-                  icon: Icons.description_outlined,
-                  title: 'Remodelación Cocina',
-                  subtitle: 'Col. Del Valle · hace 2 h',
-                  status: 'En proceso',
-                  statusColor: AppColors.warning,
-                ),
-                const SizedBox(height: 10),
-                _BudgetItem(
-                  icon: Icons.description_outlined,
-                  title: 'Ampliación Cuarto',
-                  subtitle: 'Iztapalapa · ayer',
-                  status: 'Borrador',
-                  statusColor: AppColors.textSecondary,
-                ),
-                const SizedBox(height: 10),
-                _BudgetItem(
-                  icon: Icons.description_outlined,
-                  title: 'Bardeo Perimetral',
-                  subtitle: 'Xochimilco · hace 3 días',
-                  status: 'Completado',
-                  statusColor: AppColors.success,
-                ),
-                const SizedBox(height: 24),
-              ]),
-            ),
+          const SizedBox(height: 4),
+          const Text(
+            'Crea tu primer proyecto con el botón de arriba para empezar a grabar presupuestos.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -264,61 +343,10 @@ class _OfflineBanner extends StatelessWidget {
               ),
             ),
           ),
-          const _HazardStripes(),
         ],
       ),
     );
   }
-}
-
-class _HazardStripes extends StatelessWidget {
-  const _HazardStripes();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 24,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: CustomPaint(
-        painter: _StripesPainter(),
-      ),
-    );
-  }
-}
-
-class _StripesPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    const stripeWidth = 8.0;
-
-    for (double i = -size.height; i < size.width; i += stripeWidth * 2) {
-      paint.color = Colors.black.withValues(alpha: 0.8);
-      final path = Path()
-        ..moveTo(i, 0)
-        ..lineTo(i + stripeWidth, 0)
-        ..lineTo(i + stripeWidth + size.height, size.height)
-        ..lineTo(i + size.height, size.height)
-        ..close();
-      canvas.drawPath(path, paint);
-
-      paint.color = Colors.yellow.withValues(alpha: 0.8);
-      final path2 = Path()
-        ..moveTo(i + stripeWidth, 0)
-        ..lineTo(i + stripeWidth * 2, 0)
-        ..lineTo(i + stripeWidth * 2 + size.height, size.height)
-        ..lineTo(i + stripeWidth + size.height, size.height)
-        ..close();
-      canvas.drawPath(path2, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 Widget _newBudgetButton(BuildContext context) {
@@ -343,7 +371,7 @@ Widget _newBudgetButton(BuildContext context) {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.mic_rounded, size: 22, color: Colors.white),
+            Icon(Icons.mic_rounded, size: 22, color: Colors.white),
             SizedBox(width: 12),
             Text(
               'Nuevo presupuesto por voz',
@@ -360,51 +388,168 @@ Widget _newBudgetButton(BuildContext context) {
   );
 }
 
-class _PendingSyncChip extends StatelessWidget {
+/// Botón de la home para crear un proyecto (el alta ahora vive aquí, no en la
+/// pantalla de grabación).
+Widget _createProjectButton(BuildContext context, HomeViewModel vm) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton(
+        onPressed: () => showCreateProjectSheet(context, vm),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.primary),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.create_new_folder_outlined, size: 20),
+            SizedBox(width: 10),
+            Text(
+              'Crear nuevo proyecto',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Bottom sheet para dar de alta un proyecto desde la home.
+void showCreateProjectSheet(BuildContext context, HomeViewModel vm) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => _CreateProjectSheet(vm: vm),
+  );
+}
+
+class _CreateProjectSheet extends StatefulWidget {
+  final HomeViewModel vm;
+  const _CreateProjectSheet({required this.vm});
+
+  @override
+  State<_CreateProjectSheet> createState() => _CreateProjectSheetState();
+}
+
+class _CreateProjectSheetState extends State<_CreateProjectSheet> {
+  final _nombreController = TextEditingController();
+  final _direccionController = TextEditingController();
+  bool _creating = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _direccionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _crear() async {
+    final nombre = _nombreController.text.trim();
+    if (nombre.length < 2) {
+      setState(() => _error = 'Escribe un nombre (mín. 2 caracteres)');
+      return;
+    }
+    setState(() {
+      _creating = true;
+      _error = null;
+    });
+    try {
+      await widget.vm.crearProyecto(
+        nombre: nombre,
+        direccion: _direccionController.text.trim(),
+      );
+      if (mounted) Navigator.pop(context);
+    } catch (_) {
+      setState(() => _error = 'No se pudo crear el proyecto.');
+    } finally {
+      if (mounted) setState(() => _creating = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.cloud_done_outlined,
-                size: 20, color: AppColors.primary),
-            const SizedBox(width: 10),
-            RichText(
-              text: const TextSpan(
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textPrimary,
-                ),
-                children: [
-                  TextSpan(
-                    text: '2 audios',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  TextSpan(text: ' pendientes de sincronizar'),
-                ],
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Nuevo proyecto',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _nombreController,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              labelText: 'Nombre',
+              hintText: 'Ej. Casa Polanco',
+              prefixIcon: const Icon(Icons.create_new_folder_outlined,
+                  size: 20, color: AppColors.textSecondary),
+              errorText: _error,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _direccionController,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(
+              labelText: 'Dirección (opcional)',
+              hintText: 'Ej. Col. Del Valle',
+              prefixIcon: Icon(Icons.location_on_outlined,
+                  size: 20, color: AppColors.textSecondary),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: _creating ? null : _crear,
+              child: _creating
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Crear proyecto'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -431,23 +576,14 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _BudgetItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final String status;
-  final Color statusColor;
-
-  const _BudgetItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.status,
-    required this.statusColor,
-  });
+/// Tarjeta de un proyecto real del usuario.
+class _ProjectCard extends StatelessWidget {
+  final ProyectoEntity proyecto;
+  const _ProjectCard({required this.proyecto});
 
   @override
   Widget build(BuildContext context) {
+    final estadoColor = _estadoColor(proyecto.estado);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
@@ -464,7 +600,8 @@ class _BudgetItem extends StatelessWidget {
               color: AppColors.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 18, color: AppColors.textSecondary),
+            child: Icon(Icons.folder_outlined,
+                size: 18, color: AppColors.textSecondary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -472,7 +609,9 @@ class _BudgetItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  proyecto.nombre,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -481,7 +620,9 @@ class _BudgetItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  subtitle,
+                  _subtitle(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -491,18 +632,17 @@ class _BudgetItem extends StatelessWidget {
             ),
           ),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.12),
+              color: estadoColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              status,
+              _capitalize(proyecto.estado),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: statusColor,
+                color: estadoColor,
               ),
             ),
           ),
@@ -510,8 +650,32 @@ class _BudgetItem extends StatelessWidget {
       ),
     );
   }
-}
 
+  String _subtitle() {
+    final dir = proyecto.direccion;
+    final presupuestos = proyecto.totalPresupuestos == 1
+        ? '1 presupuesto'
+        : '${proyecto.totalPresupuestos} presupuestos';
+    if (dir != null && dir.isNotEmpty) return '$dir · $presupuestos';
+    return presupuestos;
+  }
+
+  static Color _estadoColor(String estado) {
+    switch (estado.toLowerCase()) {
+      case 'completado':
+      case 'terminado':
+        return AppColors.success;
+      case 'borrador':
+      case 'pausado':
+        return AppColors.textSecondary;
+      default:
+        return AppColors.primary; // activo / en proceso
+    }
+  }
+
+  static String _capitalize(String s) =>
+      s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+}
 // ─── Placeholder tabs ────────────────────────────────────────────────────────
 
 class _MisObrasTab extends StatelessWidget {
