@@ -21,6 +21,8 @@ import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/usecases/auth_usecases.dart' as _i46;
 import '../../features/auth/presentation/providers/login_provider.dart'
     as _i1005;
+import '../../features/auth/presentation/providers/perfil_provider.dart'
+    as _i801;
 import '../../features/auth/presentation/providers/register_provider.dart'
     as _i74;
 import '../../features/project/data/datasources/proyecto_remote_datasource.dart'
@@ -109,6 +111,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i46.GoogleLoginUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.GoogleRegisterUseCase>(
         () => _i46.GoogleRegisterUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i46.GetPerfilUseCase>(
+        () => _i46.GetPerfilUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.LogoutUseCase>(
         () => _i46.LogoutUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i74.RegisterViewModel>(() => _i74.RegisterViewModel(
@@ -133,6 +137,8 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i46.VerifyTwoFactorUseCase>(),
           gh<_i46.GoogleLoginUseCase>(),
         ));
+    gh.factory<_i801.PerfilViewModel>(
+        () => _i801.PerfilViewModel(gh<_i46.GetPerfilUseCase>()));
     gh.factory<_i354.ProcessingViewModel>(
         () => _i354.ProcessingViewModel(gh<_i540.ObtenerGrabacionUseCase>()));
     gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(

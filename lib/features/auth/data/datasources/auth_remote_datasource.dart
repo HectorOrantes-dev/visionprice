@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../domain/entities/auth_session_entity.dart';
+import '../../domain/entities/perfil_entity.dart';
 import '../../domain/entities/register_result_entity.dart';
 import '../../domain/entities/role_entity.dart';
 
@@ -17,6 +18,7 @@ abstract class AuthRemoteDataSource {
   Future<RegisterResultEntity> register(Map<String, dynamic> body);
   Future<AuthSessionEntity> googleLogin(String idToken);
   Future<AuthSessionEntity> googleRegister(String idToken, String rol);
+  Future<PerfilEntity> getPerfil();
 }
 
 /// `@LazySingleton(as: AuthRemoteDataSource)`: Injectable registra esta
@@ -71,5 +73,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'rol': rol,
     });
     return AuthSessionEntity.fromJson(data);
+  }
+
+  @override
+  Future<PerfilEntity> getPerfil() async {
+    final data = await _client.getJson(ApiConfig.mePerfil, auth: true);
+    return PerfilEntity.fromJson(data);
   }
 }

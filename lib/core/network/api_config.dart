@@ -26,6 +26,7 @@ class ApiConfig {
   // --- Catálogos / cuenta ---
   static const String roles = '$apiPrefix/roles';
   static const String me = '$apiPrefix/me';
+  static const String mePerfil = '$apiPrefix/me/perfil';
 
   // --- Proyectos ---
   static const String proyectos = '$apiPrefix/proyectos';
