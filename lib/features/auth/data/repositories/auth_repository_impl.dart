@@ -17,6 +17,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   AuthRepositoryImpl(this._remote, this._tokenStorage);
 
+  /// Caché en memoria del perfil. Como este repositorio es `@LazySingleton`,
+  /// vive toda la sesión: el perfil se pide UNA vez a la red y luego se
+  /// reutiliza (se limpia en [logout]).
+  PerfilEntity? _perfilCache;
+
   @override
   Future<void> login({
     required String correo,
@@ -73,8 +78,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<PerfilEntity> getPerfil() => _remote.getPerfil();
+  Future<PerfilEntity> getPerfil({bool forceRefresh = false}) async {
+    if (!forceRefresh && _perfilCache != null) return _perfilCache!;
+    final perfil = await _remote.getPerfil();
+    _perfilCache = perfil;
+    return perfil;
+  }
 
   @override
-  Future<void> logout() => _tokenStorage.clear();
+  Future<void> logout() async {
+    _perfilCache = null;
+    await _tokenStorage.clear();
+  }
 }

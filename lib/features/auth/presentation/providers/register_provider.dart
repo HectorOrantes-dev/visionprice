@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/validation_mixin.dart';
+import '../../../devices/data/services/device_registrar.dart';
 import '../../domain/entities/role_entity.dart';
 import '../../domain/usecases/auth_usecases.dart';
 
@@ -22,11 +23,13 @@ class RegisterViewModel extends ChangeNotifier with ValidationMixin {
   final RegisterUseCase _registerUseCase;
   final VerifyTwoFactorUseCase _verifyUseCase;
   final GetRolesUseCase _getRolesUseCase;
+  final DeviceRegistrar _deviceRegistrar;
 
   RegisterViewModel(
     this._registerUseCase,
     this._verifyUseCase,
     this._getRolesUseCase,
+    this._deviceRegistrar,
   ) {
     loadRoles();
   }
@@ -145,6 +148,7 @@ class RegisterViewModel extends ChangeNotifier with ValidationMixin {
       await _verifyUseCase(correo: _correo, code: code);
       _state = RegisterState.success;
       notifyListeners();
+      _deviceRegistrar.register();
       onSuccess();
     } catch (e) {
       _fail(e);

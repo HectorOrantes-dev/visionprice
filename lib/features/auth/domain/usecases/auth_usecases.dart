@@ -87,7 +87,8 @@ class GetPerfilUseCase {
   final AuthRepository _repo;
   GetPerfilUseCase(this._repo);
 
-  Future<PerfilEntity> call() => _repo.getPerfil();
+  Future<PerfilEntity> call({bool forceRefresh = false}) =>
+      _repo.getPerfil(forceRefresh: forceRefresh);
 }
 
 @injectable

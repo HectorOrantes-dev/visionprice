@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/validation_mixin.dart';
+import '../../../devices/data/services/device_registrar.dart';
 import '../../domain/usecases/auth_usecases.dart';
 
 /// Flujo del login:
@@ -22,11 +23,13 @@ class LoginViewModel extends ChangeNotifier with ValidationMixin {
   final LoginUseCase _loginUseCase;
   final VerifyTwoFactorUseCase _verifyUseCase;
   final GoogleLoginUseCase _googleLoginUseCase;
+  final DeviceRegistrar _deviceRegistrar;
 
   LoginViewModel(
     this._loginUseCase,
     this._verifyUseCase,
     this._googleLoginUseCase,
+    this._deviceRegistrar,
   );
 
   LoginState _state = LoginState.idle;
@@ -105,6 +108,8 @@ class LoginViewModel extends ChangeNotifier with ValidationMixin {
       await _verifyUseCase(correo: _correo, code: code);
       _state = LoginState.success;
       notifyListeners();
+      // Registra el device token para push (best-effort, no bloquea).
+      _deviceRegistrar.register();
       onSuccess();
     } catch (e) {
       _fail(e);
@@ -123,6 +128,7 @@ class LoginViewModel extends ChangeNotifier with ValidationMixin {
       await _googleLoginUseCase(idToken: idToken);
       _state = LoginState.success;
       notifyListeners();
+      _deviceRegistrar.register();
       onSuccess();
     } on ApiException catch (e) {
       if (e.isNotFound) {

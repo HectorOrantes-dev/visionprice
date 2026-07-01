@@ -27,6 +27,7 @@ class ApiConfig {
   static const String roles = '$apiPrefix/roles';
   static const String me = '$apiPrefix/me';
   static const String mePerfil = '$apiPrefix/me/perfil';
+  static const String meSubscriptions = '$apiPrefix/me/subscriptions';
 
   // --- Proyectos ---
   static const String proyectos = '$apiPrefix/proyectos';
@@ -34,5 +35,18 @@ class ApiConfig {
   // --- Grabaciones (flujo de audio del maestro de obra) ---
   static const String grabaciones = '$apiPrefix/grabaciones';
   static String grabacion(int id) => '$apiPrefix/grabaciones/$id';
+
+  // --- Cotizaciones ---
   static const String cotizacionesCalculo = '$apiPrefix/cotizaciones/calculo';
+  static const String cotizaciones = '$apiPrefix/cotizaciones';
+  static const String cotizacionesProductos = '$apiPrefix/cotizaciones/productos';
+  static String cotizacionPdf(int id) => '$apiPrefix/cotizaciones/$id/pdf';
+
+  // --- Notificaciones ---
+  static const String notificaciones = '$apiPrefix/notificaciones';
+  static String notificacionLeida(int id) =>
+      '$apiPrefix/notificaciones/$id/leida';
+
+  // --- Dispositivos (push FCM) ---
+  static const String dispositivos = '$apiPrefix/dispositivos';
 }

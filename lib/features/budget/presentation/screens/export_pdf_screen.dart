@@ -1,275 +1,146 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../domain/entities/cotizacion_entity.dart';
+import '../providers/export_pdf_provider.dart';
 
-class ExportPdfScreen extends StatefulWidget {
-  const ExportPdfScreen({super.key});
-
-  @override
-  State<ExportPdfScreen> createState() => _ExportPdfScreenState();
-}
-
-class _ExportPdfScreenState extends State<ExportPdfScreen> {
-  bool _includeDesglose = true;
-  bool _includeProveedor = true;
-  bool _includeParametros = true;
-  bool _includeFecha = false;
+class ExportPdfScreen extends StatelessWidget {
+  final CotizacionEntity cotizacion;
+  const ExportPdfScreen({super.key, required this.cotizacion});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _ExportAppBar(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    _PdfPreviewCard(),
-                    const SizedBox(height: 24),
-                    const _SectionLabel('INCLUIR EN EL DOCUMENTO'),
-                    const SizedBox(height: 12),
-                    _ToggleOption(
-                      label: 'Desglose por material',
-                      value: _includeDesglose,
-                      onChanged: (v) => setState(() => _includeDesglose = v),
-                    ),
-                    _ToggleOption(
-                      label: 'Proveedor y distancia',
-                      value: _includeProveedor,
-                      onChanged: (v) => setState(() => _includeProveedor = v),
-                    ),
-                    _ToggleOption(
-                      label: 'Parámetros detectados por LLM',
-                      value: _includeParametros,
-                      onChanged: (v) => setState(() => _includeParametros = v),
-                    ),
-                    _ToggleOption(
-                      label: 'Fecha de precios',
-                      value: _includeFecha,
-                      onChanged: (v) => setState(() => _includeFecha = v),
-                    ),
-                    const SizedBox(height: 28),
-                    _ShareButton(),
-                    const SizedBox(height: 10),
-                    _DownloadButton(),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ChangeNotifierProvider(
+      create: (_) => getIt<ExportPdfViewModel>(),
+      child: _ExportPdfView(cotizacion: cotizacion),
     );
   }
 }
 
-class _ExportAppBar extends StatelessWidget {
+class _ExportPdfView extends StatelessWidget {
+  final CotizacionEntity cotizacion;
+  const _ExportPdfView({required this.cotizacion});
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios,
-                size: 18, color: AppColors.textPrimary),
-            onPressed: () => Navigator.pop(context),
-          ),
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.picture_as_pdf_outlined,
-                color: AppColors.primary, size: 20),
-          ),
-          const SizedBox(width: 10),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final vm = context.watch<ExportPdfViewModel>();
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: const BackButton(color: AppColors.textPrimary),
+        title: const Text('Exportar PDF',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            )),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Exportar PDF',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.picture_as_pdf_outlined,
+                        size: 48, color: AppColors.primary),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Cotización #${cotizacion.id}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${cotizacion.lineas.length} materiales',
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                'Vista previa del presupuesto',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
+              const SizedBox(height: 24),
+              if (vm.pdfUrl != null) _PdfLink(url: vm.pdfUrl!),
+              if (vm.errorMessage != null)
+                Text(
+                  vm.errorMessage!,
+                  style: const TextStyle(color: Colors.red, fontSize: 13),
+                ),
+              const Spacer(),
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: vm.loading
+                      ? null
+                      : () => vm.descargar(cotizacion.id),
+                  icon: vm.loading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.download_outlined, size: 18),
+                  label: Text(vm.loading ? 'Generando…' : 'Generar PDF'),
                 ),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PdfPreviewCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(0),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: AppColors.primary,
-            child: const Row(
-              children: [
-                Icon(Icons.apartment, color: Colors.white, size: 16),
-                SizedBox(width: 8),
-                Text(
-                  'VisionPrice · Presupuesto de Obra',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: List.generate(
-                4,
-                (i) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Container(
-                    height: 10,
-                    width: i == 0
-                        ? double.infinity
-                        : i == 1
-                            ? 220
-                            : i == 2
-                                ? 180
-                                : 240,
-                    decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  const _SectionLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textSecondary,
-        letterSpacing: 1.0,
-      ),
-    );
-  }
-}
-
-class _ToggleOption extends StatelessWidget {
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _ToggleOption({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 1),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          bottom: BorderSide(color: AppColors.divider),
         ),
+      ),
+    );
+  }
+}
+
+class _PdfLink extends StatelessWidget {
+  final String url;
+  const _PdfLink({required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.successLight,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
+          const Icon(Icons.check_circle, color: AppColors.success, size: 18),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 15,
-                color: AppColors.textPrimary,
-              ),
+              url,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
             ),
           ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
+          IconButton(
+            icon: const Icon(Icons.copy, size: 18, color: AppColors.primary),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: url));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Enlace copiado')),
+              );
+            },
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ShareButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton.icon(
-        onPressed: () {},
-        icon: const Icon(Icons.share_outlined, size: 18),
-        label: const Text('Compartir PDF'),
-      ),
-    );
-  }
-}
-
-class _DownloadButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: const Icon(Icons.download_outlined, size: 18),
-        label: const Text('Descargar'),
       ),
     );
   }

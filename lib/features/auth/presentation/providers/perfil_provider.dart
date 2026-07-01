@@ -31,12 +31,14 @@ class PerfilViewModel extends ChangeNotifier {
   PerfilEntity? get perfil => _perfil;
   bool get isLoading => _state == PerfilState.loading;
 
-  Future<void> load() async {
+  /// Carga el perfil. Tras la primera vez viene de la caché del repositorio
+  /// (sin pegar a la red). Usa [forceRefresh] para forzar una recarga real.
+  Future<void> load({bool forceRefresh = false}) async {
     _state = PerfilState.loading;
     _errorMessage = null;
     notifyListeners();
     try {
-      _perfil = await _getPerfilUseCase();
+      _perfil = await _getPerfilUseCase(forceRefresh: forceRefresh);
       _state = PerfilState.success;
     } catch (e) {
       _state = PerfilState.error;
@@ -45,4 +47,7 @@ class PerfilViewModel extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  /// Fuerza una recarga desde el back-end (p. ej. pull-to-refresh).
+  Future<void> refresh() => load(forceRefresh: true);
 }

@@ -8,8 +8,12 @@ import '../../../sync/presentation/screens/sync_queue_screen.dart';
 import '../../../security/presentation/screens/inactivity_detector.dart';
 import '../../../security/presentation/screens/sensitive_data_screen.dart';
 import '../../../auth/domain/entities/perfil_entity.dart';
+import '../../../auth/domain/usecases/auth_usecases.dart';
 import '../../../auth/presentation/providers/perfil_provider.dart';
+import '../../../devices/data/services/device_registrar.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../account/presentation/screens/subscriptions_screen.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
 import '../providers/home_provider.dart';
 
@@ -33,6 +37,12 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Cierra la sesión y regresa al login limpiando la pila de navegación.
   void _logout({String? reason}) {
     final messenger = ScaffoldMessenger.of(context);
+    // Borra el device token de push y limpia la sesión (token + caché perfil).
+    // Se hace en orden: unregister primero (necesita el JWT) y luego logout.
+    () async {
+      await getIt<DeviceRegistrar>().unregister();
+      await getIt<LogoutUseCase>().call();
+    }();
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,
@@ -763,6 +773,26 @@ class _PerfilTab extends StatelessWidget {
                 else if (perfil != null)
                   _PerfilInfoCard(perfil: perfil),
                 const SizedBox(height: 20),
+                _ProfileItem(
+                  icon: Icons.workspace_premium_outlined,
+                  label: 'Mis suscripciones',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const SubscriptionsScreen()),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _ProfileItem(
+                  icon: Icons.notifications_none,
+                  label: 'Notificaciones',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const NotificationsScreen()),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 _ProfileItem(
                   icon: Icons.shield_outlined,
                   label: 'Datos sensibles',

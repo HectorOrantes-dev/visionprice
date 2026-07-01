@@ -13,6 +13,15 @@ import 'package:http/http.dart' as _i519;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
+import '../../features/account/data/datasources/account_remote_datasource.dart'
+    as _i302;
+import '../../features/account/data/repositories/account_repository_impl.dart'
+    as _i857;
+import '../../features/account/domain/repositories/account_repository.dart'
+    as _i1067;
+import '../../features/account/domain/usecases/account_usecases.dart' as _i878;
+import '../../features/account/presentation/providers/subscriptions_provider.dart'
+    as _i488;
 import '../../features/auth/data/datasources/auth_remote_datasource.dart'
     as _i161;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
@@ -25,7 +34,38 @@ import '../../features/auth/presentation/providers/perfil_provider.dart'
     as _i801;
 import '../../features/auth/presentation/providers/register_provider.dart'
     as _i74;
+import '../../features/budget/data/datasources/cotizacion_remote_datasource.dart'
+    as _i82;
+import '../../features/budget/data/repositories/cotizacion_repository_impl.dart'
+    as _i603;
+import '../../features/budget/domain/repositories/cotizacion_repository.dart'
+    as _i475;
+import '../../features/budget/domain/usecases/cotizacion_usecases.dart'
+    as _i924;
+import '../../features/budget/presentation/providers/export_pdf_provider.dart'
+    as _i537;
+import '../../features/budget/presentation/providers/nearby_stores_provider.dart'
+    as _i453;
+import '../../features/devices/data/datasources/dispositivo_remote_datasource.dart'
+    as _i992;
+import '../../features/devices/data/repositories/dispositivo_repository_impl.dart'
+    as _i706;
+import '../../features/devices/data/services/device_registrar.dart' as _i330;
+import '../../features/devices/domain/repositories/dispositivo_repository.dart'
+    as _i251;
+import '../../features/devices/domain/usecases/dispositivo_usecases.dart'
+    as _i580;
 import '../../features/home/presentation/providers/home_provider.dart' as _i526;
+import '../../features/notifications/data/datasources/notificacion_remote_datasource.dart'
+    as _i587;
+import '../../features/notifications/data/repositories/notificacion_repository_impl.dart'
+    as _i40;
+import '../../features/notifications/domain/repositories/notificacion_repository.dart'
+    as _i382;
+import '../../features/notifications/domain/usecases/notificacion_usecases.dart'
+    as _i331;
+import '../../features/notifications/presentation/providers/notifications_provider.dart'
+    as _i506;
 import '../../features/project/data/datasources/proyecto_remote_datasource.dart'
     as _i1054;
 import '../../features/project/data/repositories/proyecto_repository_impl.dart'
@@ -51,6 +91,7 @@ import '../../features/recording/presentation/providers/recording_provider.dart'
     as _i719;
 import '../network/api_client.dart' as _i557;
 import '../network/connectivity_service.dart' as _i491;
+import '../services/location_service.dart' as _i669;
 import '../storage/token_storage.dart' as _i973;
 import 'register_module.dart' as _i291;
 
@@ -76,14 +117,41 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i695.AudioRecorderService(),
       dispose: (i) => i.dispose(),
     );
+    gh.lazySingleton<_i669.LocationService>(() => _i669.LocationService());
     gh.lazySingleton<_i557.ApiClient>(() => _i557.ApiClient(
           gh<_i519.Client>(),
           gh<_i973.TokenStorage>(),
         ));
+    gh.lazySingleton<_i82.CotizacionRemoteDataSource>(
+        () => _i82.CotizacionRemoteDataSourceImpl(gh<_i557.ApiClient>()));
+    gh.lazySingleton<_i475.CotizacionRepository>(() =>
+        _i603.CotizacionRepositoryImpl(gh<_i82.CotizacionRemoteDataSource>()));
+    gh.factory<_i924.ObtenerProductosUseCase>(
+        () => _i924.ObtenerProductosUseCase(gh<_i475.CotizacionRepository>()));
+    gh.factory<_i924.CrearCotizacionUseCase>(
+        () => _i924.CrearCotizacionUseCase(gh<_i475.CotizacionRepository>()));
+    gh.factory<_i924.ObtenerPdfUseCase>(
+        () => _i924.ObtenerPdfUseCase(gh<_i475.CotizacionRepository>()));
+    gh.lazySingleton<_i992.DispositivoRemoteDataSource>(
+        () => _i992.DispositivoRemoteDataSourceImpl(gh<_i557.ApiClient>()));
+    gh.factory<_i537.ExportPdfViewModel>(
+        () => _i537.ExportPdfViewModel(gh<_i924.ObtenerPdfUseCase>()));
+    gh.factory<_i453.NearbyStoresViewModel>(() => _i453.NearbyStoresViewModel(
+          gh<_i924.ObtenerProductosUseCase>(),
+          gh<_i924.CrearCotizacionUseCase>(),
+          gh<_i669.LocationService>(),
+        ));
+    gh.lazySingleton<_i251.DispositivoRepository>(() =>
+        _i706.DispositivoRepositoryImpl(
+            gh<_i992.DispositivoRemoteDataSource>()));
+    gh.lazySingleton<_i587.NotificacionRemoteDataSource>(
+        () => _i587.NotificacionRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i491.ConnectivityService>(
         () => _i491.ConnectivityService(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i161.AuthRemoteDataSource>(
         () => _i161.AuthRemoteDataSourceImpl(gh<_i557.ApiClient>()));
+    gh.lazySingleton<_i302.AccountRemoteDataSource>(
+        () => _i302.AccountRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i667.GrabacionRemoteDataSource>(
         () => _i667.GrabacionRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i1054.ProyectoRemoteDataSource>(
@@ -100,6 +168,13 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.lazySingleton<_i85.GrabacionRepository>(() =>
         _i520.GrabacionRepositoryImpl(gh<_i667.GrabacionRemoteDataSource>()));
+    gh.factory<_i580.RegistrarDispositivoUseCase>(() =>
+        _i580.RegistrarDispositivoUseCase(gh<_i251.DispositivoRepository>()));
+    gh.factory<_i580.BorrarDispositivoUseCase>(() =>
+        _i580.BorrarDispositivoUseCase(gh<_i251.DispositivoRepository>()));
+    gh.lazySingleton<_i382.NotificacionRepository>(() =>
+        _i40.NotificacionRepositoryImpl(
+            gh<_i587.NotificacionRemoteDataSource>()));
     gh.factory<_i46.LoginUseCase>(
         () => _i46.LoginUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.VerifyTwoFactorUseCase>(
@@ -116,17 +191,20 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i46.GetPerfilUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.LogoutUseCase>(
         () => _i46.LogoutUseCase(gh<_i787.AuthRepository>()));
-    gh.factory<_i74.RegisterViewModel>(() => _i74.RegisterViewModel(
-          gh<_i46.RegisterUseCase>(),
-          gh<_i46.VerifyTwoFactorUseCase>(),
-          gh<_i46.GetRolesUseCase>(),
-        ));
+    gh.lazySingleton<_i1067.AccountRepository>(
+        () => _i857.AccountRepositoryImpl(gh<_i302.AccountRemoteDataSource>()));
     gh.factory<_i526.HomeViewModel>(() => _i526.HomeViewModel(
           gh<_i836.ObtenerProyectosUseCase>(),
           gh<_i836.CrearProyectoUseCase>(),
           gh<_i491.ConnectivityService>(),
           gh<_i46.GetPerfilUseCase>(),
         ));
+    gh.lazySingleton<_i330.DeviceRegistrar>(() => _i330.DeviceRegistrar(
+          gh<_i580.RegistrarDispositivoUseCase>(),
+          gh<_i580.BorrarDispositivoUseCase>(),
+        ));
+    gh.factory<_i878.ObtenerSuscripcionesUseCase>(() =>
+        _i878.ObtenerSuscripcionesUseCase(gh<_i1067.AccountRepository>()));
     gh.factory<_i540.SubirGrabacionUseCase>(
         () => _i540.SubirGrabacionUseCase(gh<_i85.GrabacionRepository>()));
     gh.factory<_i540.ObtenerGrabacionUseCase>(
@@ -135,23 +213,41 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i540.ObtenerHistorialUseCase(gh<_i85.GrabacionRepository>()));
     gh.factory<_i540.CalcularMetrosUseCase>(
         () => _i540.CalcularMetrosUseCase(gh<_i85.GrabacionRepository>()));
+    gh.factory<_i331.ObtenerNotificacionesUseCase>(() =>
+        _i331.ObtenerNotificacionesUseCase(gh<_i382.NotificacionRepository>()));
+    gh.factory<_i331.MarcarNotificacionLeidaUseCase>(() =>
+        _i331.MarcarNotificacionLeidaUseCase(
+            gh<_i382.NotificacionRepository>()));
     gh.factory<_i407.ParametersViewModel>(() => _i407.ParametersViewModel(
           gh<_i540.ObtenerGrabacionUseCase>(),
           gh<_i540.CalcularMetrosUseCase>(),
         ));
+    gh.factory<_i488.SubscriptionsViewModel>(() =>
+        _i488.SubscriptionsViewModel(gh<_i878.ObtenerSuscripcionesUseCase>()));
     gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
           gh<_i695.AudioRecorderService>(),
           gh<_i540.SubirGrabacionUseCase>(),
           gh<_i491.ConnectivityService>(),
           gh<_i836.ObtenerProyectosUseCase>(),
         ));
+    gh.factory<_i74.RegisterViewModel>(() => _i74.RegisterViewModel(
+          gh<_i46.RegisterUseCase>(),
+          gh<_i46.VerifyTwoFactorUseCase>(),
+          gh<_i46.GetRolesUseCase>(),
+          gh<_i330.DeviceRegistrar>(),
+        ));
+    gh.factory<_i801.PerfilViewModel>(
+        () => _i801.PerfilViewModel(gh<_i46.GetPerfilUseCase>()));
     gh.factory<_i1005.LoginViewModel>(() => _i1005.LoginViewModel(
           gh<_i46.LoginUseCase>(),
           gh<_i46.VerifyTwoFactorUseCase>(),
           gh<_i46.GoogleLoginUseCase>(),
+          gh<_i330.DeviceRegistrar>(),
         ));
-    gh.factory<_i801.PerfilViewModel>(
-        () => _i801.PerfilViewModel(gh<_i46.GetPerfilUseCase>()));
+    gh.factory<_i506.NotificationsViewModel>(() => _i506.NotificationsViewModel(
+          gh<_i331.ObtenerNotificacionesUseCase>(),
+          gh<_i331.MarcarNotificacionLeidaUseCase>(),
+        ));
     gh.factory<_i354.ProcessingViewModel>(
         () => _i354.ProcessingViewModel(gh<_i540.ObtenerGrabacionUseCase>()));
     return this;

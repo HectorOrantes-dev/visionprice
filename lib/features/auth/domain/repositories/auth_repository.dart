@@ -42,7 +42,9 @@ abstract class AuthRepository {
 
   /// Perfil completo del usuario autenticado (`GET /api/v1/me/perfil`),
   /// para la pantalla de "Perfil / Mi cuenta". Requiere token válido.
-  Future<PerfilEntity> getPerfil();
+  /// Se cachea en memoria: solo pega a la red la primera vez o si
+  /// [forceRefresh] es `true`.
+  Future<PerfilEntity> getPerfil({bool forceRefresh = false});
 
   /// Cierra la sesión local (borra el token).
   Future<void> logout();
