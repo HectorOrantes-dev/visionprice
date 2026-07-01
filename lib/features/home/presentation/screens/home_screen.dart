@@ -257,44 +257,48 @@ class _EmptyProjects extends StatelessWidget {
 class _AppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<HomeViewModel>();
+    final nombre = vm.nombreCorto;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
         children: [
           Icon(Icons.home_outlined, color: AppColors.primary, size: 28),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'VisionPrice',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              RichText(
-                text: TextSpan(
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'VisionPrice',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
-                  children: [
-                    const TextSpan(text: 'Buenos días, '),
-                    TextSpan(
-                      text: 'Roberto 👋',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ],
                 ),
-              ),
-            ],
+                RichText(
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                    children: [
+                      TextSpan(text: '${vm.saludo}, '),
+                      TextSpan(
+                        text: nombre != null ? '$nombre 👋' : '👋',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          const Spacer(),
+          const SizedBox(width: 12),
           Stack(
             children: [
               Icon(Icons.notifications_outlined,
