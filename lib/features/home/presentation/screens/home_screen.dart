@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
 import '../../../sync/presentation/screens/sync_queue_screen.dart';
 import '../../../security/presentation/screens/inactivity_detector.dart';
 import '../../../security/presentation/screens/sensitive_data_screen.dart';
+import '../../../auth/domain/entities/perfil_entity.dart';
+import '../../../auth/presentation/providers/perfil_provider.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -535,51 +540,229 @@ class _PerfilTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(16),
+    // El perfil se carga desde `GET /api/v1/me/perfil` a través del ViewModel
+    // (resuelto por getIt). Una instancia nueva por entrada a la pestaña.
+    return ChangeNotifierProvider(
+      create: (_) => getIt<PerfilViewModel>(),
+      child: Consumer<PerfilViewModel>(
+        builder: (context, vm, _) {
+          final perfil = vm.perfil;
+          return SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                const SizedBox(height: 8),
+                Center(
+                  child: CircleAvatar(
+                    radius: 36,
+                    backgroundColor: AppColors.primaryLight,
+                    child: const Icon(Icons.person,
+                        size: 40, color: AppColors.primary),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Text(
+                    perfil?.nombre.isNotEmpty == true
+                        ? perfil!.nombre
+                        : (vm.isLoading ? 'Cargando…' : 'Mi perfil'),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (perfil?.correo.isNotEmpty == true)
+                  Center(
+                    child: Text(
+                      perfil!.correo,
+                      style: const TextStyle(
+                          fontSize: 13, color: AppColors.textSecondary),
+                    ),
+                  ),
+                const SizedBox(height: 28),
+                if (vm.isLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (vm.state == PerfilState.error)
+                  _PerfilError(
+                    message: vm.errorMessage ?? 'No se pudo cargar el perfil',
+                    onRetry: vm.load,
+                  )
+                else if (perfil != null)
+                  _PerfilInfoCard(perfil: perfil),
+                const SizedBox(height: 20),
+                _ProfileItem(
+                  icon: Icons.shield_outlined,
+                  label: 'Datos sensibles',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const SensitiveDataScreen()),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _ProfileItem(
+                  icon: Icons.logout,
+                  label: 'Cerrar sesión',
+                  danger: true,
+                  onTap: onLogout,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Tarjeta con los datos de la cuenta que devuelve `/me/perfil`.
+class _PerfilInfoCard extends StatelessWidget {
+  final PerfilEntity perfil;
+
+  const _PerfilInfoCard({required this.perfil});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
         children: [
-          const SizedBox(height: 8),
-          Center(
-            child: CircleAvatar(
-              radius: 36,
-              backgroundColor: AppColors.primaryLight,
-              child: const Icon(Icons.person,
-                  size: 40, color: AppColors.primary),
-            ),
+          _InfoRow(
+            icon: Icons.badge_outlined,
+            label: 'Rol',
+            value: _capitalize(perfil.rol.replaceAll('_', ' ')),
           ),
-          const SizedBox(height: 12),
-          const Center(
-            child: Text(
-              'Roberto Maestro',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+          if (perfil.telefono.isNotEmpty)
+            _InfoRow(
+              icon: Icons.phone_outlined,
+              label: 'Teléfono',
+              value: perfil.telefono,
+            ),
+          _InfoRow(
+            icon: Icons.workspace_premium_outlined,
+            label: 'Plan',
+            value: perfil.tienePlan ? perfil.planActivo! : 'Sin plan activo',
+            valueColor:
+                perfil.tienePlan ? AppColors.primary : AppColors.textSecondary,
+          ),
+          if (perfil.vigenciaHasta != null)
+            _InfoRow(
+              icon: Icons.event_available_outlined,
+              label: 'Vigencia',
+              value: _fmtDate(perfil.vigenciaHasta!),
+            ),
+          _InfoRow(
+            icon: Icons.lock_outline,
+            label: 'Inicio de sesión',
+            value: perfil.proveedorAuth == 'google'
+                ? 'Google'
+                : 'Correo y contraseña',
+          ),
+          if (perfil.fechaRegistro != null)
+            _InfoRow(
+              icon: Icons.calendar_today_outlined,
+              label: 'Miembro desde',
+              value: _fmtDate(perfil.fechaRegistro!),
+              showDivider: false,
+            ),
+        ],
+      ),
+    );
+  }
+
+  static String _fmtDate(DateTime d) => DateFormat('dd/MM/yyyy').format(d);
+
+  static String _capitalize(String s) =>
+      s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final bool showDivider;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.showDivider = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: AppColors.textSecondary),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: const TextStyle(
+                    fontSize: 13, color: AppColors.textSecondary),
               ),
-            ),
+              const Spacer(),
+              Flexible(
+                child: Text(
+                  value,
+                  textAlign: TextAlign.right,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: valueColor ?? AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const Center(
-            child: Text(
-              'miguel.angel@obra.mx',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            ),
+        ),
+        if (showDivider)
+          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.6)),
+      ],
+    );
+  }
+}
+
+class _PerfilError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _PerfilError({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.errorLight,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13, color: AppColors.error),
           ),
-          const SizedBox(height: 28),
-          _ProfileItem(
-            icon: Icons.shield_outlined,
-            label: 'Datos sensibles',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SensitiveDataScreen()),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _ProfileItem(
-            icon: Icons.logout,
-            label: 'Cerrar sesión',
-            danger: true,
-            onTap: onLogout,
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: onRetry,
+            child: const Text('Reintentar'),
           ),
         ],
       ),
