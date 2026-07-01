@@ -1,62 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../domain/entities/cotizacion_entity.dart';
 import 'export_pdf_screen.dart';
 
 class BudgetResultScreen extends StatelessWidget {
-  const BudgetResultScreen({super.key});
+  final CotizacionEntity cotizacion;
+  const BudgetResultScreen({super.key, required this.cotizacion});
 
   @override
   Widget build(BuildContext context) {
+    final money = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
-            _BudgetAppBar(),
+            _ResultAppBar(),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.all(16),
-                children: const [
-                  _TotalCard(),
-                  SizedBox(height: 20),
-                  _SectionLabel('DESGLOSE DE MATERIALES'),
-                  SizedBox(height: 12),
-                  _MaterialRow(
-                    icon: Icons.layers_outlined,
-                    name: 'Firme de concreto f\'c 150',
-                    formula: '80 m² × \$920/m² = \$73,600',
-                    total: '\$73,600',
-                    color: AppColors.primary,
+                children: [
+                  _TotalCard(
+                    total: money.format(cotizacion.total),
+                    estado: cotizacion.estado,
+                    lineas: cotizacion.lineas.length,
                   ),
-                  SizedBox(height: 8),
-                  _MaterialRow(
-                    icon: Icons.square_outlined,
-                    name: 'Mortero revoque',
-                    formula: '16 bultos × \$185 = \$2,960',
-                    total: '\$2,960',
-                    color: AppColors.primary,
-                  ),
-                  SizedBox(height: 8),
-                  _MaterialRow(
-                    icon: Icons.view_column_outlined,
-                    name: 'Castillos de amarre',
-                    formula: '6 pzas × \$87 = \$522',
-                    total: '\$522',
-                    color: AppColors.primary,
-                  ),
-                  SizedBox(height: 8),
-                  _MaterialRow(
-                    icon: Icons.construction_outlined,
-                    name: 'Mano de obra',
-                    formula: 'Estimado regional CDMX',
-                    total: '\$7,238',
-                    color: AppColors.success,
-                  ),
-                  SizedBox(height: 24),
+                  const SizedBox(height: 20),
+                  const _SectionLabel('DESGLOSE DE MATERIALES'),
+                  const SizedBox(height: 8),
+                  if (cotizacion.lineas.isEmpty)
+                    const Text('Sin líneas',
+                        style: TextStyle(color: AppColors.textSecondary))
+                  else
+                    ...cotizacion.lineas.map(
+                      (l) => _LineaCard(linea: l, money: money),
+                    ),
                 ],
               ),
             ),
-            _BottomActions(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ExportPdfScreen(cotizacion: cotizacion),
+                    ),
+                  ),
+                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                  label: const Text('Exportar PDF'),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -64,7 +63,7 @@ class BudgetResultScreen extends StatelessWidget {
   }
 }
 
-class _BudgetAppBar extends StatelessWidget {
+class _ResultAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -83,7 +82,7 @@ class _BudgetAppBar extends StatelessWidget {
               color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.description_outlined,
+            child: const Icon(Icons.receipt_long_outlined,
                 color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 10),
@@ -91,7 +90,7 @@ class _BudgetAppBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Presupuesto',
+                'Cotización',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
@@ -99,11 +98,8 @@ class _BudgetAppBar extends StatelessWidget {
                 ),
               ),
               Text(
-                'Remodelación Cocina · Col. Del Valle',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
+                'Materiales y precios',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
               ),
             ],
           ),
@@ -132,7 +128,14 @@ class _SectionLabel extends StatelessWidget {
 }
 
 class _TotalCard extends StatelessWidget {
-  const _TotalCard();
+  final String total;
+  final String estado;
+  final int lineas;
+  const _TotalCard({
+    required this.total,
+    required this.estado,
+    required this.lineas,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -140,53 +143,36 @@ class _TotalCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        gradient: const LinearGradient(
+          colors: [AppColors.info, AppColors.primaryDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'TOTAL ESTIMADO',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: Colors.white70,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '\$84,320 MXN',
-            style: TextStyle(
+          const Text('TOTAL ESTIMADO',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.white70,
+                letterSpacing: 1,
+                fontWeight: FontWeight.w600,
+              )),
+          const SizedBox(height: 6),
+          Text(
+            total,
+            style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 12),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.location_on, size: 14, color: Colors.white),
-                SizedBox(width: 6),
-                Text(
-                  'Ferretería El Constructor · 0.8 km',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(height: 6),
+          Text(
+            '$lineas materiales · $estado',
+            style: const TextStyle(fontSize: 13, color: Colors.white70),
           ),
         ],
       ),
@@ -194,24 +180,15 @@ class _TotalCard extends StatelessWidget {
   }
 }
 
-class _MaterialRow extends StatelessWidget {
-  final IconData icon;
-  final String name;
-  final String formula;
-  final String total;
-  final Color color;
-
-  const _MaterialRow({
-    required this.icon,
-    required this.name,
-    required this.formula,
-    required this.total,
-    required this.color,
-  });
+class _LineaCard extends StatelessWidget {
+  final LineaCotizacionEntity linea;
+  final NumberFormat money;
+  const _LineaCard({required this.linea, required this.money});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -220,23 +197,12 @@ class _MaterialRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child:
-                Icon(icon, size: 18, color: AppColors.textSecondary),
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  linea.descripcion,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -245,7 +211,7 @@ class _MaterialRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  formula,
+                  '${linea.cantidad.toStringAsFixed(2)} ${linea.unidad} × ${money.format(linea.precioUnitario)}',
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -255,46 +221,11 @@ class _MaterialRow extends StatelessWidget {
             ),
           ),
           Text(
-            total,
-            style: TextStyle(
-              fontSize: 15,
+            money.format(linea.subtotal),
+            style: const TextStyle(
+              fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BottomActions extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      child: Column(
-        children: [
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ExportPdfScreen()),
-              ),
-              icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-              label: const Text('Exportar PDF'),
-            ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.edit_outlined, size: 18),
-              label: const Text('Editar presupuesto'),
+              color: AppColors.textPrimary,
             ),
           ),
         ],

@@ -1,103 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../domain/entities/producto_entity.dart';
+import '../providers/nearby_stores_provider.dart';
 import 'budget_result_screen.dart';
 
-class NearbyStoresScreen extends StatefulWidget {
-  const NearbyStoresScreen({super.key});
+class NearbyStoresScreen extends StatelessWidget {
+  final int proyectoId;
+  final double? pisoM2;
+  final double? paredesM2;
 
-  @override
-  State<NearbyStoresScreen> createState() => _NearbyStoresScreenState();
-}
-
-class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
-  int _selectedFilter = 0;
-  final List<String> _filters = ['Cercanía', 'Precio', 'Cobertura'];
+  const NearbyStoresScreen({
+    super.key,
+    required this.proyectoId,
+    this.pisoM2,
+    this.paredesM2,
+  });
 
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => getIt<NearbyStoresViewModel>()
+        ..load(proyectoId: proyectoId, pisoM2: pisoM2, paredesM2: paredesM2),
+      child: const _NearbyStoresView(),
+    );
+  }
+}
+
+class _NearbyStoresView extends StatelessWidget {
+  const _NearbyStoresView();
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.watch<NearbyStoresViewModel>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
-            _StoresAppBar(),
-            const SizedBox(height: 12),
-            _FilterChips(
-              selected: _selectedFilter,
-              filters: _filters,
-              onSelected: (i) => setState(() => _selectedFilter = i),
-            ),
-            const SizedBox(height: 12),
+            _StoresAppBar(count: vm.productos.length),
+            if (vm.usandoUbicacionAprox && !vm.loading)
+              _ApproxLocationBanner(),
+            const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  _StoreCard(
-                    name: 'Ferretería El Constructor',
-                    distance: '0.8 km',
-                    neighborhood: 'Col. Del Valle',
-                    badge: 'Cubre todo',
-                    badgeColor: AppColors.success,
-                    total: '\$84,320 MXN',
-                    items: const [
-                      _StoreItem('Concreto premezclado', '\$1,850/m²',
-                          available: true),
-                      _StoreItem('Mortero revoque', '\$185/bulto',
-                          available: true),
-                      _StoreItem('Varilla 3/8"', '\$87/pza', available: true),
-                    ],
-                    isSelected: true,
-                    onSelect: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const BudgetResultScreen()),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _StoreCard(
-                    name: 'Materiales del Valle',
-                    distance: '1.4 km',
-                    neighborhood: 'Narvarte',
-                    badge: 'Parcial',
-                    badgeColor: AppColors.warning,
-                    items: const [
-                      _StoreItem('Concreto premezclado', '\$1,780/m²',
-                          available: true),
-                      _StoreItem('Mortero revoque', null, available: false),
-                      _StoreItem('Varilla 3/8"', '\$82/pza', available: true),
-                    ],
-                    isSelected: false,
-                    onSelect: () {},
-                  ),
-                  const SizedBox(height: 12),
-                  _StoreCard(
-                    name: 'Suministros Omega',
-                    distance: '2.1 km',
-                    neighborhood: 'Insurgentes Sur',
-                    badge: 'Parcial',
-                    badgeColor: AppColors.warning,
-                    items: const [
-                      _StoreItem('Concreto premezclado', '\$1,920/m²',
-                          available: true),
-                      _StoreItem('Mortero revoque', '\$192/bulto',
-                          available: true),
-                      _StoreItem('Varilla 3/8"', null, available: false),
-                    ],
-                    isSelected: false,
-                    onSelect: () {},
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
+              child: _body(context, vm),
             ),
+            if (!vm.loading && vm.productos.isNotEmpty)
+              _GenerateBar(vm: vm),
           ],
         ),
       ),
     );
   }
+
+  Widget _body(BuildContext context, NearbyStoresViewModel vm) {
+    if (vm.loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (vm.errorMessage != null && vm.productos.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Text(
+            vm.errorMessage!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+      );
+    }
+    if (vm.productos.isEmpty) {
+      return const Center(
+        child: Text('No hay productos cercanos',
+            style: TextStyle(color: AppColors.textSecondary)),
+      );
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: vm.productos.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (_, i) => _ProductCard(producto: vm.productos[i], vm: vm),
+    );
+  }
 }
 
 class _StoresAppBar extends StatelessWidget {
+  final int count;
+  const _StoresAppBar({required this.count});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -120,11 +112,11 @@ class _StoresAppBar extends StatelessWidget {
                 color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 10),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Ferreterías cercanas',
+              const Text(
+                'Materiales cercanos',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
@@ -132,8 +124,8 @@ class _StoresAppBar extends StatelessWidget {
                 ),
               ),
               Text(
-                '3 proveedores · Remodelación Cocina',
-                style: TextStyle(
+                '$count productos · elige piso o paredes',
+                style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,
                 ),
@@ -146,99 +138,50 @@ class _StoresAppBar extends StatelessWidget {
   }
 }
 
-class _FilterChips extends StatelessWidget {
-  final int selected;
-  final List<String> filters;
-  final ValueChanged<int> onSelected;
-
-  const _FilterChips({
-    required this.selected,
-    required this.filters,
-    required this.onSelected,
-  });
-
+class _ApproxLocationBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.warningLight,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Row(
-        children: List.generate(filters.length, (i) {
-          final isSelected = i == selected;
-          return Padding(
-            padding: EdgeInsets.only(right: i < filters.length - 1 ? 8 : 0),
-            child: GestureDetector(
-              onTap: () => onSelected(i),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary : AppColors.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color:
-                        isSelected ? AppColors.primary : AppColors.border,
-                  ),
-                ),
-                child: Text(
-                  filters[i],
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: isSelected
-                        ? Colors.white
-                        : AppColors.textSecondary,
-                  ),
-                ),
-              ),
+        children: [
+          const Icon(Icons.location_off_outlined,
+              size: 16, color: AppColors.warning),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'Ubicación aproximada (sin permiso) · resultados cerca del centro',
+              style: TextStyle(fontSize: 12, color: AppColors.warning),
             ),
-          );
-        }),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _StoreItem {
-  final String name;
-  final String? price;
-  final bool available;
-
-  const _StoreItem(this.name, this.price, {required this.available});
-}
-
-class _StoreCard extends StatelessWidget {
-  final String name;
-  final String distance;
-  final String neighborhood;
-  final String badge;
-  final Color badgeColor;
-  final String? total;
-  final List<_StoreItem> items;
-  final bool isSelected;
-  final VoidCallback onSelect;
-
-  const _StoreCard({
-    required this.name,
-    required this.distance,
-    required this.neighborhood,
-    required this.badge,
-    required this.badgeColor,
-    this.total,
-    required this.items,
-    required this.isSelected,
-    required this.onSelect,
-  });
+class _ProductCard extends StatelessWidget {
+  final ProductoEntity producto;
+  final NearbyStoresViewModel vm;
+  const _ProductCard({required this.producto, required this.vm});
 
   @override
   Widget build(BuildContext context) {
+    final aplicar = vm.aplicarDe(producto.productoId);
+    final selected = aplicar != null;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isSelected ? AppColors.primary : AppColors.border,
-          width: isSelected ? 1.5 : 1,
+          color: selected ? AppColors.primary : AppColors.border,
+          width: selected ? 1.5 : 1,
         ),
       ),
       child: Column(
@@ -246,11 +189,9 @@ class _StoreCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (isSelected)
-                const Text('⭐ ', style: TextStyle(fontSize: 14)),
               Expanded(
                 child: Text(
-                  name,
+                  producto.nombre,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -258,102 +199,127 @@ class _StoreCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  badge,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: badgeColor,
-                  ),
+              Text(
+                '\$${producto.precioUnitario.toStringAsFixed(2)}/${producto.unidad}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
-            '$distance · $neighborhood',
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
+            [
+              producto.proveedorNombre ?? producto.categoria,
+              if (producto.distanciaKm != null)
+                '${producto.distanciaKm!.toStringAsFixed(1)} km',
+            ].join(' · '),
+            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _SurfaceChip(
+                label: 'Piso',
+                selected: aplicar == 'piso',
+                onTap: () => vm.setAplicar(
+                    producto.productoId, aplicar == 'piso' ? null : 'piso'),
+              ),
+              const SizedBox(width: 8),
+              _SurfaceChip(
+                label: 'Paredes',
+                selected: aplicar == 'paredes',
+                onTap: () => vm.setAplicar(producto.productoId,
+                    aplicar == 'paredes' ? null : 'paredes'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SurfaceChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _SurfaceChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GenerateBar extends StatelessWidget {
+  final NearbyStoresViewModel vm;
+  const _GenerateBar({required this.vm});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+      child: Column(
+        children: [
+          if (vm.errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                vm.errorMessage!,
+                style: const TextStyle(color: Colors.red, fontSize: 13),
+              ),
+            ),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: vm.creating
+                  ? null
+                  : () => vm.generar(
+                        onCreated: (cot) => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BudgetResultScreen(cotizacion: cot),
+                          ),
+                        ),
+                      ),
+              child: vm.creating
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text('Generar cotización (${vm.seleccionados})'),
             ),
           ),
-          const SizedBox(height: 12),
-          ...items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: item.available
-                            ? AppColors.success
-                            : AppColors.error,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      item.name,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      item.available
-                          ? (item.price ?? '')
-                          : '— sin stock',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: item.available
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        color: item.available
-                            ? AppColors.textPrimary
-                            : AppColors.error,
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-          if (total != null) ...[
-            const SizedBox(height: 12),
-            const Divider(),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  'Total: $total',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const Spacer(),
-                ElevatedButton.icon(
-                  onPressed: onSelect,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size.zero,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                  ),
-                  icon: const Icon(Icons.check, size: 16),
-                  label: const Text('Seleccionar',
-                      style: TextStyle(fontSize: 13)),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );

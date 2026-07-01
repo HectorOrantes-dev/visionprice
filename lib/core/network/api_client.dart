@@ -23,7 +23,17 @@ class ApiClient {
 
   static const Duration _timeout = Duration(seconds: 20);
 
-  Uri _uri(String path) => Uri.parse('${ApiConfig.baseUrl}$path');
+  Uri _uri(String path, [Map<String, dynamic>? query]) {
+    final base = Uri.parse('${ApiConfig.baseUrl}$path');
+    if (query == null || query.isEmpty) return base;
+    return base.replace(
+      queryParameters: {
+        ...base.queryParameters,
+        for (final e in query.entries)
+          if (e.value != null) e.key: '${e.value}',
+      },
+    );
+  }
 
   Map<String, String> _headers({bool auth = false}) {
     final headers = <String, String>{
@@ -51,10 +61,25 @@ class ApiClient {
 
   Future<Map<String, dynamic>> getJson(
     String path, {
+    Map<String, dynamic>? query,
     bool auth = true,
   }) async {
-    final data =
-        await _send(() => _client.get(_uri(path), headers: _headers(auth: auth)));
+    final data = await _send(
+        () => _client.get(_uri(path, query), headers: _headers(auth: auth)));
+    return data is Map<String, dynamic> ? data : <String, dynamic>{};
+  }
+
+  /// DELETE con cuerpo JSON opcional (p. ej. borrar un device token).
+  Future<Map<String, dynamic>> deleteJson(
+    String path, {
+    Map<String, dynamic>? body,
+    bool auth = true,
+  }) async {
+    final data = await _send(() => _client.delete(
+          _uri(path),
+          headers: _headers(auth: auth),
+          body: body != null ? jsonEncode(body) : null,
+        ));
     return data is Map<String, dynamic> ? data : <String, dynamic>{};
   }
 
@@ -83,13 +108,21 @@ class ApiClient {
     return data is Map<String, dynamic> ? data : <String, dynamic>{};
   }
 
+  /// GET que devuelve el JSON crudo decodificado (`Map` o `List`), para
+  /// endpoints cuyo esquema es variable (p. ej. `/me/subscriptions`).
+  Future<dynamic> getRaw(String path, {bool auth = true}) {
+    return _send(
+        () => _client.get(_uri(path), headers: _headers(auth: auth)));
+  }
+
   /// Para endpoints que devuelven un arreglo JSON (p. ej. `GET /roles`).
   Future<List<dynamic>> getJsonList(
     String path, {
+    Map<String, dynamic>? query,
     bool auth = false,
   }) async {
-    final data =
-        await _send(() => _client.get(_uri(path), headers: _headers(auth: auth)));
+    final data = await _send(
+        () => _client.get(_uri(path, query), headers: _headers(auth: auth)));
     return data is List ? data : const [];
   }
 

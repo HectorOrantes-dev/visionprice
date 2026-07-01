@@ -3,6 +3,7 @@
 /// el detalle (`GET /grabaciones/{id}`) que ya trae transcripción/extracción.
 class GrabacionEntity {
   final int id;
+  final int? proyectoId;
   final String estado; // estado_sincronizacion: procesando | sincronizado | error
   final int? duracionSegundos;
   final String? transcripcion;
@@ -13,6 +14,7 @@ class GrabacionEntity {
 
   const GrabacionEntity({
     required this.id,
+    this.proyectoId,
     required this.estado,
     this.duracionSegundos,
     this.transcripcion,
@@ -35,6 +37,9 @@ class GrabacionEntity {
       id: (json['id'] is int)
           ? json['id'] as int
           : int.tryParse('${json['id']}') ?? 0,
+      proyectoId: json['proyecto_id'] is int
+          ? json['proyecto_id'] as int
+          : int.tryParse('${json['proyecto_id']}'),
       estado: (json['estado_sincronizacion'] ?? json['estado'] ?? '').toString(),
       duracionSegundos: json['duracion_segundos'] is int
           ? json['duracion_segundos'] as int

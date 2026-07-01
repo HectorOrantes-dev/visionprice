@@ -63,7 +63,11 @@ class _ParametersView extends StatelessWidget {
                   ],
                 ),
               ),
-              _ConfirmButton(enabled: calculo != null),
+              _ConfirmButton(
+                proyectoId: vm.grabacion?.proyectoId,
+                pisoM2: calculo?.pisoM2,
+                paredesM2: calculo?.paredesM2,
+              ),
             ],
           ],
         ),
@@ -349,11 +353,20 @@ class _ErrorView extends StatelessWidget {
 }
 
 class _ConfirmButton extends StatelessWidget {
-  final bool enabled;
-  const _ConfirmButton({required this.enabled});
+  final int? proyectoId;
+  final double? pisoM2;
+  final double? paredesM2;
+  const _ConfirmButton({
+    required this.proyectoId,
+    required this.pisoM2,
+    required this.paredesM2,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Necesitamos el proyecto (obligatorio para crear la cotización) y al menos
+    // una superficie calculada.
+    final enabled = proyectoId != null && (pisoM2 != null || paredesM2 != null);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: SizedBox(
@@ -364,7 +377,12 @@ class _ConfirmButton extends StatelessWidget {
               ? () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (_) => const NearbyStoresScreen()),
+                      builder: (_) => NearbyStoresScreen(
+                        proyectoId: proyectoId!,
+                        pisoM2: pisoM2,
+                        paredesM2: paredesM2,
+                      ),
+                    ),
                   )
               : null,
           child: const Row(
