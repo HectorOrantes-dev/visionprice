@@ -25,6 +25,7 @@ import '../../features/auth/presentation/providers/perfil_provider.dart'
     as _i801;
 import '../../features/auth/presentation/providers/register_provider.dart'
     as _i74;
+import '../../features/home/presentation/providers/home_provider.dart' as _i526;
 import '../../features/project/data/datasources/proyecto_remote_datasource.dart'
     as _i1054;
 import '../../features/project/data/repositories/proyecto_repository_impl.dart'
@@ -97,6 +98,11 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i161.AuthRemoteDataSource>(),
           gh<_i973.TokenStorage>(),
         ));
+    gh.factory<_i526.HomeViewModel>(() => _i526.HomeViewModel(
+          gh<_i836.ObtenerProyectosUseCase>(),
+          gh<_i836.CrearProyectoUseCase>(),
+          gh<_i491.ConnectivityService>(),
+        ));
     gh.lazySingleton<_i85.GrabacionRepository>(() =>
         _i520.GrabacionRepositoryImpl(gh<_i667.GrabacionRemoteDataSource>()));
     gh.factory<_i46.LoginUseCase>(
@@ -132,6 +138,12 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i540.ObtenerGrabacionUseCase>(),
           gh<_i540.CalcularMetrosUseCase>(),
         ));
+    gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
+          gh<_i695.AudioRecorderService>(),
+          gh<_i540.SubirGrabacionUseCase>(),
+          gh<_i491.ConnectivityService>(),
+          gh<_i836.ObtenerProyectosUseCase>(),
+        ));
     gh.factory<_i1005.LoginViewModel>(() => _i1005.LoginViewModel(
           gh<_i46.LoginUseCase>(),
           gh<_i46.VerifyTwoFactorUseCase>(),
@@ -141,13 +153,6 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i801.PerfilViewModel(gh<_i46.GetPerfilUseCase>()));
     gh.factory<_i354.ProcessingViewModel>(
         () => _i354.ProcessingViewModel(gh<_i540.ObtenerGrabacionUseCase>()));
-    gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
-          gh<_i695.AudioRecorderService>(),
-          gh<_i540.SubirGrabacionUseCase>(),
-          gh<_i491.ConnectivityService>(),
-          gh<_i836.ObtenerProyectosUseCase>(),
-          gh<_i836.CrearProyectoUseCase>(),
-        ));
     return this;
   }
 }

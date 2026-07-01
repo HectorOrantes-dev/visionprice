@@ -424,48 +424,12 @@ void showProjectSheet(BuildContext context, RecordingViewModel vm) {
   );
 }
 
-class _ProjectSheet extends StatefulWidget {
+class _ProjectSheet extends StatelessWidget {
   final RecordingViewModel vm;
   const _ProjectSheet({required this.vm});
 
   @override
-  State<_ProjectSheet> createState() => _ProjectSheetState();
-}
-
-class _ProjectSheetState extends State<_ProjectSheet> {
-  final _nombreController = TextEditingController();
-  bool _creating = false;
-  String? _createError;
-
-  @override
-  void dispose() {
-    _nombreController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _crear() async {
-    final nombre = _nombreController.text.trim();
-    if (nombre.length < 2) {
-      setState(() => _createError = 'Escribe un nombre (mín. 2 caracteres)');
-      return;
-    }
-    setState(() {
-      _creating = true;
-      _createError = null;
-    });
-    try {
-      await widget.vm.crearProyecto(nombre);
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      setState(() => _createError = 'No se pudo crear el proyecto.');
-    } finally {
-      if (mounted) setState(() => _creating = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final vm = widget.vm;
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -503,16 +467,44 @@ class _ProjectSheetState extends State<_ProjectSheet> {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (vm.proyectos.isEmpty)
+            // El alta de proyectos ahora vive en la pantalla de inicio; aquí
+            // solo se selecciona uno existente.
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                'No tienes proyectos. Crea uno abajo.',
-                style: TextStyle(color: AppColors.textSecondary),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          size: 18, color: AppColors.textSecondary),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Aún no tienes proyectos.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Créalos desde la pantalla de Inicio con "Crear nuevo proyecto" y vuelve aquí para seleccionarlo.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             )
           else
             ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 260),
+              constraints: const BoxConstraints(maxHeight: 320),
               child: ListView(
                 shrinkWrap: true,
                 children: vm.proyectos.map((p) {
@@ -537,43 +529,6 @@ class _ProjectSheetState extends State<_ProjectSheet> {
                 }).toList(),
               ),
             ),
-          const Divider(height: 24),
-          const Text(
-            'NUEVO PROYECTO',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _nombreController,
-            textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(
-              hintText: 'Ej. Casa Polanco',
-              prefixIcon: const Icon(Icons.create_new_folder_outlined,
-                  size: 20, color: AppColors.textSecondary),
-              errorText: _createError,
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: _creating ? null : _crear,
-              child: _creating
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Text('Crear y seleccionar'),
-            ),
-          ),
         ],
       ),
     );

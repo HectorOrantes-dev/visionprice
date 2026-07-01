@@ -26,14 +26,12 @@ class RecordingViewModel extends ChangeNotifier {
   final SubirGrabacionUseCase _subir;
   final ConnectivityService _connectivity;
   final ObtenerProyectosUseCase _obtenerProyectos;
-  final CrearProyectoUseCase _crearProyecto;
 
   RecordingViewModel(
     this._recorder,
     this._subir,
     this._connectivity,
     this._obtenerProyectos,
-    this._crearProyecto,
   ) {
     checkConnectivity();
     cargarProyectos();
@@ -90,14 +88,6 @@ class RecordingViewModel extends ChangeNotifier {
   }
 
   void selectProyecto(ProyectoEntity? proyecto) {
-    _selectedProyecto = proyecto;
-    notifyListeners();
-  }
-
-  /// Crea un proyecto nuevo y lo deja seleccionado.
-  Future<void> crearProyecto(String nombre) async {
-    final proyecto = await _crearProyecto(nombre: nombre);
-    _proyectos = [proyecto, ..._proyectos];
     _selectedProyecto = proyecto;
     notifyListeners();
   }
