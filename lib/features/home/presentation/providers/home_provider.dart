@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/connectivity_service.dart';
+import '../../../auth/domain/usecases/auth_usecases.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
 import '../../../project/domain/usecases/proyecto_usecases.dart';
 
@@ -16,24 +17,54 @@ class HomeViewModel extends ChangeNotifier {
   final ObtenerProyectosUseCase _obtenerProyectos;
   final CrearProyectoUseCase _crearProyecto;
   final ConnectivityService _connectivity;
+  final GetPerfilUseCase _getPerfil;
 
   HomeViewModel(
     this._obtenerProyectos,
     this._crearProyecto,
     this._connectivity,
+    this._getPerfil,
   ) {
     checkConnectivity();
     cargarProyectos();
+    cargarNombre();
   }
 
   bool _loading = false;
   String? _error;
   List<ProyectoEntity> _proyectos = const [];
   bool? _online; // null = verificando
+  String? _nombre;
 
   bool get loading => _loading;
   String? get error => _error;
   List<ProyectoEntity> get proyectos => _proyectos;
+
+  /// Saludo dependiente de la hora local del dispositivo.
+  String get saludo {
+    final hora = DateTime.now().hour;
+    if (hora >= 5 && hora < 12) return 'Buenos días';
+    if (hora >= 12 && hora < 19) return 'Buenas tardes';
+    return 'Buenas noches';
+  }
+
+  /// Primer nombre del usuario (o `null` mientras carga el perfil).
+  String? get nombreCorto {
+    final n = _nombre?.trim();
+    if (n == null || n.isEmpty) return null;
+    return n.split(' ').first;
+  }
+
+  /// Trae el nombre del usuario desde `/me/perfil` para el saludo.
+  Future<void> cargarNombre() async {
+    try {
+      final perfil = await _getPerfil();
+      _nombre = perfil.nombre;
+      notifyListeners();
+    } catch (_) {
+      // Si falla, el saludo se muestra sin nombre.
+    }
+  }
 
   /// `null` mientras verifica; luego `true`/`false` según conectividad real.
   bool? get online => _online;

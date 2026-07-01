@@ -98,11 +98,6 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i161.AuthRemoteDataSource>(),
           gh<_i973.TokenStorage>(),
         ));
-    gh.factory<_i526.HomeViewModel>(() => _i526.HomeViewModel(
-          gh<_i836.ObtenerProyectosUseCase>(),
-          gh<_i836.CrearProyectoUseCase>(),
-          gh<_i491.ConnectivityService>(),
-        ));
     gh.lazySingleton<_i85.GrabacionRepository>(() =>
         _i520.GrabacionRepositoryImpl(gh<_i667.GrabacionRemoteDataSource>()));
     gh.factory<_i46.LoginUseCase>(
@@ -125,6 +120,12 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i46.RegisterUseCase>(),
           gh<_i46.VerifyTwoFactorUseCase>(),
           gh<_i46.GetRolesUseCase>(),
+        ));
+    gh.factory<_i526.HomeViewModel>(() => _i526.HomeViewModel(
+          gh<_i836.ObtenerProyectosUseCase>(),
+          gh<_i836.CrearProyectoUseCase>(),
+          gh<_i491.ConnectivityService>(),
+          gh<_i46.GetPerfilUseCase>(),
         ));
     gh.factory<_i540.SubirGrabacionUseCase>(
         () => _i540.SubirGrabacionUseCase(gh<_i85.GrabacionRepository>()));
