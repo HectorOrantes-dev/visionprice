@@ -18,6 +18,8 @@ abstract class AuthRemoteDataSource {
   Future<RegisterResultEntity> register(Map<String, dynamic> body);
   Future<AuthSessionEntity> googleLogin(String idToken);
   Future<AuthSessionEntity> googleRegister(String idToken, String rol);
+  Future<void> forgotPassword(String correo);
+  Future<void> resetPassword(String correo, String code, String nuevaContrasena);
   Future<PerfilEntity> getPerfil();
 }
 
@@ -73,6 +75,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'rol': rol,
     });
     return AuthSessionEntity.fromJson(data);
+  }
+
+  @override
+  Future<void> forgotPassword(String correo) async {
+    await _client.postJson(ApiConfig.passwordForgot, {'correo': correo});
+  }
+
+  @override
+  Future<void> resetPassword(
+      String correo, String code, String nuevaContrasena) async {
+    await _client.postJson(ApiConfig.passwordReset, {
+      'correo': correo,
+      'code': code,
+      'nueva_contrasena': nuevaContrasena,
+    });
   }
 
   @override

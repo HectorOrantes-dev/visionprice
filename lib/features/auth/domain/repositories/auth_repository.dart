@@ -40,6 +40,18 @@ abstract class AuthRepository {
     required String rol,
   });
 
+  /// Paso 1 de recuperar contraseña: envía un código al correo (si existe).
+  /// Responde igual exista o no el correo (anti-enumeración).
+  Future<void> forgotPassword({required String correo});
+
+  /// Paso 2: verifica el código y establece la nueva contraseña.
+  /// Lanza `ApiException(401)` si el código es inválido.
+  Future<void> resetPassword({
+    required String correo,
+    required String code,
+    required String nuevaContrasena,
+  });
+
   /// Perfil completo del usuario autenticado (`GET /api/v1/me/perfil`),
   /// para la pantalla de "Perfil / Mi cuenta". Requiere token válido.
   /// Se cachea en memoria: solo pega a la red la primera vez o si

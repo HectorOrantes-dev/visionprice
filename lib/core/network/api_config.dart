@@ -19,6 +19,8 @@ class ApiConfig {
   static const String loginVerify = '$apiPrefix/auth/login/verify';
   static const String googleLogin = '$apiPrefix/auth/google/login';
   static const String googleRegister = '$apiPrefix/auth/google/register';
+  static const String passwordForgot = '$apiPrefix/auth/password/forgot';
+  static const String passwordReset = '$apiPrefix/auth/password/reset';
 
   // Salud del back-end (raíz, sin prefijo) — para verificar conectividad real.
   static const String health = '/health';

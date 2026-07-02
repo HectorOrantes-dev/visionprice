@@ -78,6 +78,18 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> forgotPassword({required String correo}) =>
+      _remote.forgotPassword(correo);
+
+  @override
+  Future<void> resetPassword({
+    required String correo,
+    required String code,
+    required String nuevaContrasena,
+  }) =>
+      _remote.resetPassword(correo, code, nuevaContrasena);
+
+  @override
   Future<PerfilEntity> getPerfil({bool forceRefresh = false}) async {
     if (!forceRefresh && _perfilCache != null) return _perfilCache!;
     final perfil = await _remote.getPerfil();

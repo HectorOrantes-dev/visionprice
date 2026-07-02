@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../security/services/notification_service.dart';
 import '../providers/login_provider.dart';
 import '../widgets/login_widgets.dart';
+import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,8 +16,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController(text: 'miguel.angel@obra.mx');
-  final _passwordController = TextEditingController(text: '••••••••••');
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _codeController = TextEditingController();
 
   @override
@@ -58,7 +59,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   passwordController: _passwordController,
                 ),
                 const SizedBox(height: 24),
-                const LoginKeepSessionRow(),
+                LoginKeepSessionRow(
+                  onForgot: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const ForgotPasswordScreen()),
+                  ),
+                ),
                 const SizedBox(height: 24),
                 LoginContinueButton(
                   emailController: _emailController,

@@ -83,6 +83,32 @@ class GoogleRegisterUseCase {
 }
 
 @injectable
+class ForgotPasswordUseCase {
+  final AuthRepository _repo;
+  ForgotPasswordUseCase(this._repo);
+
+  Future<void> call({required String correo}) =>
+      _repo.forgotPassword(correo: correo);
+}
+
+@injectable
+class ResetPasswordUseCase {
+  final AuthRepository _repo;
+  ResetPasswordUseCase(this._repo);
+
+  Future<void> call({
+    required String correo,
+    required String code,
+    required String nuevaContrasena,
+  }) =>
+      _repo.resetPassword(
+        correo: correo,
+        code: code,
+        nuevaContrasena: nuevaContrasena,
+      );
+}
+
+@injectable
 class GetPerfilUseCase {
   final AuthRepository _repo;
   GetPerfilUseCase(this._repo);

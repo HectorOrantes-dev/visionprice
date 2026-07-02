@@ -117,7 +117,8 @@ class LoginForm extends StatelessWidget {
 }
 
 class LoginKeepSessionRow extends StatelessWidget {
-  const LoginKeepSessionRow({super.key});
+  final VoidCallback onForgot;
+  const LoginKeepSessionRow({super.key, required this.onForgot});
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +136,7 @@ class LoginKeepSessionRow extends StatelessWidget {
         ),
         const Spacer(),
         GestureDetector(
-          onTap: () {},
+          onTap: onForgot,
           child: const Text(
             '¿Olvidaste?',
             style: TextStyle(
@@ -323,24 +324,10 @@ class SocialButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: SocialButton(
-            icon: Icons.face_outlined,
-            label: 'Face ID',
-            onTap: () {},
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SocialButton(
-            icon: Icons.g_mobiledata,
-            label: 'Google',
-            onTap: () {},
-          ),
-        ),
-      ],
+    return SocialButton(
+      icon: Icons.g_mobiledata,
+      label: 'Google',
+      onTap: () {},
     );
   }
 }

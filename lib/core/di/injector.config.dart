@@ -28,6 +28,8 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/usecases/auth_usecases.dart' as _i46;
+import '../../features/auth/presentation/providers/forgot_password_provider.dart'
+    as _i1003;
 import '../../features/auth/presentation/providers/login_provider.dart'
     as _i1005;
 import '../../features/auth/presentation/providers/perfil_provider.dart'
@@ -187,6 +189,10 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i46.GoogleLoginUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.GoogleRegisterUseCase>(
         () => _i46.GoogleRegisterUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i46.ForgotPasswordUseCase>(
+        () => _i46.ForgotPasswordUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i46.ResetPasswordUseCase>(
+        () => _i46.ResetPasswordUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.GetPerfilUseCase>(
         () => _i46.GetPerfilUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.LogoutUseCase>(
@@ -224,6 +230,11 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.factory<_i488.SubscriptionsViewModel>(() =>
         _i488.SubscriptionsViewModel(gh<_i878.ObtenerSuscripcionesUseCase>()));
+    gh.factory<_i1003.ForgotPasswordViewModel>(
+        () => _i1003.ForgotPasswordViewModel(
+              gh<_i46.ForgotPasswordUseCase>(),
+              gh<_i46.ResetPasswordUseCase>(),
+            ));
     gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
           gh<_i695.AudioRecorderService>(),
           gh<_i540.SubirGrabacionUseCase>(),
