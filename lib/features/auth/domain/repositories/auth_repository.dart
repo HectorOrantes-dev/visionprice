@@ -44,11 +44,19 @@ abstract class AuthRepository {
   /// Responde igual exista o no el correo (anti-enumeración).
   Future<void> forgotPassword({required String correo});
 
-  /// Paso 2: verifica el código y establece la nueva contraseña.
-  /// Lanza `ApiException(401)` si el código es inválido.
-  Future<void> resetPassword({
+  /// Paso 2: verifica el código de recuperación. Devuelve el `reset_token`
+  /// (JWT de un solo uso, 15 min) que autoriza el cambio de contraseña.
+  /// Lanza `ApiException` si el código es inválido o expiró.
+  Future<String> verifyResetCode({
     required String correo,
     required String code,
+  });
+
+  /// Paso 3: establece la nueva contraseña usando el `reset_token` obtenido en
+  /// [verifyResetCode]. Lanza `ApiException` si el token es inválido o expiró.
+  Future<void> resetPassword({
+    required String correo,
+    required String resetToken,
     required String nuevaContrasena,
   });
 

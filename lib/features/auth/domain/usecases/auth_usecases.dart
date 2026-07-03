@@ -92,18 +92,30 @@ class ForgotPasswordUseCase {
 }
 
 @injectable
+class VerifyResetCodeUseCase {
+  final AuthRepository _repo;
+  VerifyResetCodeUseCase(this._repo);
+
+  Future<String> call({
+    required String correo,
+    required String code,
+  }) =>
+      _repo.verifyResetCode(correo: correo, code: code);
+}
+
+@injectable
 class ResetPasswordUseCase {
   final AuthRepository _repo;
   ResetPasswordUseCase(this._repo);
 
   Future<void> call({
     required String correo,
-    required String code,
+    required String resetToken,
     required String nuevaContrasena,
   }) =>
       _repo.resetPassword(
         correo: correo,
-        code: code,
+        resetToken: resetToken,
         nuevaContrasena: nuevaContrasena,
       );
 }

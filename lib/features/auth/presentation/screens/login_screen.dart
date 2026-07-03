@@ -6,6 +6,7 @@ import '../../../security/services/notification_service.dart';
 import '../providers/login_provider.dart';
 import '../widgets/login_widgets.dart';
 import 'forgot_password_screen.dart';
+import 'privacy_notice_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -49,11 +50,11 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 const LoginLogo(),
-                const SizedBox(height: 40),
+                const SizedBox(height: 28),
                 const LoginHeader(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 LoginForm(
                   emailController: _emailController,
                   passwordController: _passwordController,
@@ -77,14 +78,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 const OrDivider(),
                 const SizedBox(height: 16),
                 const SocialButtons(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
                 LoginRegisterRow(
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const RegisterScreen()),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
+                LoginPrivacyNotice(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const PrivacyNoticeScreen()),
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),

@@ -88,11 +88,12 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
         title: const Text('Datos sensibles'),
         backgroundColor: AppColors.surface,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
             const Text(
               'Ingresar nuevos datos',
               style: TextStyle(
@@ -183,6 +184,7 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

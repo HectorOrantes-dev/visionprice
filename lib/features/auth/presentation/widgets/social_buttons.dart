@@ -11,14 +11,6 @@ class SocialButtons extends StatelessWidget {
       children: [
         Expanded(
           child: SocialButton(
-            icon: Icons.face_outlined,
-            label: 'Face ID',
-            onTap: () {},
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SocialButton(
             icon: Icons.g_mobiledata,
             label: 'Google',
             onTap: () {},

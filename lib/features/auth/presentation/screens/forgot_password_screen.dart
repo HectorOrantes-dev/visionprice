@@ -59,9 +59,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      vm.codeSent
-                          ? 'Ingresa el código que enviamos a tu correo y tu nueva contraseña.'
-                          : 'Escribe tu correo y te enviaremos un código para restablecerla.',
+                      switch (vm.step) {
+                        ForgotStep.email =>
+                          'Escribe tu correo y te enviaremos un código para restablecerla.',
+                        ForgotStep.code =>
+                          'Ingresa el código de verificación que enviamos a tu correo.',
+                        ForgotStep.password =>
+                          'Código verificado. Define tu nueva contraseña.',
+                      },
                       style: TextStyle(
                         fontSize: 15,
                         color: AppColors.textSecondary,
@@ -69,71 +74,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    if (!vm.codeSent) ...[
-                      const FieldLabel('CORREO'),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: vm.onEmailChanged,
-                        decoration: InputDecoration(
-                          hintText: 'tu@correo.mx',
-                          prefixIcon: const Icon(Icons.person_outline,
-                              color: AppColors.textSecondary, size: 20),
-                          errorText: vm.emailError,
+                    switch (vm.step) {
+                      ForgotStep.email => _EmailStep(
+                          controller: _emailController,
+                          vm: vm,
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      _PrimaryButton(
-                        loading: vm.isLoading,
-                        label: 'Enviar código',
-                        onPressed: () =>
-                            vm.enviarCodigo(correo: _emailController.text),
-                      ),
-                    ] else ...[
-                      const FieldLabel('CÓDIGO'),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _codeController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: 'Código de verificación',
-                          prefixIcon: const Icon(Icons.shield_outlined,
-                              color: AppColors.textSecondary, size: 20),
-                          errorText: vm.codeError,
+                      ForgotStep.code => _CodeStep(
+                          controller: _codeController,
+                          vm: vm,
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      const FieldLabel('NUEVA CONTRASEÑA'),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: vm.obscurePassword,
-                        decoration: InputDecoration(
-                          hintText: '••••••••',
-                          prefixIcon: const Icon(Icons.lock_outline,
-                              color: AppColors.textSecondary, size: 20),
-                          suffixIcon: TextButton(
-                            onPressed: vm.toggleObscurePassword,
-                            child: Text(
-                              vm.obscurePassword ? 'MOSTRAR' : 'OCULTAR',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                          errorText: vm.passwordError,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _PrimaryButton(
-                        loading: vm.isLoading,
-                        label: 'Restablecer contraseña',
-                        onPressed: () => vm.restablecer(
-                          code: _codeController.text,
-                          nuevaContrasena: _passwordController.text,
+                      ForgotStep.password => _PasswordStep(
+                          controller: _passwordController,
+                          vm: vm,
                           onSuccess: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -144,8 +96,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             Navigator.pop(context);
                           },
                         ),
-                      ),
-                    ],
+                    },
                     if (vm.errorMessage != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 16),
@@ -202,6 +153,161 @@ class _PrimaryButton extends StatelessWidget {
               )
             : Text(label),
       ),
+    );
+  }
+}
+
+/// Enlace de texto para retroceder al paso anterior.
+class _BackStepLink extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _BackStepLink({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: TextButton(
+        onPressed: onTap,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Paso 1: captura del correo y envío del código.
+class _EmailStep extends StatelessWidget {
+  final TextEditingController controller;
+  final ForgotPasswordViewModel vm;
+
+  const _EmailStep({required this.controller, required this.vm});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const FieldLabel('CORREO'),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          onChanged: vm.onEmailChanged,
+          decoration: InputDecoration(
+            hintText: 'tu@correo.mx',
+            prefixIcon: const Icon(Icons.person_outline,
+                color: AppColors.textSecondary, size: 20),
+            errorText: vm.emailError,
+          ),
+        ),
+        const SizedBox(height: 24),
+        _PrimaryButton(
+          loading: vm.isLoading,
+          label: 'Enviar código',
+          onPressed: () => vm.enviarCodigo(correo: controller.text),
+        ),
+      ],
+    );
+  }
+}
+
+/// Paso 2: verificación del código recibido.
+class _CodeStep extends StatelessWidget {
+  final TextEditingController controller;
+  final ForgotPasswordViewModel vm;
+
+  const _CodeStep({required this.controller, required this.vm});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const FieldLabel('CÓDIGO'),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          onChanged: vm.onCodeChanged,
+          decoration: InputDecoration(
+            hintText: 'Código de verificación',
+            prefixIcon: const Icon(Icons.shield_outlined,
+                color: AppColors.textSecondary, size: 20),
+            errorText: vm.codeError,
+          ),
+        ),
+        const SizedBox(height: 24),
+        _PrimaryButton(
+          loading: vm.isLoading,
+          label: 'Verificar código',
+          onPressed: () => vm.verificarCodigo(code: controller.text),
+        ),
+        const SizedBox(height: 8),
+        _BackStepLink(label: 'Cambiar correo', onTap: vm.volverAtras),
+      ],
+    );
+  }
+}
+
+/// Paso 3: definición de la nueva contraseña.
+class _PasswordStep extends StatelessWidget {
+  final TextEditingController controller;
+  final ForgotPasswordViewModel vm;
+  final VoidCallback onSuccess;
+
+  const _PasswordStep({
+    required this.controller,
+    required this.vm,
+    required this.onSuccess,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const FieldLabel('NUEVA CONTRASEÑA'),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: vm.obscurePassword,
+          decoration: InputDecoration(
+            hintText: '••••••••',
+            prefixIcon: const Icon(Icons.lock_outline,
+                color: AppColors.textSecondary, size: 20),
+            suffixIcon: TextButton(
+              onPressed: vm.toggleObscurePassword,
+              child: Text(
+                vm.obscurePassword ? 'MOSTRAR' : 'OCULTAR',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            errorText: vm.passwordError,
+          ),
+        ),
+        const SizedBox(height: 24),
+        _PrimaryButton(
+          loading: vm.isLoading,
+          label: 'Restablecer contraseña',
+          onPressed: () => vm.restablecer(
+            nuevaContrasena: controller.text,
+            onSuccess: onSuccess,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _BackStepLink(label: 'Volver al código', onTap: vm.volverAtras),
+      ],
     );
   }
 }

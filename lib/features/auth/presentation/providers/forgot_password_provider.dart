@@ -5,34 +5,38 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/validation_mixin.dart';
 import '../../domain/usecases/auth_usecases.dart';
 
-/// Flujo de "¿Olvidaste tu contraseña?":
-/// - [idle] → pide el correo.
-/// - [loading] → petición en curso.
-/// - [codeSent] → el back-end envió el código (paso 1 ok).
-/// - [success] → contraseña actualizada.
-/// - [error] → ver [errorMessage].
-enum ForgotState { idle, loading, codeSent, success, error }
+/// Pasos del flujo de "¿Olvidaste tu contraseña?":
+/// - [email] → pide el correo y envía el código.
+/// - [code] → el usuario ingresa y verifica el código recibido.
+/// - [password] → el usuario define su nueva contraseña.
+enum ForgotStep { email, code, password }
 
 @injectable
 class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
   final ForgotPasswordUseCase _forgotUseCase;
+  final VerifyResetCodeUseCase _verifyUseCase;
   final ResetPasswordUseCase _resetUseCase;
 
-  ForgotPasswordViewModel(this._forgotUseCase, this._resetUseCase);
+  ForgotPasswordViewModel(
+    this._forgotUseCase,
+    this._verifyUseCase,
+    this._resetUseCase,
+  );
 
-  ForgotState _state = ForgotState.idle;
+  ForgotStep _step = ForgotStep.email;
+  bool _isLoading = false;
   String? _errorMessage;
   String _correo = '';
+  String _resetToken = '';
   bool _obscurePassword = true;
 
   String? emailError;
   String? codeError;
   String? passwordError;
 
-  ForgotState get state => _state;
+  ForgotStep get step => _step;
+  bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  bool get isLoading => _state == ForgotState.loading;
-  bool get codeSent => _state == ForgotState.codeSent;
   bool get obscurePassword => _obscurePassword;
 
   void toggleObscurePassword() {
@@ -45,8 +49,25 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
     notifyListeners();
   }
 
+  void onCodeChanged(String value) {
+    codeError = value.isEmpty ? null : validateCode(value);
+    notifyListeners();
+  }
+
+  /// Vuelve al paso anterior sin perder los datos ya capturados.
+  void volverAtras() {
+    _errorMessage = null;
+    if (_step == ForgotStep.password) {
+      _step = ForgotStep.code;
+    } else if (_step == ForgotStep.code) {
+      _step = ForgotStep.email;
+    }
+    notifyListeners();
+  }
+
   /// Paso 1: envía el código de recuperación al correo. Por anti-enumeración
-  /// el back-end responde igual exista o no el correo.
+  /// el back-end responde igual exista o no el correo. Al terminar, avanza al
+  /// paso de verificación de código.
   Future<void> enviarCodigo({required String correo}) async {
     emailError = validateEmail(correo);
     if (emailError != null) {
@@ -57,22 +78,40 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
     _setLoading();
     try {
       await _forgotUseCase(correo: correo);
-      _state = ForgotState.codeSent;
+      _isLoading = false;
+      _step = ForgotStep.code;
       notifyListeners();
     } catch (e) {
       _fail(e);
     }
   }
 
-  /// Paso 2: verifica el código y establece la nueva contraseña.
+  /// Paso 2: verifica el código contra el back-end. Si es válido, guarda el
+  /// `reset_token` recibido y avanza al paso de nueva contraseña.
+  Future<void> verificarCodigo({required String code}) async {
+    codeError = validateCode(code);
+    if (codeError != null) {
+      notifyListeners();
+      return;
+    }
+    _setLoading();
+    try {
+      _resetToken = await _verifyUseCase(correo: _correo, code: code);
+      _isLoading = false;
+      _step = ForgotStep.password;
+      notifyListeners();
+    } catch (e) {
+      _fail(e);
+    }
+  }
+
+  /// Paso 3: establece la nueva contraseña usando el `reset_token` verificado.
   Future<void> restablecer({
-    required String code,
     required String nuevaContrasena,
     required VoidCallback onSuccess,
   }) async {
-    codeError = validateCode(code);
     passwordError = validatePassword(nuevaContrasena);
-    if (codeError != null || passwordError != null) {
+    if (passwordError != null) {
       notifyListeners();
       return;
     }
@@ -80,10 +119,10 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
     try {
       await _resetUseCase(
         correo: _correo,
-        code: code,
+        resetToken: _resetToken,
         nuevaContrasena: nuevaContrasena,
       );
-      _state = ForgotState.success;
+      _isLoading = false;
       notifyListeners();
       onSuccess();
     } catch (e) {
@@ -92,13 +131,13 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
   }
 
   void _setLoading() {
-    _state = ForgotState.loading;
+    _isLoading = true;
     _errorMessage = null;
     notifyListeners();
   }
 
   void _fail(Object error) {
-    _state = ForgotState.error;
+    _isLoading = false;
     _errorMessage =
         error is ApiException ? error.message : 'Ocurrió un error inesperado';
     notifyListeners();

@@ -19,7 +19,12 @@ abstract class AuthRemoteDataSource {
   Future<AuthSessionEntity> googleLogin(String idToken);
   Future<AuthSessionEntity> googleRegister(String idToken, String rol);
   Future<void> forgotPassword(String correo);
-  Future<void> resetPassword(String correo, String code, String nuevaContrasena);
+
+  /// Verifica el código de recuperación. Devuelve el `reset_token` (JWT de un
+  /// solo uso) que autoriza el cambio de contraseña.
+  Future<String> verifyResetCode(String correo, String code);
+  Future<void> resetPassword(
+      String correo, String resetToken, String nuevaContrasena);
   Future<PerfilEntity> getPerfil();
 }
 
@@ -83,11 +88,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> resetPassword(
-      String correo, String code, String nuevaContrasena) async {
-    await _client.postJson(ApiConfig.passwordReset, {
+  Future<String> verifyResetCode(String correo, String code) async {
+    final data = await _client.postJson(ApiConfig.passwordVerifyCode, {
       'correo': correo,
       'code': code,
+    });
+    return data['reset_token'] as String;
+  }
+
+  @override
+  Future<void> resetPassword(
+      String correo, String resetToken, String nuevaContrasena) async {
+    await _client.postJson(ApiConfig.passwordReset, {
+      'correo': correo,
+      'reset_token': resetToken,
       'nueva_contrasena': nuevaContrasena,
     });
   }

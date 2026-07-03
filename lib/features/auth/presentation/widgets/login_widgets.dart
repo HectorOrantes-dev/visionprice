@@ -7,6 +7,7 @@ export 'login_form.dart';
 export 'login_header.dart';
 export 'login_keep_session_row.dart';
 export 'login_logo.dart';
+export 'login_privacy_notice.dart';
 export 'login_register_row.dart';
 export 'or_divider.dart';
 export 'social_button.dart';

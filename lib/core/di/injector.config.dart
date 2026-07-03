@@ -191,6 +191,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i46.GoogleRegisterUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.ForgotPasswordUseCase>(
         () => _i46.ForgotPasswordUseCase(gh<_i787.AuthRepository>()));
+    gh.factory<_i46.VerifyResetCodeUseCase>(
+        () => _i46.VerifyResetCodeUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.ResetPasswordUseCase>(
         () => _i46.ResetPasswordUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i46.GetPerfilUseCase>(
@@ -233,6 +235,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1003.ForgotPasswordViewModel>(
         () => _i1003.ForgotPasswordViewModel(
               gh<_i46.ForgotPasswordUseCase>(),
+              gh<_i46.VerifyResetCodeUseCase>(),
               gh<_i46.ResetPasswordUseCase>(),
             ));
     gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
