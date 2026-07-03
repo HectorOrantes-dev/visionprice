@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/field_label.dart';
+import '../../../../shared/widgets/field_label.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../domain/entities/role_entity.dart';
 import '../providers/register_provider.dart';
@@ -153,7 +153,7 @@ class _RoleDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<RegisterViewModel>();
     return DropdownButtonFormField<RoleEntity>(
-      initialValue: vm.selectedRole,
+      value: vm.selectedRole,
       isExpanded: true,
       decoration: InputDecoration(
         hintText: 'Selecciona tu rol',

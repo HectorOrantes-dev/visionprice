@@ -1,3 +1,4 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'core/di/injector.dart';
 import 'core/storage/token_storage.dart';
@@ -19,6 +20,9 @@ class App extends StatelessWidget {
       title: 'VisionPrice',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      // Integración con DevicePreview (activo solo en debug desde main()).
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
       // El gateway de seguridad (RASP + Fake GPS) protege la entrada.
       home: SecurityGateway(
         child: loggedIn ? const HomeScreen() : const LoginScreen(),
