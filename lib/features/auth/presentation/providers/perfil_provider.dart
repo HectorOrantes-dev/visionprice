@@ -4,11 +4,12 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/perfil_entity.dart';
 import '../../domain/usecases/auth_usecases.dart';
-import 'perfil_state.dart';
 
-// El enum de estado vive en su propio archivo (SRP); se re-exporta para que
-// las pantallas que importan este provider sigan viendo `PerfilState`.
-export 'perfil_state.dart';
+/// Estado de la pantalla de Perfil:
+/// - [loading] → cargando el perfil desde el back-end.
+/// - [success] → [perfil] disponible.
+/// - [error] → ver [errorMessage].
+enum PerfilState { loading, success, error }
 
 /// ViewModel de la pantalla "Perfil". `@injectable` (factory): una instancia
 /// por pantalla, con el [GetPerfilUseCase] ya inyectado. Carga el perfil

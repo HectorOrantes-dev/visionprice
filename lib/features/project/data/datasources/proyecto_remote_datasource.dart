@@ -1,10 +1,38 @@
-import '../../domain/entities/proyecto_entity.dart';
+import 'package:injectable/injectable.dart';
 
-// La implementación vive en su propio archivo (una clase por archivo, SRP);
-// se re-exporta para no romper imports existentes ni la DI generada.
-export 'proyecto_remote_datasource_impl.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../core/network/api_config.dart';
+import '../../domain/entities/proyecto_entity.dart';
 
 abstract class ProyectoRemoteDataSource {
   Future<List<ProyectoEntity>> listar();
   Future<ProyectoEntity> crear(String nombre, {String? direccion});
+}
+
+@LazySingleton(as: ProyectoRemoteDataSource)
+class ProyectoRemoteDataSourceImpl implements ProyectoRemoteDataSource {
+  final ApiClient _client;
+  ProyectoRemoteDataSourceImpl(this._client);
+
+  @override
+  Future<List<ProyectoEntity>> listar() async {
+    final data = await _client.getJsonList(ApiConfig.proyectos, auth: true);
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map(ProyectoEntity.fromJson)
+        .toList();
+  }
+
+  @override
+  Future<ProyectoEntity> crear(String nombre, {String? direccion}) async {
+    final data = await _client.postJson(
+      ApiConfig.proyectos,
+      {
+        'nombre': nombre,
+        if (direccion != null && direccion.isNotEmpty) 'direccion': direccion,
+      },
+      auth: true,
+    );
+    return ProyectoEntity.fromJson(data);
+  }
 }

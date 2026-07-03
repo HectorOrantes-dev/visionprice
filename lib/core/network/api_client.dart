@@ -145,7 +145,6 @@ class ApiClient {
   Future<dynamic> _send(
     Future<http.Response> Function() request, {
     Duration? timeout,
-    bool allowRefresh = true,
   }) async {
     http.Response res;
     try {
@@ -156,68 +155,17 @@ class ApiClient {
       throw ApiException.network();
     }
 
-    // Access token vencido: intenta renovarlo con el refresh token UNA vez y
-    // reintenta la petición original (las closures reconstruyen el header
-    // Authorization con el token nuevo). Si no se puede renovar, cae al 401.
-    if (res.statusCode == 401 &&
-        allowRefresh &&
-        _tokenStorage.hasRefreshToken) {
-      final renovado = await _refreshSession();
-      if (renovado) {
-        return _send(request, timeout: timeout, allowRefresh: false);
-      }
-    }
-
     final decoded = res.body.isNotEmpty ? await decodeJson(res.body) : null;
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       return decoded;
     }
-    // Sesión no recuperable: borra los tokens para que el próximo arranque
-    // pida login en vez de auto-entrar con una sesión muerta.
+    // Sesión expirada/ inválida: borra el token para que el próximo arranque
+    // pida login en vez de auto-entrar con un token muerto.
     if (res.statusCode == 401) {
       unawaited(_tokenStorage.clear());
     }
     throw ApiException(res.statusCode, _extractError(decoded));
-  }
-
-  /// Renovación de sesión con *single-flight*: si varias peticiones reciben 401
-  /// a la vez, comparten UNA sola llamada a `/auth/refresh`.
-  Future<bool>? _refreshing;
-
-  Future<bool> _refreshSession() {
-    return _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
-  }
-
-  Future<bool> _doRefresh() async {
-    final refreshToken = _tokenStorage.refreshToken;
-    if (refreshToken == null || refreshToken.isEmpty) return false;
-    try {
-      // Llamada directa (no pasa por _send) para evitar recursión/limpieza.
-      final res = await _client
-          .post(
-            _uri(ApiConfig.refresh),
-            headers: const {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: jsonEncode({'refresh_token': refreshToken}),
-          )
-          .timeout(_timeout);
-      if (res.statusCode < 200 || res.statusCode >= 300) return false;
-      final data = res.body.isNotEmpty ? await decodeJson(res.body) : null;
-      if (data is Map<String, dynamic>) {
-        final access = (data['access_token'] ?? '').toString();
-        final newRefresh = data['refresh_token']?.toString();
-        if (access.isNotEmpty) {
-          await _tokenStorage.saveSession(access, newRefresh);
-          return true;
-        }
-      }
-    } catch (_) {
-      // Sin red o error transitorio: no renovamos ahora (no borramos tokens).
-    }
-    return false;
   }
 
   /// Extrae un mensaje legible de los distintos formatos de error del back-end:

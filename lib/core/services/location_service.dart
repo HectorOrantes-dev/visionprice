@@ -1,11 +1,12 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 
-import 'lat_lng.dart';
-
-// El value object LatLng vive en su propio archivo (SRP); se re-exporta para
-// no romper los imports existentes.
-export 'lat_lng.dart';
+/// Coordenada simple.
+class LatLng {
+  final double lat;
+  final double lng;
+  const LatLng(this.lat, this.lng);
+}
 
 /// Obtiene la ubicación actual del dispositivo (para buscar ferreterías
 /// cercanas). `@lazySingleton` reutilizable.

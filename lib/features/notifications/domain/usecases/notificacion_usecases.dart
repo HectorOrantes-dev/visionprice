@@ -1,4 +1,21 @@
-// Barrel de los casos de uso de notificaciones. Una clase por archivo (SRP);
-// este archivo solo re-exporta para no romper imports ni la DI generada.
-export 'marcar_notificacion_leida_use_case.dart';
-export 'obtener_notificaciones_use_case.dart';
+import 'package:injectable/injectable.dart';
+
+import '../entities/notificacion_entity.dart';
+import '../repositories/notificacion_repository.dart';
+
+@injectable
+class ObtenerNotificacionesUseCase {
+  final NotificacionRepository _repo;
+  ObtenerNotificacionesUseCase(this._repo);
+
+  Future<List<NotificacionEntity>> call({bool soloNoLeidas = false}) =>
+      _repo.listar(soloNoLeidas: soloNoLeidas);
+}
+
+@injectable
+class MarcarNotificacionLeidaUseCase {
+  final NotificacionRepository _repo;
+  MarcarNotificacionLeidaUseCase(this._repo);
+
+  Future<void> call(int id) => _repo.marcarLeida(id);
+}

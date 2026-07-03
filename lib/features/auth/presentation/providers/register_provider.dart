@@ -6,11 +6,14 @@ import '../../../../core/utils/validation_mixin.dart';
 import '../../../devices/data/services/device_registrar.dart';
 import '../../domain/entities/role_entity.dart';
 import '../../domain/usecases/auth_usecases.dart';
-import 'register_state.dart';
 
-// El enum de estado vive en su propio archivo (SRP); se re-exporta para que
-// las pantallas que importan este provider sigan viendo `RegisterState`.
-export 'register_state.dart';
+/// Flujo del registro (refleja al del login):
+/// - [idle] → estado inicial.
+/// - [loading] → petición en curso.
+/// - [codeSent] → el back-end registró y mandó el código 2FA al correo.
+/// - [success] → 2FA verificado, token guardado.
+/// - [error] → ver [errorMessage].
+enum RegisterState { idle, loading, codeSent, success, error }
 
 /// ViewModel del registro. `@injectable` (factory). Carga los roles al crearse
 /// y reutiliza [VerifyTwoFactorUseCase] para el paso 2FA (mismo mecanismo que

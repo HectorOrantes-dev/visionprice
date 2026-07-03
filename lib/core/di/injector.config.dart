@@ -24,7 +24,6 @@ import '../../features/account/presentation/providers/subscriptions_provider.dar
     as _i488;
 import '../../features/auth/data/datasources/auth_remote_datasource.dart'
     as _i161;
-import '../../features/auth/data/datasources/perfil_storage.dart' as _i1033;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
@@ -121,8 +120,6 @@ extension GetItInjectableX on _i174.GetIt {
       dispose: (i) => i.dispose(),
     );
     gh.lazySingleton<_i669.LocationService>(() => _i669.LocationService());
-    gh.lazySingleton<_i1033.PerfilStorage>(
-        () => _i1033.PerfilStorage(gh<_i460.SharedPreferences>()));
     gh.lazySingleton<_i557.ApiClient>(() => _i557.ApiClient(
           gh<_i519.Client>(),
           gh<_i973.TokenStorage>(),
@@ -155,11 +152,6 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i491.ConnectivityService(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i161.AuthRemoteDataSource>(
         () => _i161.AuthRemoteDataSourceImpl(gh<_i557.ApiClient>()));
-    gh.lazySingleton<_i787.AuthRepository>(() => _i153.AuthRepositoryImpl(
-          gh<_i161.AuthRemoteDataSource>(),
-          gh<_i973.TokenStorage>(),
-          gh<_i1033.PerfilStorage>(),
-        ));
     gh.lazySingleton<_i302.AccountRemoteDataSource>(
         () => _i302.AccountRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i667.GrabacionRemoteDataSource>(
@@ -172,6 +164,10 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i836.ObtenerProyectosUseCase(gh<_i901.ProyectoRepository>()));
     gh.factory<_i836.CrearProyectoUseCase>(
         () => _i836.CrearProyectoUseCase(gh<_i901.ProyectoRepository>()));
+    gh.lazySingleton<_i787.AuthRepository>(() => _i153.AuthRepositoryImpl(
+          gh<_i161.AuthRemoteDataSource>(),
+          gh<_i973.TokenStorage>(),
+        ));
     gh.lazySingleton<_i85.GrabacionRepository>(() =>
         _i520.GrabacionRepositoryImpl(gh<_i667.GrabacionRemoteDataSource>()));
     gh.factory<_i580.RegistrarDispositivoUseCase>(() =>
