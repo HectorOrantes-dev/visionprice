@@ -23,11 +23,16 @@ class AuthRepositoryImpl implements AuthRepository {
   PerfilEntity? _perfilCache;
 
   @override
-  Future<void> login({
+  Future<AuthSessionEntity?> login({
     required String correo,
     required String contrasena,
-  }) {
-    return _remote.login(correo, contrasena);
+  }) async {
+    final session = await _remote.login(correo, contrasena);
+    // Login directo (sin 2FA): persiste el token igual que verifyTwoFactor.
+    if (session != null) {
+      await _tokenStorage.saveToken(session.accessToken);
+    }
+    return session;
   }
 
   @override
@@ -89,12 +94,19 @@ class AuthRepositoryImpl implements AuthRepository {
       _remote.verifyResetCode(correo, code);
 
   @override
-  Future<void> resetPassword({
+  Future<AuthSessionEntity?> resetPassword({
     required String correo,
     required String resetToken,
     required String nuevaContrasena,
-  }) =>
-      _remote.resetPassword(correo, resetToken, nuevaContrasena);
+  }) async {
+    final session =
+        await _remote.resetPassword(correo, resetToken, nuevaContrasena);
+    // Auto-login tras el reset: persiste el token igual que verifyTwoFactor.
+    if (session != null) {
+      await _tokenStorage.saveToken(session.accessToken);
+    }
+    return session;
+  }
 
   @override
   Future<PerfilEntity> getPerfil({bool forceRefresh = false}) async {

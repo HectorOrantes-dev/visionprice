@@ -69,10 +69,13 @@ class LoginViewModel extends ChangeNotifier with ValidationMixin {
     notifyListeners();
   }
 
-  /// Paso 1: valida y dispara el envío del código 2FA al correo.
+  /// Paso 1: valida y hace login. Si el back-end responde con token (2FA
+  /// desactivado), inicia sesión directo y llama a [onSuccess]. Si en su lugar
+  /// envió un código, pasa al paso de verificación (2FA).
   Future<void> login({
     required String email,
     required String password,
+    required VoidCallback onSuccess,
   }) async {
     emailError = validateEmail(email);
     passwordError = validatePassword(password);
@@ -84,9 +87,17 @@ class LoginViewModel extends ChangeNotifier with ValidationMixin {
     _correo = email;
     _setLoading();
     try {
-      await _loginUseCase(correo: email, contrasena: password);
-      _state = LoginState.codeSent;
-      notifyListeners();
+      final session = await _loginUseCase(correo: email, contrasena: password);
+      if (session != null) {
+        // Login directo: no hace falta código de verificación.
+        _state = LoginState.success;
+        notifyListeners();
+        _deviceRegistrar.register();
+        onSuccess();
+      } else {
+        _state = LoginState.codeSent;
+        notifyListeners();
+      }
     } catch (e) {
       _fail(e);
     }

@@ -237,6 +237,7 @@ extension GetItInjectableX on _i174.GetIt {
               gh<_i46.ForgotPasswordUseCase>(),
               gh<_i46.VerifyResetCodeUseCase>(),
               gh<_i46.ResetPasswordUseCase>(),
+              gh<_i330.DeviceRegistrar>(),
             ));
     gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
           gh<_i695.AudioRecorderService>(),

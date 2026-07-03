@@ -12,7 +12,9 @@ import '../../domain/entities/role_entity.dart';
 /// (mock/fake) en tests. Mapea el JSON directamente a entidades de dominio
 /// con sus `fromJson` (sin DTOs intermedios).
 abstract class AuthRemoteDataSource {
-  Future<void> login(String correo, String contrasena);
+  /// Devuelve la sesión si el back-end responde con `access_token` (login
+  /// directo, sin 2FA); `null` si en su lugar envió un código de verificación.
+  Future<AuthSessionEntity?> login(String correo, String contrasena);
   Future<AuthSessionEntity> verifyTwoFactor(String correo, String code);
   Future<List<RoleEntity>> getRoles();
   Future<RegisterResultEntity> register(Map<String, dynamic> body);
@@ -23,7 +25,11 @@ abstract class AuthRemoteDataSource {
   /// Verifica el código de recuperación. Devuelve el `reset_token` (JWT de un
   /// solo uso) que autoriza el cambio de contraseña.
   Future<String> verifyResetCode(String correo, String code);
-  Future<void> resetPassword(
+
+  /// Establece la nueva contraseña. El back-end responde con la sesión ya
+  /// iniciada (`access_token`) → devuelve `AuthSessionEntity`; `null` si por
+  /// algún motivo no vino token.
+  Future<AuthSessionEntity?> resetPassword(
       String correo, String resetToken, String nuevaContrasena);
   Future<PerfilEntity> getPerfil();
 }
@@ -37,11 +43,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this._client);
 
   @override
-  Future<void> login(String correo, String contrasena) async {
-    await _client.postJson(ApiConfig.login, {
+  Future<AuthSessionEntity?> login(String correo, String contrasena) async {
+    final data = await _client.postJson(ApiConfig.login, {
       'correo': correo,
       'contrasena': contrasena,
     });
+    // Si el back-end ya devuelve token (2FA desactivado), la sesión queda
+    // lista; si solo mandó el código de verificación, no hay token → null.
+    final token = (data['access_token'] ?? data['token'] ?? '').toString();
+    return token.isEmpty ? null : AuthSessionEntity.fromJson(data);
   }
 
   @override
@@ -97,13 +107,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> resetPassword(
+  Future<AuthSessionEntity?> resetPassword(
       String correo, String resetToken, String nuevaContrasena) async {
-    await _client.postJson(ApiConfig.passwordReset, {
+    final data = await _client.postJson(ApiConfig.passwordReset, {
       'correo': correo,
       'reset_token': resetToken,
       'nueva_contrasena': nuevaContrasena,
     });
+    final token = (data['access_token'] ?? data['token'] ?? '').toString();
+    return token.isEmpty ? null : AuthSessionEntity.fromJson(data);
   }
 
   @override

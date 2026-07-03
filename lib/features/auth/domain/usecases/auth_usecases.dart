@@ -16,7 +16,12 @@ class LoginUseCase {
   final AuthRepository _repo;
   LoginUseCase(this._repo);
 
-  Future<void> call({required String correo, required String contrasena}) =>
+  /// Devuelve la sesión si el login fue directo (sin 2FA), o `null` si el
+  /// back-end envió un código de verificación que hay que confirmar.
+  Future<AuthSessionEntity?> call({
+    required String correo,
+    required String contrasena,
+  }) =>
       _repo.login(correo: correo, contrasena: contrasena);
 }
 
@@ -108,7 +113,7 @@ class ResetPasswordUseCase {
   final AuthRepository _repo;
   ResetPasswordUseCase(this._repo);
 
-  Future<void> call({
+  Future<AuthSessionEntity?> call({
     required String correo,
     required String resetToken,
     required String nuevaContrasena,

@@ -7,9 +7,13 @@ import '../entities/role_entity.dart';
 /// (`AuthRepositoryImpl`) lo implementa. La presentación nunca conoce la
 /// implementación concreta → bajo acoplamiento, fácil de testear/mockear.
 abstract class AuthRepository {
-  /// Paso 1 del login con correo: dispara el envío del código 2FA al correo.
-  /// No devuelve token todavía.
-  Future<void> login({required String correo, required String contrasena});
+  /// Login con correo/contraseña. Si el back-end responde con `access_token`
+  /// (2FA desactivado), devuelve la sesión ya con el token persistido. Si en su
+  /// lugar envió un código 2FA al correo, devuelve `null` y falta verificarlo.
+  Future<AuthSessionEntity?> login({
+    required String correo,
+    required String contrasena,
+  });
 
   /// Paso 2: verifica el código 2FA y devuelve la sesión (token ya persistido).
   Future<AuthSessionEntity> verifyTwoFactor({
@@ -53,8 +57,10 @@ abstract class AuthRepository {
   });
 
   /// Paso 3: establece la nueva contraseña usando el `reset_token` obtenido en
-  /// [verifyResetCode]. Lanza `ApiException` si el token es inválido o expiró.
-  Future<void> resetPassword({
+  /// [verifyResetCode]. El back-end responde con la sesión ya iniciada; si trae
+  /// `access_token`, devuelve la sesión con el token persistido (auto-login).
+  /// Lanza `ApiException` si el token es inválido o expiró.
+  Future<AuthSessionEntity?> resetPassword({
     required String correo,
     required String resetToken,
     required String nuevaContrasena,

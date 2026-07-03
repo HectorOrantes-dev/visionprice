@@ -5,6 +5,7 @@ import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/field_label.dart';
 import '../../../../shared/widgets/vision_price_logo.dart';
+import '../../../home/presentation/screens/home_screen.dart';
 import '../providers/forgot_password_provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -87,13 +88,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           controller: _passwordController,
                           vm: vm,
                           onSuccess: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Contraseña actualizada. Inicia sesión.'),
-                              ),
-                            );
-                            Navigator.pop(context);
+                            if (vm.sessionActive) {
+                              // Auto-login tras el reset: directo al Home,
+                              // limpiando la pila de auth.
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const HomeScreen()),
+                                (route) => false,
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Contraseña actualizada. Inicia sesión.'),
+                                ),
+                              );
+                              Navigator.pop(context);
+                            }
                           },
                         ),
                     },

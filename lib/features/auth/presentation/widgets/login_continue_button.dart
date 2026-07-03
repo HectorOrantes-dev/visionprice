@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../home/presentation/screens/home_screen.dart';
 import '../providers/login_provider.dart';
 
 class LoginContinueButton extends StatelessWidget {
@@ -28,6 +29,10 @@ class LoginContinueButton extends StatelessWidget {
             : () => vm.login(
                   email: emailController.text,
                   password: passwordController.text,
+                  onSuccess: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  ),
                 ),
         child: vm.isLoading
             ? const SizedBox(

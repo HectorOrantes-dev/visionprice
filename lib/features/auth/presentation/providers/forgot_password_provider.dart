@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/validation_mixin.dart';
+import '../../../devices/data/services/device_registrar.dart';
 import '../../domain/usecases/auth_usecases.dart';
 
 /// Pasos del flujo de "¿Olvidaste tu contraseña?":
@@ -16,11 +17,13 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
   final ForgotPasswordUseCase _forgotUseCase;
   final VerifyResetCodeUseCase _verifyUseCase;
   final ResetPasswordUseCase _resetUseCase;
+  final DeviceRegistrar _deviceRegistrar;
 
   ForgotPasswordViewModel(
     this._forgotUseCase,
     this._verifyUseCase,
     this._resetUseCase,
+    this._deviceRegistrar,
   );
 
   ForgotStep _step = ForgotStep.email;
@@ -28,6 +31,7 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
   String? _errorMessage;
   String _correo = '';
   String _resetToken = '';
+  bool _sessionActive = false;
   bool _obscurePassword = true;
 
   String? emailError;
@@ -38,6 +42,10 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get obscurePassword => _obscurePassword;
+
+  /// `true` si tras el reset el back-end devolvió sesión (auto-login) → la UI
+  /// va directo al Home; `false` → cae al login manual (fallback).
+  bool get sessionActive => _sessionActive;
 
   void toggleObscurePassword() {
     _obscurePassword = !_obscurePassword;
@@ -106,6 +114,8 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
   }
 
   /// Paso 3: establece la nueva contraseña usando el `reset_token` verificado.
+  /// El back-end responde con la sesión iniciada → guarda el token (en el
+  /// repositorio) y marca [sessionActive] para que la UI vaya directo al Home.
   Future<void> restablecer({
     required String nuevaContrasena,
     required VoidCallback onSuccess,
@@ -117,13 +127,16 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
     }
     _setLoading();
     try {
-      await _resetUseCase(
+      final session = await _resetUseCase(
         correo: _correo,
         resetToken: _resetToken,
         nuevaContrasena: nuevaContrasena,
       );
+      _sessionActive = session != null;
       _isLoading = false;
       notifyListeners();
+      // Registra el device token para push (best-effort) si quedó logueado.
+      if (_sessionActive) _deviceRegistrar.register();
       onSuccess();
     } catch (e) {
       _fail(e);
