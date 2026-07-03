@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/vision_price_logo.dart';
+import '../../../../shared/widgets/vision_price_logo.dart';
 import '../providers/register_provider.dart';
 import '../widgets/register_widgets.dart';
 

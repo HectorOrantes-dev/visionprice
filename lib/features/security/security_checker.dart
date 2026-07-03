@@ -6,17 +6,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screen_protector/screen_protector.dart';
 
-/// Posibles estados de seguridad del dispositivo respecto a la ubicación.
-enum SecurityStatus {
-  /// Dispositivo seguro, sin Fake GPS.
-  secure,
+import 'security_status.dart';
 
-  /// Se detectó ubicación simulada (Fake GPS).
-  fakeGpsDetected,
-
-  /// Permisos de ubicación denegados o servicio de ubicación apagado.
-  permissionDenied,
-}
+// El enum vive en su propio archivo (SRP); se re-exporta para no romper imports.
+export 'security_status.dart';
 
 /// Audita la seguridad del dispositivo respecto a la ubicación (Anti Fake-GPS).
 class SecurityChecker {

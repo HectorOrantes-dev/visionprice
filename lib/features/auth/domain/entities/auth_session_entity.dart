@@ -6,19 +6,23 @@ import 'user_entity.dart';
 class AuthSessionEntity {
   final String accessToken;
   final String tokenType;
+  final String? refreshToken;
   final UserEntity? user;
 
   const AuthSessionEntity({
     required this.accessToken,
     this.tokenType = 'Bearer',
+    this.refreshToken,
     this.user,
   });
 
   factory AuthSessionEntity.fromJson(Map<String, dynamic> json) {
     final userJson = json['user'] ?? json['usuario'];
+    final refresh = json['refresh_token']?.toString();
     return AuthSessionEntity(
       accessToken: (json['access_token'] ?? json['token'] ?? '').toString(),
       tokenType: (json['token_type'] ?? 'Bearer').toString(),
+      refreshToken: (refresh != null && refresh.isNotEmpty) ? refresh : null,
       user: userJson is Map<String, dynamic>
           ? UserEntity.fromJson(userJson)
           : null,

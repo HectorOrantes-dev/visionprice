@@ -1,4 +1,7 @@
-enum RecordingStatus { pending, uploading, ready, error }
+import 'recording_status.dart';
+
+// El enum vive en su propio archivo (SRP); se re-exporta para no romper imports.
+export 'recording_status.dart';
 
 class RecordingEntity {
   final String id;

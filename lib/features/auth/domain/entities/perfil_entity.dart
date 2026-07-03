@@ -51,6 +51,21 @@ class PerfilEntity {
     );
   }
 
+  /// Serializa a JSON con las MISMAS claves que espera [fromJson], para poder
+  /// guardarlo en disco y releerlo idéntico (persistencia local del perfil).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nombre': nombre,
+        'correo': correo,
+        'telefono': telefono,
+        'rol': rol,
+        'activo': activo,
+        'proveedor_auth': proveedorAuth,
+        'fecha_registro': fechaRegistro?.toIso8601String(),
+        'plan_activo': planActivo,
+        'vigencia_hasta': vigenciaHasta?.toIso8601String(),
+      };
+
   static DateTime? _parseDate(dynamic value) {
     if (value == null) return null;
     return DateTime.tryParse(value.toString());

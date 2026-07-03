@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../widgets/countdown_dialog.dart';
 
 /// Envuelve la parte autenticada de la app y detecta la inactividad del usuario.
 ///
@@ -20,7 +20,7 @@ class InactivityDetector extends StatefulWidget {
     super.key,
     required this.child,
     required this.onTimeout,
-    this.inactivityDuration = const Duration(minutes: 2),
+    this.inactivityDuration = const Duration(minutes: 15),
     this.countdownSeconds = 30,
   });
 
@@ -61,7 +61,7 @@ class _InactivityDetectorState extends State<InactivityDetector> {
     final bool? continued = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => _CountdownDialog(seconds: widget.countdownSeconds),
+      builder: (_) => CountdownDialog(seconds: widget.countdownSeconds),
     );
 
     _dialogOpen = false;
@@ -81,120 +81,6 @@ class _InactivityDetectorState extends State<InactivityDetector> {
       onPointerDown: _handleUserInteraction,
       onPointerMove: _handleUserInteraction,
       child: widget.child,
-    );
-  }
-}
-
-/// Diálogo modal con cuenta regresiva (tema claro).
-class _CountdownDialog extends StatefulWidget {
-  final int seconds;
-
-  const _CountdownDialog({required this.seconds});
-
-  @override
-  State<_CountdownDialog> createState() => _CountdownDialogState();
-}
-
-class _CountdownDialogState extends State<_CountdownDialog> {
-  late int _remaining;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _remaining = widget.seconds;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      if (_remaining <= 1) {
-        timer.cancel();
-        Navigator.of(context).pop(false);
-      } else {
-        setState(() => _remaining--);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final double progress = _remaining / widget.seconds;
-    final Color ringColor =
-        progress > 0.33 ? AppColors.primary : AppColors.error;
-
-    return AlertDialog(
-      backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Row(
-        children: [
-          Icon(Icons.timer_outlined, color: AppColors.primary),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              '¿Sigues ahí?',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Tu sesión se cerrará por inactividad en:',
-            style: TextStyle(color: AppColors.textSecondary, height: 1.4),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: 96,
-            height: 96,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 96,
-                  height: 96,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 6,
-                    backgroundColor: AppColors.border,
-                    valueColor: AlwaysStoppedAnimation<Color>(ringColor),
-                  ),
-                ),
-                Text(
-                  '$_remaining',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      actions: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Seguir conectado'),
-          ),
-        ),
-      ],
     );
   }
 }

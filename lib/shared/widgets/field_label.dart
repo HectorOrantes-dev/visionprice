@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
+import '../../core/theme/app_theme.dart';
 
 /// Etiqueta de campo de formulario reutilizable (mayúsculas, espaciada).
 /// Compartida por las pantallas de login y registro.

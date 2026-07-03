@@ -5,14 +5,11 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/validation_mixin.dart';
 import '../../../devices/data/services/device_registrar.dart';
 import '../../domain/usecases/auth_usecases.dart';
+import 'login_state.dart';
 
-/// Flujo del login:
-/// - [idle] → estado inicial.
-/// - [loading] → petición en curso.
-/// - [codeSent] → el back-end mandó el código 2FA al correo (paso 1 ok).
-/// - [success] → 2FA verificado, token guardado.
-/// - [error] → ver [errorMessage].
-enum LoginState { idle, loading, codeSent, success, error }
+// El enum de estado vive en su propio archivo (SRP); se re-exporta para que
+// las pantallas que importan este provider sigan viendo `LoginState`.
+export 'login_state.dart';
 
 /// ViewModel del login. `@injectable` (factory): `getIt<LoginViewModel>()`
 /// crea una instancia nueva por pantalla, con sus use cases ya inyectados.

@@ -9,14 +9,11 @@ import '../../../project/domain/entities/proyecto_entity.dart';
 import '../../../project/domain/usecases/proyecto_usecases.dart';
 import '../../data/services/audio_recorder_service.dart';
 import '../../domain/usecases/grabacion_usecases.dart';
+import 'record_state.dart';
 
-/// Estados de la pantalla de grabación:
-/// - [idle] → sin grabar.
-/// - [recording] → capturando audio.
-/// - [recorded] → audio listo para subir.
-/// - [uploading] → subiendo al back-end.
-/// - [error] → ver [errorMessage].
-enum RecordState { idle, recording, recorded, uploading, error }
+// El enum de estado vive en su propio archivo (SRP); se re-exporta para que
+// las pantallas que importan este provider sigan viendo `RecordState`.
+export 'record_state.dart';
 
 /// ViewModel de la grabación. `@injectable`: recibe el servicio de audio y el
 /// caso de uso de subida. Captura audio real y lo sube como multipart.

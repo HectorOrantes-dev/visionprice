@@ -1,0 +1,49 @@
+import 'package:flutter/material.dart';
+
+import '../../../../core/theme/app_theme.dart';
+
+/// Fila de acción del perfil (con chevron). Antes el privado `_ProfileItem`.
+class ProfileItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool danger;
+
+  const ProfileItem({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.danger = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = danger ? AppColors.error : AppColors.textPrimary;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: color),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.w600, color: color),
+            ),
+            const Spacer(),
+            Icon(Icons.chevron_right, size: 20, color: AppColors.textHint),
+          ],
+        ),
+      ),
+    );
+  }
+}
