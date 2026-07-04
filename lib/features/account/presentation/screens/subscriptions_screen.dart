@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../providers/subscriptions_provider.dart';
 import '../widgets/account_message.dart';
 import '../widgets/subscription_card.dart';
+import 'payment_method_screen.dart';
 
 class SubscriptionsScreen extends StatelessWidget {
   const SubscriptionsScreen({super.key});
@@ -25,6 +26,17 @@ class SubscriptionsScreen extends StatelessWidget {
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
               )),
+          actions: [
+            IconButton(
+              tooltip: 'Método de pago',
+              icon: const Icon(Icons.credit_card, color: AppColors.primary),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const PaymentMethodScreen()),
+              ),
+            ),
+          ],
         ),
         body: SafeArea(
           child: Consumer<SubscriptionsViewModel>(
