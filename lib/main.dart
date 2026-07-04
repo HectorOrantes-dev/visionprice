@@ -7,6 +7,7 @@ import 'features/devices/data/services/device_registrar.dart';
 import 'features/security/services/notification_service.dart';
 import 'app.dart';
 
+// crear a main async para operaciones concurrentes
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
