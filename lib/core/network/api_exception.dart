@@ -15,6 +15,10 @@ class ApiException implements Exception {
   /// `true` para fallos de red/timeout (sin respuesta HTTP).
   bool get isNetwork => statusCode == 0;
 
+  /// `true` cuando el back-end respondió 429 (demasiadas peticiones) → conviene
+  /// esperar (backoff) antes de reintentar.
+  bool get isTooManyRequests => statusCode == 429;
+
   factory ApiException.network([String? detail]) =>
       ApiException(0, detail ?? 'No hay conexión con el servidor.');
 

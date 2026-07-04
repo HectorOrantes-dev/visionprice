@@ -91,7 +91,10 @@ class _ProcessingView extends StatelessWidget {
                     if (!vm.isDone && !vm.hasError)
                       Center(
                         child: Text(
-                          'Sondeando cada 4 s · puedes esperar aquí',
+                          vm.timedOut
+                              ? 'Sigue procesando. Vuelve más tarde para ver el resultado.'
+                              : 'Sondeando cada 4 s · puedes esperar aquí',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
