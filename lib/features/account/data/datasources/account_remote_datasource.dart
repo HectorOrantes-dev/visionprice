@@ -1,5 +1,5 @@
-import '../../domain/entities/subscripcion_entity.dart';
+import '../../domain/entities/subscription_entity.dart';
 
 abstract class AccountRemoteDataSource {
-  Future<List<SubscripcionEntity>> listarSubscripciones();
+  Future<List<SubscriptionEntity>> subscriptions();
 }

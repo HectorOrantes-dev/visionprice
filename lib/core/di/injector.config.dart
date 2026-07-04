@@ -28,6 +28,8 @@ import '../../features/account/presentation/providers/subscriptions_provider.dar
     as _i488;
 import '../../features/auth/data/datasources/auth_remote_datasource.dart'
     as _i161;
+import '../../features/auth/data/datasources/auth_remote_datasource_impl.dart'
+    as _i1071;
 import '../../features/auth/data/datasources/perfil_storage.dart' as _i1033;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
@@ -176,7 +178,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i587.NotificacionRemoteDataSource>(
         () => _i359.NotificacionRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i161.AuthRemoteDataSource>(
-        () => _i161.AuthRemoteDataSourceImpl(gh<_i557.ApiClient>()));
+        () => _i1071.AuthRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i667.GrabacionRemoteDataSource>(
         () => _i901.GrabacionRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i1054.ProyectoRemoteDataSource>(
