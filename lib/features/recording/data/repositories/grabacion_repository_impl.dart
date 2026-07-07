@@ -15,11 +15,13 @@ class GrabacionRepositoryImpl implements GrabacionRepository {
     required String audioPath,
     int? duracionSegundos,
     int? proyectoId,
+    void Function(double)? onProgress,
   }) =>
       _remote.subir(
         audioPath,
         duracionSegundos: duracionSegundos,
         proyectoId: proyectoId,
+        onProgress: onProgress,
       );
 
   @override

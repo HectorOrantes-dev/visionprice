@@ -1,9 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
-import '../../../sync/services/sync_service.dart';
+import '../../../../core/storage/token_storage.dart';
 import '../../domain/entities/calculo_entity.dart';
 import '../../domain/entities/grabacion_entity.dart';
 import 'grabacion_remote_datasource.dart';
@@ -11,35 +12,52 @@ import 'grabacion_remote_datasource.dart';
 @LazySingleton(as: GrabacionRemoteDataSource)
 class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
   final ApiClient _client;
-  final SyncService _syncService;
+  final TokenStorage _tokenStorage;
+  final Dio _dio;
 
-  GrabacionRemoteDataSourceImpl(this._client, this._syncService);
+  GrabacionRemoteDataSourceImpl(this._client, this._tokenStorage)
+      : _dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
 
   @override
   Future<GrabacionEntity> subir(
     String audioPath, {
     int? duracionSegundos,
     int? proyectoId,
+    void Function(double)? onProgress,
   }) async {
     final localId = const Uuid().v4();
     final fecha = DateTime.now().toUtc().toIso8601String();
+    
+    final token = _tokenStorage.token;
+    if (token == null) throw Exception('No auth token');
 
-    await _syncService.queueAudio(
-      localId: localId,
-      audioPath: audioPath,
-      proyectoId: proyectoId ?? 0,
-      fechaGrabacion: fecha,
-      duracionSegundos: duracionSegundos,
+    final formData = FormData.fromMap({
+      'proyecto_id': proyectoId ?? 0,
+      'local_id': localId,
+      'fecha_grabacion': fecha,
+      if (duracionSegundos != null) 'duracion_segundos': duracionSegundos,
+      'audio': await MultipartFile.fromFile(audioPath),
+    });
+
+    final response = await _dio.post(
+      ApiConfig.grabaciones,
+      data: formData,
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+      onSendProgress: (sent, total) {
+        if (total > 0 && onProgress != null) {
+          onProgress(sent / total);
+        }
+      },
     );
 
-    // Retorna una entidad simulada porque la subida es asíncrona
-    return GrabacionEntity(
-      id: 0,
-      proyectoId: proyectoId,
-      estado: 'pending',
-      duracionSegundos: duracionSegundos,
-      fechaGrabacion: fecha,
-    );
+    if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 202) {
+      final data = response.data;
+      return GrabacionEntity.fromJson(data);
+    } else {
+      throw Exception('Error al subir la grabación');
+    }
   }
 
   @override

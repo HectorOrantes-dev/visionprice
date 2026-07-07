@@ -175,7 +175,7 @@ class ApiClient {
     }
     // Sesión expirada/ inválida: borra el token para que el próximo arranque
     // pida login en vez de auto-entrar con un token muerto.
-    if (res.statusCode == 401) {
+    if (res.statusCode == 401 || res.statusCode == 403) {
       unawaited(_tokenStorage.clear());
     }
     throw ApiException(res.statusCode, _extractError(decoded));

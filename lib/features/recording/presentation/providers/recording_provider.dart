@@ -9,6 +9,7 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/connectivity_service.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
 import '../../../project/domain/usecases/proyecto_usecases.dart';
+import '../../../sync/services/sync_service.dart';
 import '../../data/services/audio_recorder_service.dart';
 import '../../domain/usecases/grabacion_usecases.dart';
 
@@ -28,12 +29,14 @@ class RecordingViewModel extends ChangeNotifier {
   final SubirGrabacionUseCase _subir;
   final ConnectivityService _connectivity;
   final ObtenerProyectosUseCase _obtenerProyectos;
+  final SyncService _syncService;
 
   RecordingViewModel(
     this._recorder,
     this._subir,
     this._connectivity,
     this._obtenerProyectos,
+    this._syncService,
   ) {
     checkConnectivity();
     cargarProyectos();
@@ -139,6 +142,9 @@ class RecordingViewModel extends ChangeNotifier {
 
   /// Sube el audio grabado. Invoca [onUploaded] con el id de la grabación
   /// (estado "procesando") para pasar a la pantalla de procesamiento.
+  double _uploadProgress = 0.0;
+  double get uploadProgress => _uploadProgress;
+
   Future<void> upload({required void Function(int grabacionId) onUploaded}) async {
     if (_audioPath == null) return;
     if (_selectedProyecto == null) {
@@ -149,14 +155,31 @@ class RecordingViewModel extends ChangeNotifier {
     }
     _state = RecordState.uploading;
     _errorMessage = null;
+    _uploadProgress = 0.0;
     notifyListeners();
     try {
-      final grabacion = await _subir(
-        audioPath: _audioPath!,
-        duracionSegundos: _elapsed.inSeconds,
-        proyectoId: _selectedProyecto!.id,
-      );
-      onUploaded(grabacion.id);
+      if (isOffline) {
+        final localId = DateTime.now().millisecondsSinceEpoch.toString();
+        await _syncService.queueAudio(
+          localId: localId,
+          audioPath: _audioPath!,
+          proyectoId: _selectedProyecto!.id,
+          fechaGrabacion: DateTime.now().toIso8601String(),
+          duracionSegundos: _elapsed.inSeconds,
+        );
+        onUploaded(-1);
+      } else {
+        final grabacion = await _subir(
+          audioPath: _audioPath!,
+          duracionSegundos: _elapsed.inSeconds,
+          proyectoId: _selectedProyecto!.id,
+          onProgress: (progress) {
+            _uploadProgress = progress;
+            notifyListeners();
+          },
+        );
+        onUploaded(grabacion.id);
+      }
     } catch (e) {
       _state = RecordState.error;
       _errorMessage =

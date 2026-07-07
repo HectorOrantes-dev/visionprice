@@ -176,6 +176,11 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.lazySingleton<_i705.SyncLocalDataSource>(
         () => _i705.SyncLocalDataSource(gh<_i998.LocalDatabase>()));
+    gh.lazySingleton<_i667.GrabacionRemoteDataSource>(
+        () => _i901.GrabacionRemoteDataSourceImpl(
+              gh<_i557.ApiClient>(),
+              gh<_i973.TokenStorage>(),
+            ));
     gh.lazySingleton<_i992.DispositivoRemoteDataSource>(
         () => _i977.DispositivoRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i491.ConnectivityService>(
@@ -194,11 +199,6 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.lazySingleton<_i1054.ProyectoRemoteDataSource>(
         () => _i91.ProyectoRemoteDataSourceImpl(gh<_i557.ApiClient>()));
-    gh.lazySingleton<_i667.GrabacionRemoteDataSource>(
-        () => _i901.GrabacionRemoteDataSourceImpl(
-              gh<_i557.ApiClient>(),
-              gh<_i406.SyncService>(),
-            ));
     gh.lazySingleton<_i82.CotizacionRemoteDataSource>(
         () => _i14.CotizacionRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i901.ProyectoRepository>(
@@ -311,12 +311,6 @@ extension GetItInjectableX on _i174.GetIt {
             gh<_i382.NotificacionRepository>()));
     gh.factory<_i488.SubscriptionsViewModel>(() =>
         _i488.SubscriptionsViewModel(gh<_i878.ObtenerSuscripcionesUseCase>()));
-    gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
-          gh<_i695.AudioRecorderService>(),
-          gh<_i540.SubirGrabacionUseCase>(),
-          gh<_i491.ConnectivityService>(),
-          gh<_i836.ObtenerProyectosUseCase>(),
-        ));
     gh.factory<_i922.BorrarDispositivoUseCase>(() =>
         _i922.BorrarDispositivoUseCase(gh<_i251.DispositivoRepository>()));
     gh.factory<_i580.RegistrarDispositivoUseCase>(() =>
@@ -325,6 +319,13 @@ extension GetItInjectableX on _i174.GetIt {
         _i580.BorrarDispositivoUseCase(gh<_i251.DispositivoRepository>()));
     gh.factory<_i632.RegistrarDispositivoUseCase>(() =>
         _i632.RegistrarDispositivoUseCase(gh<_i251.DispositivoRepository>()));
+    gh.factory<_i719.RecordingViewModel>(() => _i719.RecordingViewModel(
+          gh<_i695.AudioRecorderService>(),
+          gh<_i540.SubirGrabacionUseCase>(),
+          gh<_i491.ConnectivityService>(),
+          gh<_i836.ObtenerProyectosUseCase>(),
+          gh<_i406.SyncService>(),
+        ));
     gh.factory<_i801.PerfilViewModel>(
         () => _i801.PerfilViewModel(gh<_i46.GetPerfilUseCase>()));
     gh.factory<_i506.NotificationsViewModel>(() => _i506.NotificationsViewModel(

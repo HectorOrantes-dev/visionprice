@@ -6,6 +6,7 @@ abstract class GrabacionRemoteDataSource {
     String audioPath, {
     int? duracionSegundos,
     int? proyectoId,
+    void Function(double)? onProgress,
   });
   Future<GrabacionEntity> detalle(int id);
   Future<List<GrabacionEntity>> historial();

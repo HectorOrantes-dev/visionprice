@@ -16,11 +16,13 @@ class SubirGrabacionUseCase {
     required String audioPath,
     int? duracionSegundos,
     int? proyectoId,
+    void Function(double)? onProgress,
   }) =>
       _repo.subir(
         audioPath: audioPath,
         duracionSegundos: duracionSegundos,
         proyectoId: proyectoId,
+        onProgress: onProgress,
       );
 }
 

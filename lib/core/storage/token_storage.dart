@@ -38,7 +38,7 @@ class TokenStorage extends ChangeNotifier {
 
   Future<void> clear() async {
     _token = null;
-    await _storage.delete(key: _kKey);
     notifyListeners();
+    await _storage.delete(key: _kKey);
   }
 }

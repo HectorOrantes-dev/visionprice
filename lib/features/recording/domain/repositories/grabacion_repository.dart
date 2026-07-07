@@ -8,6 +8,7 @@ abstract class GrabacionRepository {
     required String audioPath,
     int? duracionSegundos,
     int? proyectoId,
+    void Function(double)? onProgress,
   });
 
   /// Detalle (para sondeo): estado + transcripción + extracción + confianza.

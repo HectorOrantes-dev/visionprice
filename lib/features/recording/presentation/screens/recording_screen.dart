@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../sync/presentation/screens/processing_screen.dart';
 import '../providers/recording_provider.dart';
 import '../widgets/audio_visualizer.dart';
 
@@ -260,24 +261,46 @@ class _BottomActions extends StatelessWidget {
                         }
                         vm.upload(
                           onUploaded: (id) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Grabación encolada para subir en segundo plano.'),
-                                backgroundColor: AppColors.primary,
-                              ),
-                            );
+                            if (id == -1) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Guardado localmente. Se subirá al conectarse a internet.'),
+                                  backgroundColor: AppColors.primary,
+                                ),
+                              );
+                            } else {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ProcessingScreen(grabacionId: id),
+                                ),
+                              );
+                            }
                           },
                         );
                       },
                 child: vm.isUploading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: vm.uploadProgress,
+                                backgroundColor: Colors.white.withValues(alpha: 0.3),
+                                color: Colors.white,
+                                minHeight: 4,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '${(vm.uploadProgress * 100).toInt()}%',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ],
                       )
                     : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
