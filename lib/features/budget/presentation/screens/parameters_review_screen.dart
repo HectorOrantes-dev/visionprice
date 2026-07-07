@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../recording/domain/entities/calculo_entity.dart';
+import '../../../recording/domain/entities/superficie_entity.dart';
 import '../../../recording/presentation/providers/parameters_provider.dart';
 import 'nearby_stores_screen.dart';
-
 class ParametersReviewScreen extends StatelessWidget {
   final int grabacionId;
   const ParametersReviewScreen({super.key, required this.grabacionId});
