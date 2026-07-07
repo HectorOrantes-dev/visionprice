@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
+import 'package:record/record.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/connectivity_service.dart';
@@ -55,6 +57,8 @@ class RecordingViewModel extends ChangeNotifier {
   bool get hasRecording => _state == RecordState.recorded;
   String? get errorMessage => _errorMessage;
 
+  Stream<Amplitude>? get amplitudeStream => _recorder.onAmplitudeChanged;
+
   List<ProyectoEntity> get proyectos => _proyectos;
   ProyectoEntity? get selectedProyecto => _selectedProyecto;
   bool get loadingProyectos => _loadingProyectos;
@@ -106,6 +110,11 @@ class RecordingViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    
+    // Reproducir evento de audio / haptic
+    HapticFeedback.lightImpact();
+    SystemSound.play(SystemSoundType.click);
+
     await _recorder.start();
     _state = RecordState.recording;
     _elapsed = Duration.zero;
@@ -118,6 +127,10 @@ class RecordingViewModel extends ChangeNotifier {
   }
 
   Future<void> stopRecording() async {
+    // Reproducir evento de audio / haptic
+    HapticFeedback.lightImpact();
+    SystemSound.play(SystemSoundType.click);
+
     _timer?.cancel();
     _audioPath = await _recorder.stop();
     _state = _audioPath != null ? RecordState.recorded : RecordState.idle;

@@ -4,6 +4,7 @@ import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/recording_provider.dart';
 import '../../../sync/presentation/screens/processing_screen.dart';
+import '../widgets/audio_visualizer.dart';
 
 class RecordingScreen extends StatelessWidget {
   const RecordingScreen({super.key});
@@ -49,7 +50,10 @@ class _RecordingView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 40),
-                  _WaveformWidget(isRecording: vm.isRecording),
+                  AudioVisualizer(
+                    amplitudeStream: vm.amplitudeStream,
+                    isRecording: vm.isRecording,
+                  ),
                   const SizedBox(height: 32),
                   _MicButton(vm: vm),
                   const SizedBox(height: 24),
@@ -122,36 +126,6 @@ class _RecordingAppBar extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _WaveformWidget extends StatelessWidget {
-  final bool isRecording;
-  const _WaveformWidget({required this.isRecording});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(20, (i) {
-          final heights = [
-            12.0, 20.0, 28.0, 16.0, 36.0, 24.0, 40.0, 18.0, 32.0, 22.0,
-            38.0, 14.0, 28.0, 20.0, 34.0, 16.0, 26.0, 30.0, 18.0, 12.0,
-          ];
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            width: 3,
-            height: heights[i],
-            decoration: BoxDecoration(
-              color: isRecording ? AppColors.primary : AppColors.textHint,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          );
-        }),
       ),
     );
   }
@@ -286,13 +260,15 @@ class _BottomActions extends StatelessWidget {
                           return;
                         }
                         vm.upload(
-                          onUploaded: (id) => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ProcessingScreen(grabacionId: id),
-                            ),
-                          ),
+                          onUploaded: (id) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Grabación encolada para subir en segundo plano.'),
+                                backgroundColor: AppColors.primary,
+                              ),
+                            );
+                          },
                         );
                       },
                 child: vm.isUploading

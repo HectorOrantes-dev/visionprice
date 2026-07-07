@@ -48,12 +48,15 @@ class RecordingBottomActions extends StatelessWidget {
                           return;
                         }
                         vm.upload(
-                          onUploaded: (id) => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ProcessingScreen(grabacionId: id),
-                            ),
-                          ),
+                          onUploaded: (id) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Grabación encolada para subir en segundo plano.'),
+                                backgroundColor: AppColors.primary,
+                              ),
+                            );
+                          },
                         );
                       },
                 child: vm.isUploading

@@ -1,79 +1,106 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart' as p;
+
+import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../services/sync_service.dart';
 
 class SyncQueueScreen extends StatelessWidget {
   const SyncQueueScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final syncService = getIt<SyncService>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _SyncAppBar(),
-            _ConnectedBanner(),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    _SyncItem(
-                      name: 'Cocina Del Valle.m4a',
-                      duration: '0:32',
-                      date: '12 jun',
-                      time: '09:28',
-                      status: _SyncStatus.uploading,
-                      progress: 0.67,
-                    ),
-                    const SizedBox(height: 8),
-                    _SyncItem(
-                      name: 'Cuarto Iztapalapa.m4a',
-                      duration: '1:04',
-                      date: '11 jun',
-                      time: '16:45',
-                      status: _SyncStatus.pending,
-                    ),
-                    const SizedBox(height: 8),
-                    _SyncItem(
-                      name: 'Bardeo Xochimilco.m4a',
-                      duration: '0:18',
-                      date: '10 jun',
-                      time: '11:03',
-                      status: _SyncStatus.ready,
-                    ),
-                    const SizedBox(height: 8),
-                    _SyncItem(
-                      name: 'Ampliación Techo.m4a',
-                      duration: '0:48',
-                      date: '9 jun',
-                      time: '08:12',
-                      status: _SyncStatus.error,
-                    ),
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Text(
-                        'Sincronización automática al conectarse · sin acción manual',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
+        child: ListenableBuilder(
+          listenable: syncService,
+          builder: (context, _) {
+            final items = syncService.items;
+            final isOnline = syncService.isOnline;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SyncAppBar(),
+                if (isOnline) _ConnectedBanner() else _OfflineBanner(),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: items.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No hay audios en cola',
+                            style: TextStyle(color: AppColors.textSecondary),
+                          ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: ListView.separated(
+                                  itemCount: items.length,
+                                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                  itemBuilder: (context, index) {
+                                    final item = items[index];
+                                    final date = DateTime.parse(item.fechaGrabacion).toLocal();
+                                    final dateStr = DateFormat('d MMM').format(date);
+                                    final timeStr = DateFormat('HH:mm').format(date);
+                                    
+                                    final dur = item.duracionSegundos ?? 0;
+                                    final m = (dur ~/ 60).toString().padLeft(2, '0');
+                                    final s = (dur % 60).toString().padLeft(2, '0');
+                                    final durationStr = '$m:$s';
+                                    
+                                    // Map to SyncStatus UI enum
+                                    _SyncStatus status;
+                                    switch (item.estado) {
+                                      case 'pending': status = _SyncStatus.pending; break;
+                                      case 'uploading': status = _SyncStatus.uploading; break;
+                                      case 'processing': status = _SyncStatus.processing; break;
+                                      case 'ready': status = _SyncStatus.ready; break;
+                                      case 'error': status = _SyncStatus.error; break;
+                                      default: status = _SyncStatus.pending;
+                                    }
+                                    
+                                    return _SyncItem(
+                                      name: p.basename(item.audioPath),
+                                      duration: durationStr,
+                                      date: dateStr,
+                                      time: timeStr,
+                                      status: status,
+                                      progress: item.progreso,
+                                    );
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16, top: 8),
+                                child: Text(
+                                  'Sincronización automática al conectarse · sin acción manual',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
   }
 }
+
 
 class _SyncAppBar extends StatelessWidget {
   @override
@@ -158,7 +185,47 @@ class _ConnectedBanner extends StatelessWidget {
   }
 }
 
-enum _SyncStatus { uploading, pending, ready, error }
+class _OfflineBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi_off, size: 16, color: Colors.orange),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: const TextSpan(
+                style: TextStyle(fontSize: 13),
+                children: [
+                  TextSpan(
+                    text: 'Sin conexión · ',
+                    style: TextStyle(color: AppColors.textPrimary),
+                  ),
+                  TextSpan(
+                    text: 'esperando red para subir',
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+enum _SyncStatus { uploading, processing, pending, ready, error }
 
 class _SyncItem extends StatelessWidget {
   final String name;
@@ -248,6 +315,8 @@ class _SyncItem extends StatelessWidget {
     switch (status) {
       case _SyncStatus.uploading:
         return AppColors.primaryLight;
+      case _SyncStatus.processing:
+        return Colors.blue.withOpacity(0.1);
       case _SyncStatus.pending:
         return AppColors.warningLight;
       case _SyncStatus.ready:
@@ -261,6 +330,8 @@ class _SyncItem extends StatelessWidget {
     switch (status) {
       case _SyncStatus.uploading:
         return AppColors.primary;
+      case _SyncStatus.processing:
+        return Colors.blue;
       case _SyncStatus.pending:
         return AppColors.warning;
       case _SyncStatus.ready:
@@ -287,6 +358,32 @@ class _StatusWidget extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w700,
             color: AppColors.primary,
+          ),
+        );
+      case _SyncStatus.processing:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Row(
+            children: [
+              SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue),
+              ),
+              SizedBox(width: 6),
+              Text(
+                'Procesando',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
           ),
         );
       case _SyncStatus.pending:

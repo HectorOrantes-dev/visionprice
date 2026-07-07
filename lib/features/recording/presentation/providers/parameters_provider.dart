@@ -12,17 +12,21 @@ import '../../domain/usecases/grabacion_usecases.dart';
 class ParametersViewModel extends ChangeNotifier {
   final ObtenerGrabacionUseCase _obtener;
   final CalcularMetrosUseCase _calcular;
-  ParametersViewModel(this._obtener, this._calcular);
+  final ActualizarTranscripcionUseCase _actualizar;
+  
+  ParametersViewModel(this._obtener, this._calcular, this._actualizar);
 
   bool _loading = true;
   String? _errorMessage;
   GrabacionEntity? _grabacion;
   CalculoEntity? _calculo;
+  String? _textoEditado;
 
   bool get loading => _loading;
   String? get errorMessage => _errorMessage;
   GrabacionEntity? get grabacion => _grabacion;
   CalculoEntity? get calculo => _calculo;
+  String? get textoEditado => _textoEditado;
 
   Future<void> load(int grabacionId) async {
     _loading = true;
@@ -37,6 +41,33 @@ class ParametersViewModel extends ChangeNotifier {
     } finally {
       _loading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> recalcular(String texto) async {
+    _textoEditado = texto;
+    _loading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      _calculo = await _calcular(texto: texto);
+    } catch (e) {
+      _errorMessage =
+          e is ApiException ? e.message : 'No se pudo recalcular los metros.';
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> guardarEdicion(int grabacionId) async {
+    if (_textoEditado != null && _textoEditado != _grabacion?.transcripcion) {
+      try {
+        await _actualizar(grabacionId, _textoEditado!);
+      } catch (e) {
+        // Si falla al guardar de forma silenciosa, podemos ignorarlo o hacer un log.
+        debugPrint('Error al guardar edición: $e');
+      }
     }
   }
 }

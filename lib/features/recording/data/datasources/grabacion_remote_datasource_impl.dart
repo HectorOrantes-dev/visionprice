@@ -1,7 +1,9 @@
 import 'package:injectable/injectable.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
+import '../../../sync/services/sync_service.dart';
 import '../../domain/entities/calculo_entity.dart';
 import '../../domain/entities/grabacion_entity.dart';
 import 'grabacion_remote_datasource.dart';
@@ -9,7 +11,9 @@ import 'grabacion_remote_datasource.dart';
 @LazySingleton(as: GrabacionRemoteDataSource)
 class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
   final ApiClient _client;
-  GrabacionRemoteDataSourceImpl(this._client);
+  final SyncService _syncService;
+
+  GrabacionRemoteDataSourceImpl(this._client, this._syncService);
 
   @override
   Future<GrabacionEntity> subir(
@@ -17,17 +21,27 @@ class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
     int? duracionSegundos,
     int? proyectoId,
   }) async {
-    final data = await _client.postMultipart(
-      ApiConfig.grabaciones,
-      filePath: audioPath,
-      fileField: 'audio',
-      fields: {
-        if (duracionSegundos != null)
-          'duracion_segundos': '$duracionSegundos',
-        if (proyectoId != null) 'proyecto_id': '$proyectoId',
-      },
+    final localId = const Uuid().v4();
+    final fecha = DateTime.now().toUtc().toIso8601String();
+
+    await _syncService.queueAudio(
+      localId: localId,
+      audioPath: audioPath,
+      proyectoId: proyectoId ?? 0,
+      fechaGrabacion: fecha,
+      duracionSegundos: duracionSegundos,
     );
-    return GrabacionEntity.fromJson(data);
+
+    // Retorna una entidad simulada porque la subida es asíncrona
+    return GrabacionEntity(
+      id: 0,
+      usuarioId: 0,
+      proyectoId: proyectoId ?? 0,
+      audioUrl: '',
+      duracionSegundos: duracionSegundos,
+      estadoSincronizacion: 'pending',
+      fechaCreacion: DateTime.now(),
+    );
   }
 
   @override
@@ -46,12 +60,28 @@ class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
   }
 
   @override
-  Future<CalculoEntity> calcular(int grabacionId) async {
+  Future<CalculoEntity> calcular({int? grabacionId, String? texto}) async {
+    final body = <String, dynamic>{};
+    if (grabacionId != null) body['grabacion_id'] = grabacionId;
+    if (texto != null) body['texto'] = texto;
+
     final data = await _client.postJson(
       ApiConfig.cotizacionesCalculo,
-      {'grabacion_id': grabacionId},
+      body,
       auth: true,
     );
     return CalculoEntity.fromJson(data);
+  }
+
+  @override
+  Future<GrabacionEntity> actualizarTranscripcion(int id, String texto) async {
+    // _client might not have patchJson. Let me check if ApiClient has patchJson.
+    // Assuming yes, but if not I'll fix it later.
+    final data = await _client.patchJson(
+      ApiConfig.grabacionTranscripcion(id),
+      {'texto': texto},
+      auth: true,
+    );
+    return GrabacionEntity.fromJson(data);
   }
 }

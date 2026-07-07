@@ -45,6 +45,15 @@ class CalcularMetrosUseCase {
   final GrabacionRepository _repo;
   CalcularMetrosUseCase(this._repo);
 
-  Future<CalculoEntity> call({required int grabacionId}) =>
-      _repo.calcular(grabacionId: grabacionId);
+  Future<CalculoEntity> call({int? grabacionId, String? texto}) =>
+      _repo.calcular(grabacionId: grabacionId, texto: texto);
+}
+
+@injectable
+class ActualizarTranscripcionUseCase {
+  final GrabacionRepository _repo;
+  ActualizarTranscripcionUseCase(this._repo);
+
+  Future<GrabacionEntity> call(int id, String texto) =>
+      _repo.actualizarTranscripcion(id, texto);
 }

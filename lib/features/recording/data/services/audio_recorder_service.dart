@@ -40,6 +40,10 @@ class AudioRecorderService {
 
   Future<bool> isRecording() => _recorder.isRecording();
 
+  /// Stream para el visualizador de audio (ondas).
+  Stream<Amplitude> get onAmplitudeChanged => 
+      _recorder.onAmplitudeChanged(const Duration(milliseconds: 100));
+
   @disposeMethod
   Future<void> dispose() => _recorder.dispose();
 }

@@ -48,7 +48,10 @@ class _ParametersView extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   children: [
                     if (vm.grabacion?.tieneTranscripcion ?? false) ...[
-                      _TranscriptionCard(texto: vm.grabacion!.transcripcion!),
+                      _TranscriptionCard(
+                        textoOriginal: vm.grabacion!.transcripcion!,
+                        textoEditado: vm.textoEditado,
+                      ),
                       const SizedBox(height: 16),
                     ],
                     _SectionLabel('MEDIDAS DETECTADAS'),
@@ -64,6 +67,7 @@ class _ParametersView extends StatelessWidget {
                 ),
               ),
               _ConfirmButton(
+                grabacionId: vm.grabacion?.id,
                 proyectoId: vm.grabacion?.proyectoId,
                 pisoM2: calculo?.pisoM2,
                 paredesM2: calculo?.paredesM2,
@@ -175,9 +179,57 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-class _TranscriptionCard extends StatelessWidget {
-  final String texto;
-  const _TranscriptionCard({required this.texto});
+class _TranscriptionCard extends StatefulWidget {
+  final String textoOriginal;
+  final String? textoEditado;
+
+  const _TranscriptionCard({
+    required this.textoOriginal,
+    this.textoEditado,
+  });
+
+  @override
+  State<_TranscriptionCard> createState() => _TranscriptionCardState();
+}
+
+class _TranscriptionCardState extends State<_TranscriptionCard> {
+  late TextEditingController _controller;
+  bool _showRecalcular = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        TextEditingController(text: widget.textoEditado ?? widget.textoOriginal);
+    _controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant _TranscriptionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newText = widget.textoEditado ?? widget.textoOriginal;
+    if (newText != (oldWidget.textoEditado ?? oldWidget.textoOriginal)) {
+      if (_controller.text != newText) {
+        _controller.text = newText;
+      }
+    }
+  }
+
+  void _onTextChanged() {
+    final currentText = widget.textoEditado ?? widget.textoOriginal;
+    final changed = _controller.text.trim() != currentText.trim();
+    if (_showRecalcular != changed) {
+      setState(() {
+        _showRecalcular = changed;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -191,16 +243,45 @@ class _TranscriptionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionLabel('LO QUE DIJISTE'),
+          _SectionLabel('LO QUE DIJISTE (toca para editar)'),
           const SizedBox(height: 10),
-          Text(
-            '"$texto"',
+          TextField(
+            controller: _controller,
+            maxLines: null,
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.textPrimary,
               height: 1.6,
             ),
+            decoration: const InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+              border: InputBorder.none,
+            ),
           ),
+          if (_showRecalcular) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  context
+                      .read<ParametersViewModel>()
+                      .recalcular(_controller.text);
+                },
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Recalcular'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -353,10 +434,12 @@ class _ErrorView extends StatelessWidget {
 }
 
 class _ConfirmButton extends StatelessWidget {
+  final int? grabacionId;
   final int? proyectoId;
   final double? pisoM2;
   final double? paredesM2;
   const _ConfirmButton({
+    required this.grabacionId,
     required this.proyectoId,
     required this.pisoM2,
     required this.paredesM2,
@@ -374,16 +457,24 @@ class _ConfirmButton extends StatelessWidget {
         height: 52,
         child: ElevatedButton(
           onPressed: enabled
-              ? () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => NearbyStoresScreen(
-                        proyectoId: proyectoId!,
-                        pisoM2: pisoM2,
-                        paredesM2: paredesM2,
+              ? () async {
+                  final vm = context.read<ParametersViewModel>();
+                  if (grabacionId != null) {
+                    await vm.guardarEdicion(grabacionId!);
+                  }
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => NearbyStoresScreen(
+                          proyectoId: proyectoId!,
+                          pisoM2: pisoM2,
+                          paredesM2: paredesM2,
+                        ),
                       ),
-                    ),
-                  )
+                    );
+                  }
+                }
               : null,
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,

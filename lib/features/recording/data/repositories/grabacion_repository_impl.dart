@@ -29,6 +29,10 @@ class GrabacionRepositoryImpl implements GrabacionRepository {
   Future<List<GrabacionEntity>> historial() => _remote.historial();
 
   @override
-  Future<CalculoEntity> calcular({required int grabacionId}) =>
-      _remote.calcular(grabacionId);
+  Future<CalculoEntity> calcular({int? grabacionId, String? texto}) =>
+      _remote.calcular(grabacionId: grabacionId, texto: texto);
+
+  @override
+  Future<GrabacionEntity> actualizarTranscripcion(int id, String texto) =>
+      _remote.actualizarTranscripcion(id, texto);
 }

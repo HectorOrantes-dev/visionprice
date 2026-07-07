@@ -59,6 +59,19 @@ class ApiClient {
     return data is Map<String, dynamic> ? data : <String, dynamic>{};
   }
 
+  Future<Map<String, dynamic>> patchJson(
+    String path,
+    Map<String, dynamic> body, {
+    bool auth = false,
+  }) async {
+    final data = await _send(() => _client.patch(
+          _uri(path),
+          headers: _headers(auth: auth),
+          body: jsonEncode(body),
+        ));
+    return data is Map<String, dynamic> ? data : <String, dynamic>{};
+  }
+
   Future<Map<String, dynamic>> getJson(
     String path, {
     Map<String, dynamic>? query,

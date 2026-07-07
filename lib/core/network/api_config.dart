@@ -39,6 +39,7 @@ class ApiConfig {
   // --- Grabaciones (flujo de audio del maestro de obra) ---
   static const String grabaciones = '$apiPrefix/grabaciones';
   static String grabacion(int id) => '$apiPrefix/grabaciones/$id';
+  static String grabacionTranscripcion(int id) => '$apiPrefix/grabaciones/$id/transcripcion';
 
   // --- Cotizaciones ---
   static const String cotizacionesCalculo = '$apiPrefix/cotizaciones/calculo';

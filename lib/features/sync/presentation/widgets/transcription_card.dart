@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import 'processing_section_label.dart';
 
 /// Tarjeta con la transcripción del audio (o su carga). Antes `_TranscriptionCard`.
-class TranscriptionCard extends StatelessWidget {
+class TranscriptionCard extends StatefulWidget {
   final String? transcripcion;
   final bool loading;
   const TranscriptionCard({
@@ -12,6 +13,52 @@ class TranscriptionCard extends StatelessWidget {
     this.transcripcion,
     required this.loading,
   });
+
+  @override
+  State<TranscriptionCard> createState() => _TranscriptionCardState();
+}
+
+class _TranscriptionCardState extends State<TranscriptionCard> {
+  Timer? _timer;
+  int _progress = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.loading) {
+      _startTimer();
+    }
+  }
+
+  @override
+  void didUpdateWidget(TranscriptionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.loading && !oldWidget.loading) {
+      _startTimer();
+    } else if (!widget.loading && oldWidget.loading) {
+      _timer?.cancel();
+    }
+  }
+
+  void _startTimer() {
+    _progress = 10;
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(milliseconds: 1500), (timer) {
+      if (!mounted) return;
+      setState(() {
+        if (_progress < 95) {
+          _progress += 10; // Aumenta 10% cada 1.5s
+          if (_progress > 95) _progress = 95;
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,30 +74,48 @@ class TranscriptionCard extends StatelessWidget {
         children: [
           const ProcessingSectionLabel('TRANSCRIPCIÓN DEL AUDIO'),
           const SizedBox(height: 12),
-          if (loading)
-            Row(
+          if (widget.loading)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2, color: AppColors.primary),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Transcribiendo...',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      '$_progress%',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                Text(
-                  'Esperando transcripción...',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: _progress / 100,
+                    backgroundColor: AppColors.border,
+                    color: AppColors.primary,
+                    minHeight: 8,
                   ),
                 ),
               ],
             )
           else
             Text(
-              transcripcion == null || transcripcion!.isEmpty
+              widget.transcripcion == null || widget.transcripcion!.isEmpty
                   ? 'Sin transcripción'
-                  : '"$transcripcion"',
+                  : '"${widget.transcripcion}"',
               style: const TextStyle(
                 fontSize: 14,
                 color: AppColors.textPrimary,

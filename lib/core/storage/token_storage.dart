@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 
@@ -11,7 +12,7 @@ import 'package:injectable/injectable.dart';
 /// Mantiene además una copia en memoria ([_token]) para acceso síncrono desde
 /// el [ApiClient] al construir el header `Authorization`.
 @lazySingleton
-class TokenStorage {
+class TokenStorage extends ChangeNotifier {
   static const _kKey = 'access_token';
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -26,15 +27,18 @@ class TokenStorage {
   /// (antes de decidir si mostrar login o home).
   Future<void> load() async {
     _token = await _storage.read(key: _kKey);
+    notifyListeners();
   }
 
   Future<void> saveToken(String token) async {
     _token = token;
     await _storage.write(key: _kKey, value: token);
+    notifyListeners();
   }
 
   Future<void> clear() async {
     _token = null;
     await _storage.delete(key: _kKey);
+    notifyListeners();
   }
 }

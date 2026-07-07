@@ -16,6 +16,7 @@ import '../../../account/presentation/screens/subscriptions_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
 import '../providers/home_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +27,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _requestLocationPermission();
+  }
+
+  Future<void> _requestLocationPermission() async {
+    await Permission.location.request();
+  }
 
   final List<Widget> _pages = const [
     _DashboardTab(),

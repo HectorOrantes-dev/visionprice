@@ -8,4 +8,7 @@ enum SecurityStatus {
 
   /// Permisos de ubicación denegados o servicio de ubicación apagado.
   permissionDenied,
+
+  /// Se detectó depuración por USB activa.
+  usbDebuggingDetected,
 }
