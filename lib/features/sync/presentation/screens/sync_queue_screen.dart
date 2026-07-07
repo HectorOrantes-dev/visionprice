@@ -4,7 +4,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../services/sync_service.dart';
+import '../../services/sync_service.dart';
 
 class SyncQueueScreen extends StatelessWidget {
   const SyncQueueScreen({super.key});

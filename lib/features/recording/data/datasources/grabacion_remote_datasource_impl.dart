@@ -35,12 +35,10 @@ class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
     // Retorna una entidad simulada porque la subida es asíncrona
     return GrabacionEntity(
       id: 0,
-      usuarioId: 0,
-      proyectoId: proyectoId ?? 0,
-      audioUrl: '',
+      proyectoId: proyectoId,
+      estado: 'pending',
       duracionSegundos: duracionSegundos,
-      estadoSincronizacion: 'pending',
-      fechaCreacion: DateTime.now(),
+      fechaGrabacion: fecha,
     );
   }
 
