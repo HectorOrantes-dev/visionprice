@@ -34,7 +34,9 @@ class ParametersViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       _grabacion = await _obtener(grabacionId);
-      _calculo = await _calcular(grabacionId: grabacionId);
+      if (_grabacion?.superficies.isEmpty ?? true) {
+        _calculo = await _calcular(grabacionId: grabacionId);
+      }
     } catch (e) {
       _errorMessage =
           e is ApiException ? e.message : 'No se pudo calcular los metros.';

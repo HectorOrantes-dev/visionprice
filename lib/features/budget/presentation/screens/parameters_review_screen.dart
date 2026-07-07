@@ -56,7 +56,7 @@ class _ParametersView extends StatelessWidget {
                     ],
                     _SectionLabel('MEDIDAS DETECTADAS'),
                     const SizedBox(height: 8),
-                    ..._buildMetrics(calculo),
+                    ..._buildMetrics(vm),
                     if ((calculo?.advertencias ?? const []).isNotEmpty) ...[
                       const SizedBox(height: 16),
                       _SectionLabel('ADVERTENCIAS'),
@@ -71,6 +71,7 @@ class _ParametersView extends StatelessWidget {
                 proyectoId: vm.grabacion?.proyectoId,
                 pisoM2: calculo?.pisoM2,
                 paredesM2: calculo?.paredesM2,
+                superficies: vm.grabacion?.superficies,
               ),
             ],
           ],
@@ -79,7 +80,26 @@ class _ParametersView extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildMetrics(CalculoEntity? c) {
+  List<Widget> _buildMetrics(ParametersViewModel vm) {
+    final superficies = vm.grabacion?.superficies;
+    final c = vm.calculo;
+
+    if (superficies != null && superficies.isNotEmpty) {
+      return superficies.map((sup) {
+        return Column(
+          children: [
+            _MetricItem(
+              icon: sup.tipo == 'piso' ? Icons.layers_outlined : Icons.square_outlined,
+              title: sup.descripcion.isNotEmpty ? sup.descripcion : sup.tipo,
+              detail: '${sup.areaM2.toStringAsFixed(2)} m²',
+              highlight: true,
+            ),
+            const SizedBox(height: 8),
+          ],
+        );
+      }).toList();
+    }
+
     if (c == null) {
       return [
         const Text('Sin medidas calculadas',
@@ -438,18 +458,22 @@ class _ConfirmButton extends StatelessWidget {
   final int? proyectoId;
   final double? pisoM2;
   final double? paredesM2;
+  final List<SuperficieEntity>? superficies;
   const _ConfirmButton({
     required this.grabacionId,
     required this.proyectoId,
     required this.pisoM2,
     required this.paredesM2,
+    this.superficies,
   });
 
   @override
   Widget build(BuildContext context) {
     // Necesitamos el proyecto (obligatorio para crear la cotización) y al menos
     // una superficie calculada.
-    final enabled = proyectoId != null && (pisoM2 != null || paredesM2 != null);
+    final hasNewFormat = superficies != null && superficies!.isNotEmpty;
+    final hasLegacyFormat = pisoM2 != null || paredesM2 != null;
+    final enabled = proyectoId != null && (hasNewFormat || hasLegacyFormat);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: SizedBox(
@@ -470,6 +494,7 @@ class _ConfirmButton extends StatelessWidget {
                           proyectoId: proyectoId!,
                           pisoM2: pisoM2,
                           paredesM2: paredesM2,
+                          superficies: superficies,
                         ),
                       ),
                     );

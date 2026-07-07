@@ -26,10 +26,12 @@ class CotizacionRepositoryImpl implements CotizacionRepository {
     double? paredesM2,
     required List<ItemCotizacion> items,
   }) {
+    final bool usingNewFormat = items.any((item) => item.areaM2 != null);
+    
     return _remote.crear({
       'proyecto_id': proyectoId,
-      if (pisoM2 != null) 'piso_m2': pisoM2,
-      if (paredesM2 != null) 'paredes_m2': paredesM2,
+      if (!usingNewFormat && pisoM2 != null) 'piso_m2': pisoM2,
+      if (!usingNewFormat && paredesM2 != null) 'paredes_m2': paredesM2,
       'items': items.map((e) => e.toJson()).toList(),
     });
   }

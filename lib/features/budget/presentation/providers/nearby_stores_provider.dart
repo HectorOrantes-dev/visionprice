@@ -6,6 +6,7 @@ import '../../../../core/services/location_service.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../../domain/entities/producto_entity.dart';
 import '../../domain/usecases/cotizacion_usecases.dart';
+import '../../../recording/domain/entities/superficie_entity.dart';
 
 /// ViewModel de "Ferreterías cercanas": obtiene la ubicación, lista los
 /// productos cercanos y permite elegir a qué superficie (piso/paredes) se
@@ -31,27 +32,38 @@ class NearbyStoresViewModel extends ChangeNotifier {
   bool _usandoUbicacionAprox = false;
   String? _errorMessage;
   List<ProductoEntity> _productos = const [];
+  List<SuperficieEntity>? _superficies;
 
-  /// producto_id → 'piso' | 'paredes'
-  final Map<int, String> _seleccion = {};
+  /// Legacy: producto_id → 'piso' | 'paredes'
+  final Map<int, String> _seleccionLegacy = {};
+
+  /// Nuevo: SuperficieEntity → producto_id
+  final Map<SuperficieEntity, int> _seleccionNueva = {};
 
   bool get loading => _loading;
   bool get creating => _creating;
   bool get usandoUbicacionAprox => _usandoUbicacionAprox;
   String? get errorMessage => _errorMessage;
   List<ProductoEntity> get productos => _productos;
-  int get seleccionados => _seleccion.length;
+  List<SuperficieEntity>? get superficies => _superficies;
+  
+  int get seleccionados => _superficies != null && _superficies!.isNotEmpty 
+      ? _seleccionNueva.length 
+      : _seleccionLegacy.length;
 
-  String? aplicarDe(int productoId) => _seleccion[productoId];
+  bool isLegacySelected(int productoId, String aplicarA) => _seleccionLegacy[productoId] == aplicarA;
+  bool isNuevaSelected(int productoId, SuperficieEntity sup) => _seleccionNueva[sup] == productoId;
 
   Future<void> load({
     required int proyectoId,
     double? pisoM2,
     double? paredesM2,
+    List<SuperficieEntity>? superficies,
   }) async {
     _proyectoId = proyectoId;
     _pisoM2 = pisoM2;
     _paredesM2 = paredesM2;
+    _superficies = superficies;
     _loading = true;
     _errorMessage = null;
     notifyListeners();
@@ -70,33 +82,58 @@ class NearbyStoresViewModel extends ChangeNotifier {
     }
   }
 
-  /// Alterna la superficie de un producto. Pasar `null` lo quita de la
-  /// selección; 'piso' o 'paredes' lo incluye con esa superficie.
-  void setAplicar(int productoId, String? aplicarA) {
-    if (aplicarA == null) {
-      _seleccion.remove(productoId);
+  void toggleLegacy(int productoId, String aplicarA) {
+    if (_seleccionLegacy[productoId] == aplicarA) {
+      _seleccionLegacy.remove(productoId);
     } else {
-      _seleccion[productoId] = aplicarA;
+      _seleccionLegacy[productoId] = aplicarA;
     }
     notifyListeners();
   }
 
-  /// Crea la cotización con la selección actual.
+  void toggleNueva(int productoId, SuperficieEntity sup) {
+    if (_seleccionNueva[sup] == productoId) {
+      _seleccionNueva.remove(sup);
+    } else {
+      _seleccionNueva[sup] = productoId;
+    }
+    notifyListeners();
+  }
+
   Future<void> generar({
     required void Function(CotizacionEntity) onCreated,
   }) async {
-    if (_seleccion.isEmpty) {
-      _errorMessage = 'Selecciona al menos un producto (piso o paredes).';
-      notifyListeners();
-      return;
+    List<ItemCotizacion> items;
+    final usaNuevo = _superficies != null && _superficies!.isNotEmpty;
+
+    if (usaNuevo) {
+      if (_seleccionNueva.isEmpty) {
+        _errorMessage = 'Selecciona al menos un producto para una superficie.';
+        notifyListeners();
+        return;
+      }
+      items = _seleccionNueva.entries
+          .map((e) => ItemCotizacion(
+                productoId: e.value,
+                areaM2: e.key.areaM2,
+                descripcion: e.key.descripcion,
+              ))
+          .toList();
+    } else {
+      if (_seleccionLegacy.isEmpty) {
+        _errorMessage = 'Selecciona al menos un producto (piso o paredes).';
+        notifyListeners();
+        return;
+      }
+      items = _seleccionLegacy.entries
+          .map((e) => ItemCotizacion(productoId: e.key, aplicarA: e.value))
+          .toList();
     }
+
     _creating = true;
     _errorMessage = null;
     notifyListeners();
     try {
-      final items = _seleccion.entries
-          .map((e) => ItemCotizacion(productoId: e.key, aplicarA: e.value))
-          .toList();
       final cotizacion = await _crearCotizacion(
         proyectoId: _proyectoId,
         pisoM2: _pisoM2,

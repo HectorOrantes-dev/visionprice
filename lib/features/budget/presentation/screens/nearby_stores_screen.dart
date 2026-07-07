@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../recording/domain/entities/superficie_entity.dart';
 import '../../domain/entities/producto_entity.dart';
 import '../providers/nearby_stores_provider.dart';
 import 'budget_result_screen.dart';
@@ -10,19 +11,25 @@ class NearbyStoresScreen extends StatelessWidget {
   final int proyectoId;
   final double? pisoM2;
   final double? paredesM2;
+  final List<SuperficieEntity>? superficies;
 
   const NearbyStoresScreen({
     super.key,
     required this.proyectoId,
     this.pisoM2,
     this.paredesM2,
+    this.superficies,
   });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => getIt<NearbyStoresViewModel>()
-        ..load(proyectoId: proyectoId, pisoM2: pisoM2, paredesM2: paredesM2),
+        ..load(
+            proyectoId: proyectoId,
+            pisoM2: pisoM2,
+            paredesM2: paredesM2,
+            superficies: superficies),
       child: const _NearbyStoresView(),
     );
   }
@@ -124,7 +131,7 @@ class _StoresAppBar extends StatelessWidget {
                 ),
               ),
               Text(
-                '$count productos · elige piso o paredes',
+                '${count} productos · elige los adecuados',
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,
@@ -172,8 +179,15 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final aplicar = vm.aplicarDe(producto.productoId);
-    final selected = aplicar != null;
+    final usaNuevo = vm.superficies != null && vm.superficies!.isNotEmpty;
+    bool selected = false;
+    if (usaNuevo) {
+      selected = vm.superficies!.any((sup) => vm.isNuevaSelected(producto.productoId, sup));
+    } else {
+      selected = vm.isLegacySelected(producto.productoId, 'piso') || 
+                 vm.isLegacySelected(producto.productoId, 'paredes');
+    }
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -219,22 +233,31 @@ class _ProductCard extends StatelessWidget {
             style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              _SurfaceChip(
-                label: 'Piso',
-                selected: aplicar == 'piso',
-                onTap: () => vm.setAplicar(
-                    producto.productoId, aplicar == 'piso' ? null : 'piso'),
-              ),
-              const SizedBox(width: 8),
-              _SurfaceChip(
-                label: 'Paredes',
-                selected: aplicar == 'paredes',
-                onTap: () => vm.setAplicar(producto.productoId,
-                    aplicar == 'paredes' ? null : 'paredes'),
-              ),
-            ],
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: usaNuevo
+                ? vm.superficies!.map((sup) {
+                    final isSel = vm.isNuevaSelected(producto.productoId, sup);
+                    final label = sup.descripcion.isNotEmpty ? sup.descripcion : sup.tipo;
+                    return _SurfaceChip(
+                      label: label,
+                      selected: isSel,
+                      onTap: () => vm.toggleNueva(producto.productoId, sup),
+                    );
+                  }).toList()
+                : [
+                    _SurfaceChip(
+                      label: 'Piso',
+                      selected: vm.isLegacySelected(producto.productoId, 'piso'),
+                      onTap: () => vm.toggleLegacy(producto.productoId, 'piso'),
+                    ),
+                    _SurfaceChip(
+                      label: 'Paredes',
+                      selected: vm.isLegacySelected(producto.productoId, 'paredes'),
+                      onTap: () => vm.toggleLegacy(producto.productoId, 'paredes'),
+                    ),
+                  ],
           ),
         ],
       ),

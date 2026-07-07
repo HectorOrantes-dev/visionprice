@@ -1,3 +1,5 @@
+import 'superficie_entity.dart';
+
 /// Una grabación de audio y su estado de procesamiento ML en el back-end.
 /// Sirve tanto para la respuesta de subida (201, solo `id` + estado) como para
 /// el detalle (`GET /grabaciones/{id}`) que ya trae transcripción/extracción.
@@ -29,6 +31,19 @@ class GrabacionEntity {
   bool get isError => estado == 'error';
   bool get tieneTranscripcion =>
       transcripcion != null && transcripcion!.isNotEmpty;
+
+  bool get esMultiple =>
+      extraccion != null && extraccion!['es_multiple'] == true;
+
+  List<SuperficieEntity> get superficies {
+    if (extraccion == null || extraccion!['items'] == null) return [];
+    final items = extraccion!['items'];
+    if (items is! List) return [];
+    return items
+        .map((e) => e is Map<String, dynamic> ? SuperficieEntity.fromJson(e) : null)
+        .whereType<SuperficieEntity>()
+        .toList();
+  }
 
   factory GrabacionEntity.fromJson(Map<String, dynamic> json) {
     final confianza = json['confianza'];
