@@ -27,4 +27,12 @@ class ProyectoEntity {
           : int.tryParse('${json['total_presupuestos']}') ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nombre': nombre,
+        'direccion': direccion,
+        'estado': estado,
+        'total_presupuestos': totalPresupuestos,
+      };
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../sync/presentation/screens/processing_screen.dart';
 import '../providers/recording_provider.dart';
 import 'project_sheet.dart';
 

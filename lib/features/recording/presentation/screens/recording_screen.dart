@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/recording_provider.dart';
-import '../../../sync/presentation/screens/processing_screen.dart';
 import '../widgets/audio_visualizer.dart';
 
 class RecordingScreen extends StatelessWidget {

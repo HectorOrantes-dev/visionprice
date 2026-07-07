@@ -18,9 +18,40 @@ class LocalDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+      CREATE TABLE perfil (
+        id INTEGER PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        correo TEXT NOT NULL,
+        telefono TEXT NOT NULL,
+        rol TEXT NOT NULL,
+        activo INTEGER NOT NULL,
+        proveedor_auth TEXT NOT NULL,
+        fecha_registro TEXT,
+        plan_activo TEXT,
+        vigencia_hasta TEXT
+      );
+      ''');
+      
+      await db.execute('''
+      CREATE TABLE proyectos (
+        id INTEGER PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        direccion TEXT,
+        estado TEXT NOT NULL,
+        total_presupuestos INTEGER NOT NULL DEFAULT 0,
+        is_synced INTEGER NOT NULL DEFAULT 1
+      );
+      ''');
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -34,7 +65,29 @@ class LocalDatabase {
         estado TEXT NOT NULL,
         progreso REAL NOT NULL DEFAULT 0.0,
         api_id INTEGER
-      )
+      );
+      
+      CREATE TABLE perfil (
+        id INTEGER PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        correo TEXT NOT NULL,
+        telefono TEXT NOT NULL,
+        rol TEXT NOT NULL,
+        activo INTEGER NOT NULL,
+        proveedor_auth TEXT NOT NULL,
+        fecha_registro TEXT,
+        plan_activo TEXT,
+        vigencia_hasta TEXT
+      );
+
+      CREATE TABLE proyectos (
+        id INTEGER PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        direccion TEXT,
+        estado TEXT NOT NULL,
+        total_presupuestos INTEGER NOT NULL DEFAULT 0,
+        is_synced INTEGER NOT NULL DEFAULT 1
+      );
     ''');
   }
 }

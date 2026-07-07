@@ -13,7 +13,7 @@ class RoleDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<RegisterViewModel>();
     return DropdownButtonFormField<RoleEntity>(
-      value: vm.selectedRole,
+      initialValue: vm.selectedRole,
       isExpanded: true,
       decoration: InputDecoration(
         hintText: 'Selecciona tu rol',

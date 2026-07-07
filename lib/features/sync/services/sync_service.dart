@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../../../core/storage/token_storage.dart';
+import '../../../../core/storage/local_database.dart';
 import '../data/datasources/sync_local_datasource.dart';
 import '../domain/entities/sync_item_entity.dart';
 
@@ -14,6 +15,7 @@ class SyncService extends ChangeNotifier {
   final SyncLocalDataSource _localDS;
   final ApiClient _apiClient;
   final TokenStorage _tokenStorage;
+  final LocalDatabase _localDatabase;
   final Dio _dio;
 
   StreamSubscription? _connSub;
@@ -25,7 +27,7 @@ class SyncService extends ChangeNotifier {
   List<SyncItemEntity> _items = [];
   List<SyncItemEntity> get items => _items;
 
-  SyncService(this._localDS, this._apiClient, this._tokenStorage)
+  SyncService(this._localDS, this._apiClient, this._tokenStorage, this._localDatabase)
       : _dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl)) {
     _init();
   }
@@ -88,6 +90,8 @@ class SyncService extends ChangeNotifier {
     _isUploading = true;
 
     try {
+      await _syncPendingProjects();
+
       while (true) {
         final pending = await _localDS.getPendingItems();
         if (pending.isEmpty) break;
@@ -98,6 +102,48 @@ class SyncService extends ChangeNotifier {
       }
     } finally {
       _isUploading = false;
+    }
+  }
+
+  Future<void> _syncPendingProjects() async {
+    final db = await _localDatabase.database;
+    final pendingProjects = await db.query('proyectos', where: 'is_synced = ?', whereArgs: [0]);
+    
+    for (var p in pendingProjects) {
+      try {
+        final int oldId = p['id'] as int;
+        final String nombre = p['nombre'] as String;
+        final String? direccion = p['direccion'] as String?;
+        
+        final data = await _apiClient.postJson(
+          ApiConfig.proyectos,
+          {
+            'nombre': nombre,
+            if (direccion != null && direccion.isNotEmpty) 'direccion': direccion,
+          },
+          auth: true,
+        );
+        
+        final int newId = data['id'] as int;
+        
+        // Actualizar proyecto en local con su ID real y marcar como sincronizado
+        await db.update(
+          'proyectos',
+          {'id': newId, 'is_synced': 1},
+          where: 'id = ?',
+          whereArgs: [oldId],
+        );
+        
+        // Actualizar cualquier audio pendiente en sync_queue que apuntara a este proyecto offline
+        await db.update(
+          'sync_queue',
+          {'proyecto_id': newId},
+          where: 'proyecto_id = ?',
+          whereArgs: [oldId],
+        );
+      } catch (e) {
+        // Falló sincronización de este proyecto, intentar después
+      }
     }
   }
 

@@ -1,5 +1,7 @@
 import 'package:injectable/injectable.dart';
+import 'package:sqflite/sqflite.dart';
 
+import '../../../../core/storage/local_database.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../domain/entities/auth_session_entity.dart';
 import '../../domain/entities/perfil_entity.dart';
@@ -14,8 +16,9 @@ import '../datasources/auth_remote_datasource.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remote;
   final TokenStorage _tokenStorage;
+  final LocalDatabase _localDatabase;
 
-  AuthRepositoryImpl(this._remote, this._tokenStorage);
+  AuthRepositoryImpl(this._remote, this._tokenStorage, this._localDatabase);
 
   /// Caché en memoria del perfil. Como este repositorio es `@LazySingleton`,
   /// vive toda la sesión: el perfil se pide UNA vez a la red y luego se
@@ -111,9 +114,29 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<PerfilEntity> getPerfil({bool forceRefresh = false}) async {
     if (!forceRefresh && _perfilCache != null) return _perfilCache!;
-    final perfil = await _remote.getPerfil();
-    _perfilCache = perfil;
-    return perfil;
+    try {
+      final perfil = await _remote.getPerfil();
+      _perfilCache = perfil;
+      
+      // Guardar en la base de datos local para modo offline
+      final db = await _localDatabase.database;
+      // Requerimos importar sqflite pero como local_database ya lo encapsula...
+      // vamos a usar sqflite aquí. Ojo: Necesito importar sqflite arriba.
+      await db.insert('perfil', perfil.toJson(), conflictAlgorithm: ConflictAlgorithm.replace);
+      
+      return perfil;
+    } catch (e) {
+      // Si falla (por falta de red), intentar recuperar de local
+      final db = await _localDatabase.database;
+      final maps = await db.query('perfil', limit: 1);
+      if (maps.isNotEmpty) {
+        final perfil = PerfilEntity.fromJson(maps.first);
+        _perfilCache = perfil;
+        return perfil;
+      }
+      // Si no hay local, relanzar el error
+      rethrow;
+    }
   }
 
   @override
