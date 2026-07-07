@@ -1,5 +1,3 @@
-import 'package:device_preview/device_preview.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'core/di/injector.dart';
 import 'core/storage/token_storage.dart';
@@ -19,12 +17,6 @@ void main() async {
   if (getIt<TokenStorage>().hasToken) {
     getIt<DeviceRegistrar>().register();
   }
-  // DevicePreview solo en debug: permite ver la app en distintos dispositivos
-  // y orientaciones sin recompilar. En release corre la App directamente.
-  runApp(
-    DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (_) => const App(),
-    ),
-  );
+  // En release corre la App directamente.
+  runApp(const App());
 }
