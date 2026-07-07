@@ -15,11 +15,18 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
 
   @override
   Future<List<ProyectoEntity>> listar() async {
+    final db = await _localDatabase.database;
+    final locales = await _leerProyectosLocales(db);
+    
+    // Si ya tenemos proyectos locales, los retornamos sin llamar al back-end.
+    // Solo hace la petición si está vacío.
+    if (locales.isNotEmpty) {
+      return locales;
+    }
+    
     try {
       final proyectos = await _remote.listar();
       // Guardar en la base de datos local
-      final db = await _localDatabase.database;
-      // Actualizamos los sincronizados. OJO: No borramos los is_synced = 0
       final batch = db.batch();
       for (var p in proyectos) {
         final map = p.toJson();
@@ -32,8 +39,7 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
       return await _leerProyectosLocales(db);
     } catch (e) {
       // Offline fallback
-      final db = await _localDatabase.database;
-      return await _leerProyectosLocales(db);
+      return locales;
     }
   }
   

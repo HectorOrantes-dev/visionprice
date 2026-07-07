@@ -196,15 +196,6 @@ class _ProjectsSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (vm.loading && vm.proyectos.isEmpty) {
-      return const SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 40),
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      );
-    }
-
     if (vm.error != null && vm.proyectos.isEmpty) {
       return SliverToBoxAdapter(
         child: Padding(
