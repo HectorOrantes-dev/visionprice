@@ -23,10 +23,13 @@ class App extends StatelessWidget {
           title: 'VisionPrice',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
-          // El gateway de seguridad (RASP + Fake GPS) protege la entrada.
-          home: SecurityGateway(
-            child: loggedIn ? const HomeScreen() : const LoginScreen(),
-          ),
+          // El gateway de seguridad envuelve toda la navegación de la app.
+          builder: (context, child) {
+            return SecurityGateway(
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
+          home: loggedIn ? const HomeScreen() : const LoginScreen(),
         );
       },
     );
