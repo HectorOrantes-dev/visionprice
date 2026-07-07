@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
@@ -34,6 +35,10 @@ class NearbyStoresViewModel extends ChangeNotifier {
   List<ProductoEntity> _productos = const [];
   List<SuperficieEntity>? _superficies;
 
+  LatLng? _lastFetchPosition;
+  StreamSubscription<LatLng>? _locationSub;
+  bool _showUpdatePrompt = false;
+
   /// Legacy: producto_id → 'piso' | 'paredes'
   final Map<int, String> _seleccionLegacy = {};
 
@@ -46,6 +51,7 @@ class NearbyStoresViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   List<ProductoEntity> get productos => _productos;
   List<SuperficieEntity>? get superficies => _superficies;
+  bool get showUpdatePrompt => _showUpdatePrompt;
   
   int get seleccionados => _superficies != null && _superficies!.isNotEmpty 
       ? _seleccionNueva.length 
@@ -53,6 +59,12 @@ class NearbyStoresViewModel extends ChangeNotifier {
 
   bool isLegacySelected(int productoId, String aplicarA) => _seleccionLegacy[productoId] == aplicarA;
   bool isNuevaSelected(int productoId, SuperficieEntity sup) => _seleccionNueva[sup] == productoId;
+
+  @override
+  void dispose() {
+    _locationSub?.cancel();
+    super.dispose();
+  }
 
   Future<void> load({
     required int proyectoId,
@@ -69,6 +81,7 @@ class NearbyStoresViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       final ubic = await _location.current();
+      _lastFetchPosition = ubic;
       _usandoUbicacionAprox = ubic == null;
       final pos = ubic ?? LocationService.fallback;
       _productos = await _obtenerProductos(lat: pos.lat, lng: pos.lng);
@@ -76,6 +89,43 @@ class NearbyStoresViewModel extends ChangeNotifier {
       _errorMessage = e is ApiException
           ? e.message
           : 'No se pudieron cargar las ferreterías.';
+    } finally {
+      _loading = false;
+      notifyListeners();
+      _listenLocation();
+    }
+  }
+
+  void _listenLocation() {
+    _locationSub?.cancel();
+    final stream = _location.getPositionStream();
+    if (stream == null) return;
+    _locationSub = stream.listen((newPos) {
+      if (_lastFetchPosition != null) {
+        final dist = _location.distanceBetween(_lastFetchPosition!, newPos);
+        if (dist > 500 && !_showUpdatePrompt) {
+          _showUpdatePrompt = true;
+          notifyListeners();
+        }
+      }
+    });
+  }
+
+  Future<void> refetchLocation() async {
+    _showUpdatePrompt = false;
+    _loading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final ubic = await _location.current();
+      _lastFetchPosition = ubic;
+      _usandoUbicacionAprox = ubic == null;
+      final pos = ubic ?? LocationService.fallback;
+      _productos = await _obtenerProductos(lat: pos.lat, lng: pos.lng);
+    } catch (e) {
+      _errorMessage = e is ApiException
+          ? e.message
+          : 'No se pudo actualizar la ubicación.';
     } finally {
       _loading = false;
       notifyListeners();

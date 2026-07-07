@@ -52,7 +52,36 @@ class _NearbyStoresView extends StatelessWidget {
               _ApproxLocationBanner(),
             const SizedBox(height: 8),
             Expanded(
-              child: _body(context, vm),
+              child: Stack(
+                children: [
+                  _body(context, vm),
+                  if (vm.showUpdatePrompt)
+                    Positioned(
+                      top: 12,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: ElevatedButton.icon(
+                          onPressed: vm.refetchLocation,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 4,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          icon: const Icon(Icons.my_location, size: 18),
+                          label: const Text(
+                            'Buscar en esta zona',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
             if (!vm.loading && vm.productos.isNotEmpty)
               _GenerateBar(vm: vm),

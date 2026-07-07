@@ -13,8 +13,15 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final aplicar = vm.aplicarDe(producto.productoId);
-    final selected = aplicar != null;
+    final usaNuevo = vm.superficies != null && vm.superficies!.isNotEmpty;
+    bool selected = false;
+    if (usaNuevo) {
+      selected = vm.superficies!.any((sup) => vm.isNuevaSelected(producto.productoId, sup));
+    } else {
+      selected = vm.isLegacySelected(producto.productoId, 'piso') || 
+                 vm.isLegacySelected(producto.productoId, 'paredes');
+    }
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -60,22 +67,31 @@ class ProductCard extends StatelessWidget {
             style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              SurfaceChip(
-                label: 'Piso',
-                selected: aplicar == 'piso',
-                onTap: () => vm.setAplicar(
-                    producto.productoId, aplicar == 'piso' ? null : 'piso'),
-              ),
-              const SizedBox(width: 8),
-              SurfaceChip(
-                label: 'Paredes',
-                selected: aplicar == 'paredes',
-                onTap: () => vm.setAplicar(producto.productoId,
-                    aplicar == 'paredes' ? null : 'paredes'),
-              ),
-            ],
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: usaNuevo
+                ? vm.superficies!.map((sup) {
+                    final isSel = vm.isNuevaSelected(producto.productoId, sup);
+                    final label = sup.descripcion.isNotEmpty ? sup.descripcion : sup.tipo;
+                    return SurfaceChip(
+                      label: label,
+                      selected: isSel,
+                      onTap: () => vm.toggleNueva(producto.productoId, sup),
+                    );
+                  }).toList()
+                : [
+                    SurfaceChip(
+                      label: 'Piso',
+                      selected: vm.isLegacySelected(producto.productoId, 'piso'),
+                      onTap: () => vm.toggleLegacy(producto.productoId, 'piso'),
+                    ),
+                    SurfaceChip(
+                      label: 'Paredes',
+                      selected: vm.isLegacySelected(producto.productoId, 'paredes'),
+                      onTap: () => vm.toggleLegacy(producto.productoId, 'paredes'),
+                    ),
+                  ],
           ),
         ],
       ),
