@@ -25,30 +25,36 @@ class SyncLocalDataSource {
 
   Future<List<SyncItemEntity>> getAllItems() async {
     final db = await _localDb.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'sync_queue',
-      orderBy: 'fecha_grabacion DESC',
-    );
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT s.*, p.nombre as proyecto_nombre 
+      FROM sync_queue s 
+      LEFT JOIN proyectos p ON s.proyecto_id = p.id 
+      ORDER BY s.fecha_grabacion DESC
+    ''');
     return maps.map((e) => SyncItemEntity.fromMap(e)).toList();
   }
 
   Future<List<SyncItemEntity>> getPendingItems() async {
     final db = await _localDb.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'sync_queue',
-      where: "estado = 'pending' OR estado = 'error'",
-      orderBy: 'fecha_grabacion ASC',
-    );
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT s.*, p.nombre as proyecto_nombre 
+      FROM sync_queue s 
+      LEFT JOIN proyectos p ON s.proyecto_id = p.id 
+      WHERE s.estado = 'pending' OR s.estado = 'error'
+      ORDER BY s.fecha_grabacion ASC
+    ''');
     return maps.map((e) => SyncItemEntity.fromMap(e)).toList();
   }
 
   Future<List<SyncItemEntity>> getProcessingItems() async {
     final db = await _localDb.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'sync_queue',
-      where: "estado = 'processing'",
-      orderBy: 'fecha_grabacion ASC',
-    );
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT s.*, p.nombre as proyecto_nombre 
+      FROM sync_queue s 
+      LEFT JOIN proyectos p ON s.proyecto_id = p.id 
+      WHERE s.estado = 'processing'
+      ORDER BY s.fecha_grabacion ASC
+    ''');
     return maps.map((e) => SyncItemEntity.fromMap(e)).toList();
   }
 

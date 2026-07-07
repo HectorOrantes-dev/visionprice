@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../budget/presentation/screens/parameters_review_screen.dart';
 import '../../services/sync_service.dart';
 
 class SyncQueueScreen extends StatelessWidget {
@@ -67,12 +68,24 @@ class SyncQueueScreen extends StatelessWidget {
                                     }
                                     
                                     return _SyncItem(
-                                      name: p.basename(item.audioPath),
+                                      name: 'Grabación para ${item.proyectoNombre ?? 'Proyecto Desconocido'}',
                                       duration: durationStr,
                                       date: dateStr,
                                       time: timeStr,
                                       status: status,
                                       progress: item.progreso,
+                                      onTap: status == _SyncStatus.ready && item.apiId != null
+                                          ? () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => ParametersReviewScreen(
+                                                    grabacionId: item.apiId!,
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          : null,
                                     );
                                   },
                                 ),
@@ -234,6 +247,7 @@ class _SyncItem extends StatelessWidget {
   final String time;
   final _SyncStatus status;
   final double? progress;
+  final VoidCallback? onTap;
 
   const _SyncItem({
     required this.name,
@@ -242,11 +256,13 @@ class _SyncItem extends StatelessWidget {
     required this.time,
     required this.status,
     this.progress,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
@@ -303,6 +319,24 @@ class _SyncItem extends StatelessWidget {
                   color: AppColors.primary,
                   minHeight: 4,
                 ),
+              ),
+            ],
+            if (onTap != null) ...[
+              const SizedBox(height: 10),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Ver transcripción y resultado',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.primary),
+                ],
               ),
             ],
           ],
