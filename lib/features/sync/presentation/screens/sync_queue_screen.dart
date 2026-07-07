@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart' as p;
 
 import '../../../../core/di/injector.dart';
 import '../../../../core/theme/app_theme.dart';
