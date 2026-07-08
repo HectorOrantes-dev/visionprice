@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_client.dart';
@@ -24,6 +25,17 @@ class CotizacionRemoteDataSourceImpl implements CotizacionRemoteDataSource {
         if (categoria != null) 'categoria': categoria,
       },
     );
+    // Diagnóstico (solo debug): imprime el JSON crudo tal como llega al
+    // dispositivo, para verificar la clave/URL real de la imagen (punto 3).
+    if (kDebugMode) {
+      debugPrint('🛰️ /cotizaciones/productos → ${data.length} productos');
+      final first = data.whereType<Map<String, dynamic>>().firstOrNull;
+      if (first != null) {
+        debugPrint('   claves: ${first.keys.toList()}');
+        debugPrint('   image_url crudo: ${first['image_url']}');
+      }
+    }
+
     return data
         .whereType<Map<String, dynamic>>()
         .map(ProductoEntity.fromJson)
