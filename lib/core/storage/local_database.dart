@@ -18,45 +18,25 @@ class LocalDatabase {
 
     return await openDatabase(
       path,
-      version: 2,
-      onCreate: _createDB,
-      onUpgrade: _upgradeDB,
+      // v3: repara instalaciones donde faltaban las tablas `perfil`/`proyectos`
+      // (el `_createDB` antiguo metía varios CREATE en un solo execute() y
+      // sqflite solo ejecuta la PRIMERA sentencia → solo se creaba sync_queue).
+      version: 3,
+      onCreate: (db, version) => _createAllTables(db),
+      onUpgrade: (db, oldVersion, newVersion) => _createAllTables(db),
     );
   }
 
-  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute('''
-      CREATE TABLE perfil (
-        id INTEGER PRIMARY KEY,
-        nombre TEXT NOT NULL,
-        correo TEXT NOT NULL,
-        telefono TEXT NOT NULL,
-        rol TEXT NOT NULL,
-        activo INTEGER NOT NULL,
-        proveedor_auth TEXT NOT NULL,
-        fecha_registro TEXT,
-        plan_activo TEXT,
-        vigencia_hasta TEXT
-      );
-      ''');
-      
-      await db.execute('''
-      CREATE TABLE proyectos (
-        id INTEGER PRIMARY KEY,
-        nombre TEXT NOT NULL,
-        direccion TEXT,
-        estado TEXT NOT NULL,
-        total_presupuestos INTEGER NOT NULL DEFAULT 0,
-        is_synced INTEGER NOT NULL DEFAULT 1
-      );
-      ''');
-    }
-  }
-
-  Future<void> _createDB(Database db, int version) async {
+  /// Crea TODAS las tablas de forma idempotente. Se usa tanto en `onCreate`
+  /// (instalación limpia) como en `onUpgrade` (repara BDs viejas a las que les
+  /// falten tablas), sin borrar datos existentes gracias a `IF NOT EXISTS`.
+  ///
+  /// IMPORTANTE: cada `CREATE TABLE` va en su PROPIO `execute()` — sqflite solo
+  /// ejecuta una sentencia por llamada; varias separadas por `;` hacen que solo
+  /// corra la primera (ese era el bug que dejaba sin `proyectos`/`perfil`).
+  Future<void> _createAllTables(Database db) async {
     await db.execute('''
-      CREATE TABLE sync_queue (
+      CREATE TABLE IF NOT EXISTS sync_queue (
         local_id TEXT PRIMARY KEY,
         audio_path TEXT NOT NULL,
         proyecto_id INTEGER NOT NULL,
@@ -66,8 +46,10 @@ class LocalDatabase {
         progreso REAL NOT NULL DEFAULT 0.0,
         api_id INTEGER
       );
-      
-      CREATE TABLE perfil (
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS perfil (
         id INTEGER PRIMARY KEY,
         nombre TEXT NOT NULL,
         correo TEXT NOT NULL,
@@ -79,8 +61,10 @@ class LocalDatabase {
         plan_activo TEXT,
         vigencia_hasta TEXT
       );
+    ''');
 
-      CREATE TABLE proyectos (
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS proyectos (
         id INTEGER PRIMARY KEY,
         nombre TEXT NOT NULL,
         direccion TEXT,

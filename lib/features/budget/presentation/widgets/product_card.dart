@@ -42,25 +42,45 @@ class ProductCard extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 12),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: producto.imageUrl != null && producto.imageUrl!.isNotEmpty
+                  child: producto.imageUrl != null &&
+                          producto.imageUrl!.isNotEmpty
                       ? Image.network(
                           producto.imageUrl!,
                           width: 60,
                           height: 60,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                              width: 60,
+                              height: 60,
+                              color: AppColors.surfaceVariant,
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2),
+                                ),
+                              ),
+                            );
+                          },
+                          // Falló la descarga (red/cert/CORS en web): ícono roto.
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
                             width: 60,
                             height: 60,
                             color: AppColors.surfaceVariant,
-                            child: const Icon(Icons.image_not_supported,
+                            child: const Icon(Icons.broken_image_outlined,
                                 color: AppColors.textSecondary),
                           ),
                         )
+                      // Sin URL de imagen en el JSON: ícono distinto.
                       : Container(
                           width: 60,
                           height: 60,
                           color: AppColors.surfaceVariant,
-                          child: const Icon(Icons.image_not_supported,
+                          child: const Icon(Icons.image_not_supported_outlined,
                               color: AppColors.textSecondary),
                         ),
                 ),
