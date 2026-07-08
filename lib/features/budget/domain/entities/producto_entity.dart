@@ -13,6 +13,9 @@ class ProductoEntity {
   final int? proveedorId;
   final String? proveedorNombre;
   final double? distanciaKm;
+  final double? proveedorLat;
+  final double? proveedorLng;
+  final String? imageUrl;
 
   const ProductoEntity({
     required this.productoId,
@@ -27,6 +30,9 @@ class ProductoEntity {
     this.proveedorId,
     this.proveedorNombre,
     this.distanciaKm,
+    this.proveedorLat,
+    this.proveedorLng,
+    this.imageUrl,
   });
 
   factory ProductoEntity.fromJson(Map<String, dynamic> json) {
@@ -48,6 +54,9 @@ class ProductoEntity {
       proveedorId: prov != null ? i(prov['proveedor_id']) : i(json['proveedor_id']),
       proveedorNombre: prov != null ? prov['nombre']?.toString() : json['proveedor_nombre']?.toString(),
       distanciaKm: prov != null ? d(prov['distancia_km']) : d(json['distancia_km']),
+      proveedorLat: prov != null ? d(prov['lat']) : d(json['proveedor_lat']),
+      proveedorLng: prov != null ? d(prov['lng']) : d(json['proveedor_lng']),
+      imageUrl: (json['image_url'] ?? '').toString().isNotEmpty ? json['image_url'].toString() : null,
     );
   }
 }

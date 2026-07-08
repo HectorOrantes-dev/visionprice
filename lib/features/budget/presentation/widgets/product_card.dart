@@ -36,35 +36,77 @@ class ProductCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  producto.nombre,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: producto.imageUrl != null && producto.imageUrl!.isNotEmpty
+                      ? Image.network(
+                          producto.imageUrl!,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            width: 60,
+                            height: 60,
+                            color: AppColors.surfaceVariant,
+                            child: const Icon(Icons.image_not_supported,
+                                color: AppColors.textSecondary),
+                          ),
+                        )
+                      : Container(
+                          width: 60,
+                          height: 60,
+                          color: AppColors.surfaceVariant,
+                          child: const Icon(Icons.image_not_supported,
+                              color: AppColors.textSecondary),
+                        ),
                 ),
               ),
-              Text(
-                '\$${producto.precioUnitario.toStringAsFixed(2)}/${producto.unidad}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            producto.nombre,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '\$${producto.precioUnitario.toStringAsFixed(2)}/${producto.unidad}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      [
+                        producto.proveedorNombre ?? producto.categoria,
+                        if (producto.distanciaKm != null)
+                          '${producto.distanciaKm!.toStringAsFixed(1)} km',
+                      ].join(' · '),
+                      style: const TextStyle(
+                          fontSize: 12, color: AppColors.textSecondary),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            [
-              producto.proveedorNombre ?? producto.categoria,
-              if (producto.distanciaKm != null)
-                '${producto.distanciaKm!.toStringAsFixed(1)} km',
-            ].join(' · '),
-            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 10),
           Wrap(
