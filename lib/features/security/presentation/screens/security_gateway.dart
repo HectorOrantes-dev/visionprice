@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../rasp_checker.dart';
 import '../../security_checker.dart';
@@ -30,10 +29,9 @@ class _SecurityGatewayState extends State<SecurityGateway>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _runRaspCheck();
       SecurityChecker.enableScreenProtection();
     });
-    _runSecurityCheck();
+    _runChecks();
   }
 
   @override
@@ -45,31 +43,35 @@ class _SecurityGatewayState extends State<SecurityGateway>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _runRaspCheck();
-      _runSecurityCheck(showLoading: false);
+      _runChecks(showLoading: false);
     }
   }
 
-  Future<void> _runRaspCheck() async {
+  /// Verifica primero la Depuración USB (lectura nativa, INSTANTÁNEA) y hace
+  /// corto-circuito: si está activa, bloquea de inmediato sin esperar el chequeo
+  /// de Fake GPS, que es lento (pide una ubicación fresca, hasta 10 s).
+  Future<void> _runChecks({bool showLoading = true}) async {
+    if (showLoading && mounted) setState(() => _isLoading = true);
+
+    // 1. USB primero (rápido).
     final bool usbOn = await RaspChecker.isUsbDebuggingEnabled();
     if (!mounted) return;
-
-    if (_isUsbDebuggingActive != usbOn) {
+    if (usbOn) {
       setState(() {
-        _isUsbDebuggingActive = usbOn;
-      });
-    }
-  }
-
-  Future<void> _runSecurityCheck({bool showLoading = true}) async {
-    if (showLoading) setState(() => _isLoading = true);
-    final status = await SecurityChecker.checkDeviceSecurity();
-    if (mounted) {
-      setState(() {
-        _securityStatus = status;
+        _isUsbDebuggingActive = true;
         _isLoading = false;
       });
+      return;
     }
+
+    // 2. USB ok → recién ahora el chequeo de ubicación (lento).
+    final SecurityStatus status = await SecurityChecker.checkDeviceSecurity();
+    if (!mounted) return;
+    setState(() {
+      _isUsbDebuggingActive = false;
+      _securityStatus = status;
+      _isLoading = false;
+    });
   }
 
   @override
@@ -100,7 +102,7 @@ class _SecurityGatewayState extends State<SecurityGateway>
     if (_isUsbDebuggingActive) {
       return SecurityBlockedScreen(
         status: SecurityStatus.usbDebuggingDetected,
-        onRetrySuccess: () => _runRaspCheck(),
+        onRetrySuccess: () => _runChecks(),
       );
     }
 
@@ -110,7 +112,7 @@ class _SecurityGatewayState extends State<SecurityGateway>
 
     return SecurityBlockedScreen(
       status: _securityStatus!,
-      onRetrySuccess: () => _runSecurityCheck(),
+      onRetrySuccess: () => _runChecks(),
     );
   }
 }

@@ -27,15 +27,17 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
     if (_isVerifying) return;
     setState(() => _isVerifying = true);
 
-    await Future.delayed(const Duration(milliseconds: 800));
-    SecurityStatus newStatus = await SecurityChecker.checkDeviceSecurity();
+    await Future.delayed(const Duration(milliseconds: 300));
 
-    // Verify USB Debugging status if basic security passed
-    if (newStatus == SecurityStatus.secure) {
-      final bool usbOn = await RaspChecker.isUsbDebuggingEnabled();
-      if (usbOn) {
-        newStatus = SecurityStatus.usbDebuggingDetected;
-      }
+    // USB primero: es instantáneo (lectura nativa). Solo si está apagada
+    // corremos el chequeo de Fake GPS (lento). Así re-verificar la Depuración
+    // USB no tarda.
+    SecurityStatus newStatus;
+    final bool usbOn = await RaspChecker.isUsbDebuggingEnabled();
+    if (usbOn) {
+      newStatus = SecurityStatus.usbDebuggingDetected;
+    } else {
+      newStatus = await SecurityChecker.checkDeviceSecurity();
     }
 
     if (!mounted) return;
