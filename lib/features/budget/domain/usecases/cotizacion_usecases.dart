@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 
 import '../entities/cotizacion_entity.dart';
+import '../entities/item_cotizacion.dart';
 import '../entities/producto_entity.dart';
 import '../repositories/cotizacion_repository.dart';
 

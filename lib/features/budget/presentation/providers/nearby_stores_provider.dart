@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/services/location_service.dart';
 import '../../domain/entities/cotizacion_entity.dart';
+import '../../domain/entities/item_cotizacion.dart';
 import '../../domain/entities/producto_entity.dart';
 import '../../domain/usecases/cotizacion_usecases.dart';
 import '../../../recording/domain/entities/superficie_entity.dart';
@@ -39,11 +40,11 @@ class NearbyStoresViewModel extends ChangeNotifier {
   StreamSubscription<LatLng>? _locationSub;
   bool _showUpdatePrompt = false;
 
-  /// Legacy: producto_id → 'piso' | 'paredes'
-  final Map<int, String> _seleccionLegacy = {};
+  /// Legacy: producto_id (string) → 'piso' | 'paredes'
+  final Map<String, String> _seleccionLegacy = {};
 
-  /// Nuevo: SuperficieEntity → producto_id
-  final Map<SuperficieEntity, int> _seleccionNueva = {};
+  /// Nuevo: SuperficieEntity → producto_id (string)
+  final Map<SuperficieEntity, String> _seleccionNueva = {};
 
   bool get loading => _loading;
   bool get creating => _creating;
@@ -57,8 +58,8 @@ class NearbyStoresViewModel extends ChangeNotifier {
       ? _seleccionNueva.length 
       : _seleccionLegacy.length;
 
-  bool isLegacySelected(int productoId, String aplicarA) => _seleccionLegacy[productoId] == aplicarA;
-  bool isNuevaSelected(int productoId, SuperficieEntity sup) => _seleccionNueva[sup] == productoId;
+  bool isLegacySelected(String productoId, String aplicarA) => _seleccionLegacy[productoId] == aplicarA;
+  bool isNuevaSelected(String productoId, SuperficieEntity sup) => _seleccionNueva[sup] == productoId;
 
   @override
   void dispose() {
@@ -132,7 +133,7 @@ class NearbyStoresViewModel extends ChangeNotifier {
     }
   }
 
-  void toggleLegacy(int productoId, String aplicarA) {
+  void toggleLegacy(String productoId, String aplicarA) {
     if (_seleccionLegacy[productoId] == aplicarA) {
       _seleccionLegacy.remove(productoId);
     } else {
@@ -141,7 +142,7 @@ class NearbyStoresViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleNueva(int productoId, SuperficieEntity sup) {
+  void toggleNueva(String productoId, SuperficieEntity sup) {
     if (_seleccionNueva[sup] == productoId) {
       _seleccionNueva.remove(sup);
     } else {
@@ -164,7 +165,7 @@ class NearbyStoresViewModel extends ChangeNotifier {
       }
       items = _seleccionNueva.entries
           .map((e) => ItemCotizacion(
-                productoId: e.value,
+                productoId: e.value, // ya es String
                 areaM2: e.key.areaM2,
                 descripcion: e.key.descripcion,
               ))

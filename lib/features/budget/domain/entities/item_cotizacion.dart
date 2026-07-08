@@ -2,7 +2,7 @@
 /// se aplica (`piso` o `paredes`). En el nuevo formato (Opción A), se envía
 /// el área específica y su descripción en lugar de solo `aplicar_a`.
 class ItemCotizacion {
-  final int productoId;
+  final String productoId; // siempre string para cumplir el contrato de la API
   final String? aplicarA; // 'piso' | 'paredes' (legacy fallback)
   final double? areaM2;
   final String? descripcion;
@@ -15,7 +15,7 @@ class ItemCotizacion {
   });
 
   Map<String, dynamic> toJson() => {
-        'producto_id': productoId,
+        'producto_id': productoId, // string: "12345" o "uuid-xxx"
         if (aplicarA != null) 'aplicar_a': aplicarA,
         if (areaM2 != null) 'area_m2': areaM2,
         if (descripcion != null) 'descripcion': descripcion,

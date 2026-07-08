@@ -1,7 +1,7 @@
 /// Producto/material disponible en una ferretería cercana
 /// (`GET /api/v1/cotizaciones/productos`).
 class ProductoEntity {
-  final int productoId;
+  final String productoId; // string para cumplir el contrato de la API
   final String nombre;
   final String categoria;
   final String unidad;
@@ -42,7 +42,7 @@ class ProductoEntity {
     final prov = json['proveedor'] is Map ? json['proveedor'] : null;
 
     return ProductoEntity(
-      productoId: i(json['producto_id']) ?? 0,
+      productoId: (json['producto_id'] ?? '').toString(),
       nombre: (json['nombre'] ?? '').toString(),
       categoria: (json['categoria'] ?? '').toString(),
       unidad: (json['unidad'] ?? '').toString(),

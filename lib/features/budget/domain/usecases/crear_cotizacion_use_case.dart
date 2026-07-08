@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 
 import '../entities/cotizacion_entity.dart';
+import '../entities/item_cotizacion.dart';
 import '../repositories/cotizacion_repository.dart';
 
 /// Crea una cotización a partir de m² e ítems.
