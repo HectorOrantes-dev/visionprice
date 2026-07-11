@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/di/infra_providers.dart';
+import 'features/devices/data/providers/device_providers.dart';
 import 'features/security/services/notification_service.dart';
 import 'app.dart';
 

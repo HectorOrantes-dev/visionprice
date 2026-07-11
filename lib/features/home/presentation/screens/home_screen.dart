@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/di/infra_providers.dart';
+import '../../../devices/data/providers/device_providers.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
 import '../../../sync/presentation/screens/sync_queue_screen.dart';

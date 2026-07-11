@@ -8,9 +8,12 @@ part of 'infra_providers.dart';
 
 String _$httpClientHash() => r'ed4c948b2fa39b9289a939034474b5f5551ff3b4';
 
-/// Providers de infraestructura compartida, construidos nativamente en Riverpod
-/// (composición declarativa). Reemplazan por completo el registro de get_it.
-/// `keepAlive`: viven toda la sesión, como singletons.
+/// Providers de infraestructura **compartida** (core), construidos nativamente
+/// en Riverpod. `keepAlive`: viven toda la sesión, como singletons.
+///
+/// Aquí solo va infra transversal usada por varias features. Las cadenas de
+/// cada feature viven en su propio `*_providers.dart` (p. ej.
+/// `features/devices/.../device_providers.dart`).
 ///
 /// Copied from [httpClient].
 @ProviderFor(httpClient)
@@ -110,60 +113,5 @@ final locationServiceProvider = Provider<LocationService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef LocationServiceRef = ProviderRef<LocationService>;
-String _$dispositivoRemoteDataSourceHash() =>
-    r'1158dddcdbabe4b0b6c9e9f7ca2e6d275086ef9b';
-
-/// See also [dispositivoRemoteDataSource].
-@ProviderFor(dispositivoRemoteDataSource)
-final dispositivoRemoteDataSourceProvider =
-    Provider<DispositivoRemoteDataSource>.internal(
-  dispositivoRemoteDataSource,
-  name: r'dispositivoRemoteDataSourceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$dispositivoRemoteDataSourceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DispositivoRemoteDataSourceRef
-    = ProviderRef<DispositivoRemoteDataSource>;
-String _$dispositivoRepositoryHash() =>
-    r'e9754d2d6adb128a2cc70973ce276f6fdf9a4acc';
-
-/// See also [dispositivoRepository].
-@ProviderFor(dispositivoRepository)
-final dispositivoRepositoryProvider = Provider<DispositivoRepository>.internal(
-  dispositivoRepository,
-  name: r'dispositivoRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$dispositivoRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DispositivoRepositoryRef = ProviderRef<DispositivoRepository>;
-String _$deviceRegistrarHash() => r'2e5f505545463df209a397d737cad0456b7031e4';
-
-/// See also [deviceRegistrar].
-@ProviderFor(deviceRegistrar)
-final deviceRegistrarProvider = Provider<DeviceRegistrar>.internal(
-  deviceRegistrar,
-  name: r'deviceRegistrarProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$deviceRegistrarHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DeviceRegistrarRef = ProviderRef<DeviceRegistrar>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

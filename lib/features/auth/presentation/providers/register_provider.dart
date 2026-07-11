@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/infra_providers.dart';
+import '../../../devices/data/providers/device_providers.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/validation_mixin.dart';
 import '../../domain/entities/role_entity.dart';
