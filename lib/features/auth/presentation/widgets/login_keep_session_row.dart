@@ -1,35 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../providers/login_provider.dart';
 
-class LoginKeepSessionRow extends StatelessWidget {
+class LoginKeepSessionRow extends ConsumerWidget {
   final VoidCallback onForgot;
   const LoginKeepSessionRow({super.key, required this.onForgot});
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<LoginViewModel>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final keepSession = ref.watch(loginProvider).keepSession;
     return Row(
       children: [
         Checkbox(
-          value: vm.keepSession,
-          onChanged: (_) => vm.toggleKeepSession(),
+          value: keepSession,
+          onChanged: (_) => ref.read(loginProvider.notifier).toggleKeepSession(),
         ),
         const SizedBox(width: 4),
-        const Text(
+        Text(
           'Mantener sesión',
-          style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
+          style: TextStyle(fontSize: 14, color: context.colors.textPrimary),
         ),
         const Spacer(),
         GestureDetector(
           onTap: onForgot,
-          child: const Text(
+          child: Text(
             '¿Olvidaste?',
             style: TextStyle(
               fontSize: 14,
-              color: AppColors.primary,
+              color: context.colors.primary,
               fontWeight: FontWeight.w600,
             ),
           ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/notificacion_entity.dart';
 
 /// Tarjeta de una notificación. Antes el privado `_NotifCard`.
@@ -17,10 +17,10 @@ class NotifCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: leida ? AppColors.surface : AppColors.primaryLight,
+          color: leida ? context.colors.surface : context.colors.primaryLight,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: leida ? AppColors.border : AppColors.primary,
+            color: leida ? context.colors.border : context.colors.primary,
             width: leida ? 1 : 1.2,
           ),
         ),
@@ -31,13 +31,13 @@ class NotifCard extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: leida ? AppColors.surfaceVariant : AppColors.surface,
+                color: leida ? context.colors.surfaceVariant : context.colors.surface,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 _iconFor(notif.tipo),
                 size: 18,
-                color: leida ? AppColors.textSecondary : AppColors.primary,
+                color: leida ? context.colors.textSecondary : context.colors.primary,
               ),
             ),
             const SizedBox(width: 12),
@@ -50,15 +50,15 @@ class NotifCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: leida ? FontWeight.w600 : FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     notif.cuerpo,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -66,9 +66,9 @@ class NotifCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       notif.fechaCreacion!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.textHint,
+                        color: context.colors.textHint,
                       ),
                     ),
                   ],
@@ -80,8 +80,8 @@ class NotifCard extends StatelessWidget {
                 width: 8,
                 height: 8,
                 margin: const EdgeInsets.only(left: 8, top: 4),
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                decoration: BoxDecoration(
+                  color: context.colors.primary,
                   shape: BoxShape.circle,
                 ),
               ),

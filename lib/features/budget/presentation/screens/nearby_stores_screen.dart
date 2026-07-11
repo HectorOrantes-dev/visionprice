@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../recording/domain/entities/superficie_entity.dart';
 import '../../domain/entities/producto_entity.dart';
 import '../providers/nearby_stores_provider.dart';
 import 'budget_result_screen.dart';
 
-class NearbyStoresScreen extends StatelessWidget {
+class NearbyStoresScreen extends ConsumerStatefulWidget {
   final int proyectoId;
   final double? pisoM2;
   final double? paredesM2;
@@ -22,28 +21,30 @@ class NearbyStoresScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<NearbyStoresViewModel>()
-        ..load(
-            proyectoId: proyectoId,
-            pisoM2: pisoM2,
-            paredesM2: paredesM2,
-            superficies: superficies),
-      child: const _NearbyStoresView(),
-    );
-  }
+  ConsumerState<NearbyStoresScreen> createState() => _NearbyStoresScreenState();
 }
 
-class _NearbyStoresView extends StatelessWidget {
-  const _NearbyStoresView();
+class _NearbyStoresScreenState extends ConsumerState<NearbyStoresScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Carga inicial una sola vez (el provider vive mientras esta pantalla lo
+    // observe). Microtask para no mutar el provider durante el primer build.
+    Future.microtask(() => ref.read(nearbyStoresProvider.notifier).load(
+          proyectoId: widget.proyectoId,
+          pisoM2: widget.pisoM2,
+          paredesM2: widget.paredesM2,
+          superficies: widget.superficies,
+        ));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<NearbyStoresViewModel>();
+    final vm = ref.watch(nearbyStoresProvider);
+    final notifier = ref.read(nearbyStoresProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -54,7 +55,7 @@ class _NearbyStoresView extends StatelessWidget {
             Expanded(
               child: Stack(
                 children: [
-                  _body(context, vm),
+                  _body(context, vm, notifier),
                   if (vm.showUpdatePrompt)
                     Positioned(
                       top: 12,
@@ -62,9 +63,9 @@ class _NearbyStoresView extends StatelessWidget {
                       right: 0,
                       child: Center(
                         child: ElevatedButton.icon(
-                          onPressed: vm.refetchLocation,
+                          onPressed: notifier.refetchLocation,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: context.colors.primary,
                             foregroundColor: Colors.white,
                             elevation: 4,
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -84,14 +85,15 @@ class _NearbyStoresView extends StatelessWidget {
               ),
             ),
             if (!vm.loading && vm.productos.isNotEmpty)
-              _GenerateBar(vm: vm),
+              _GenerateBar(state: vm, notifier: notifier),
           ],
         ),
       ),
     );
   }
 
-  Widget _body(BuildContext context, NearbyStoresViewModel vm) {
+  Widget _body(
+      BuildContext context, NearbyStoresState vm, NearbyStores notifier) {
     if (vm.loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -102,22 +104,23 @@ class _NearbyStoresView extends StatelessWidget {
           child: Text(
             vm.errorMessage!,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: context.colors.textSecondary),
           ),
         ),
       );
     }
     if (vm.productos.isEmpty) {
-      return const Center(
+      return Center(
         child: Text('No hay productos cercanos',
-            style: TextStyle(color: AppColors.textSecondary)),
+            style: TextStyle(color: context.colors.textSecondary)),
       );
     }
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: vm.productos.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, i) => _ProductCard(producto: vm.productos[i], vm: vm),
+      itemBuilder: (_, i) =>
+          _ProductCard(producto: vm.productos[i], state: vm, notifier: notifier),
     );
   }
 }
@@ -133,37 +136,37 @@ class _StoresAppBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios,
-                size: 18, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back_ios,
+                size: 18, color: context.colors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: context.colors.primaryLight,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.location_on_outlined,
-                color: AppColors.primary, size: 20),
+            child: Icon(Icons.location_on_outlined,
+                color: context.colors.primary, size: 20),
           ),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Materiales cercanos',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               Text(
                 '${count} productos · elige los adecuados',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],
@@ -181,18 +184,18 @@ class _ApproxLocationBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.warningLight,
+        color: context.colors.warningLight,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          const Icon(Icons.location_off_outlined,
-              size: 16, color: AppColors.warning),
+          Icon(Icons.location_off_outlined,
+              size: 16, color: context.colors.warning),
           const SizedBox(width: 8),
-          const Expanded(
+          Expanded(
             child: Text(
               'Ubicación aproximada (sin permiso) · resultados cerca del centro',
-              style: TextStyle(fontSize: 12, color: AppColors.warning),
+              style: TextStyle(fontSize: 12, color: context.colors.warning),
             ),
           ),
         ],
@@ -203,27 +206,33 @@ class _ApproxLocationBanner extends StatelessWidget {
 
 class _ProductCard extends StatelessWidget {
   final ProductoEntity producto;
-  final NearbyStoresViewModel vm;
-  const _ProductCard({required this.producto, required this.vm});
+  final NearbyStoresState state;
+  final NearbyStores notifier;
+  const _ProductCard({
+    required this.producto,
+    required this.state,
+    required this.notifier,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final usaNuevo = vm.superficies != null && vm.superficies!.isNotEmpty;
+    final usaNuevo = state.superficies != null && state.superficies!.isNotEmpty;
     bool selected = false;
     if (usaNuevo) {
-      selected = vm.superficies!.any((sup) => vm.isNuevaSelected(producto.productoId, sup));
+      selected = state.superficies!
+          .any((sup) => state.isNuevaSelected(producto.productoId, sup));
     } else {
-      selected = vm.isLegacySelected(producto.productoId, 'piso') || 
-                 vm.isLegacySelected(producto.productoId, 'paredes');
+      selected = state.isLegacySelected(producto.productoId, 'piso') ||
+          state.isLegacySelected(producto.productoId, 'paredes');
     }
 
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: selected ? AppColors.primary : AppColors.border,
+          color: selected ? context.colors.primary : context.colors.border,
           width: selected ? 1.5 : 1,
         ),
       ),
@@ -235,19 +244,19 @@ class _ProductCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   producto.nombre,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
               ),
               Text(
                 '\$${producto.precioUnitario.toStringAsFixed(2)}/${producto.unidad}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: context.colors.primary,
                 ),
               ),
             ],
@@ -259,32 +268,39 @@ class _ProductCard extends StatelessWidget {
               if (producto.distanciaKm != null)
                 '${producto.distanciaKm!.toStringAsFixed(1)} km',
             ].join(' · '),
-            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
           ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: usaNuevo
-                ? vm.superficies!.map((sup) {
-                    final isSel = vm.isNuevaSelected(producto.productoId, sup);
-                    final label = sup.descripcion.isNotEmpty ? sup.descripcion : sup.tipo;
+                ? state.superficies!.map((sup) {
+                    final isSel =
+                        state.isNuevaSelected(producto.productoId, sup);
+                    final label = sup.descripcion.isNotEmpty
+                        ? sup.descripcion
+                        : sup.tipo;
                     return _SurfaceChip(
                       label: label,
                       selected: isSel,
-                      onTap: () => vm.toggleNueva(producto.productoId, sup),
+                      onTap: () => notifier.toggleNueva(producto.productoId, sup),
                     );
                   }).toList()
                 : [
                     _SurfaceChip(
                       label: 'Piso',
-                      selected: vm.isLegacySelected(producto.productoId, 'piso'),
-                      onTap: () => vm.toggleLegacy(producto.productoId, 'piso'),
+                      selected:
+                          state.isLegacySelected(producto.productoId, 'piso'),
+                      onTap: () =>
+                          notifier.toggleLegacy(producto.productoId, 'piso'),
                     ),
                     _SurfaceChip(
                       label: 'Paredes',
-                      selected: vm.isLegacySelected(producto.productoId, 'paredes'),
-                      onTap: () => vm.toggleLegacy(producto.productoId, 'paredes'),
+                      selected: state.isLegacySelected(
+                          producto.productoId, 'paredes'),
+                      onTap: () =>
+                          notifier.toggleLegacy(producto.productoId, 'paredes'),
                     ),
                   ],
           ),
@@ -311,10 +327,10 @@ class _SurfaceChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.surfaceVariant,
+          color: selected ? context.colors.primary : context.colors.surfaceVariant,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.border,
+            color: selected ? context.colors.primary : context.colors.border,
           ),
         ),
         child: Text(
@@ -322,7 +338,7 @@ class _SurfaceChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : AppColors.textSecondary,
+            color: selected ? Colors.white : context.colors.textSecondary,
           ),
         ),
       ),
@@ -331,8 +347,9 @@ class _SurfaceChip extends StatelessWidget {
 }
 
 class _GenerateBar extends StatelessWidget {
-  final NearbyStoresViewModel vm;
-  const _GenerateBar({required this.vm});
+  final NearbyStoresState state;
+  final NearbyStores notifier;
+  const _GenerateBar({required this.state, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
@@ -340,11 +357,11 @@ class _GenerateBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
       child: Column(
         children: [
-          if (vm.errorMessage != null)
+          if (state.errorMessage != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                vm.errorMessage!,
+                state.errorMessage!,
                 style: const TextStyle(color: Colors.red, fontSize: 13),
               ),
             ),
@@ -352,9 +369,9 @@ class _GenerateBar extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: vm.creating
+              onPressed: state.creating
                   ? null
-                  : () => vm.generar(
+                  : () => notifier.generar(
                         onCreated: (cot) => Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -362,14 +379,14 @@ class _GenerateBar extends StatelessWidget {
                           ),
                         ),
                       ),
-              child: vm.creating
+              child: state.creating
                   ? const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white),
                     )
-                  : Text('Generar cotización (${vm.seleccionados})'),
+                  : Text('Generar cotización (${state.seleccionados})'),
             ),
           ),
         ],

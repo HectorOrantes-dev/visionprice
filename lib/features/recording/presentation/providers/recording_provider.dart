@@ -1,190 +1,148 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 import 'package:record/record.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/infra_providers.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/network/connectivity_service.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
-import '../../../project/domain/usecases/proyecto_usecases.dart';
-import '../../../sync/services/sync_service.dart';
-import '../../data/services/audio_recorder_service.dart';
-import '../../domain/usecases/grabacion_usecases.dart';
+import '../../../project/presentation/providers/project_providers.dart';
+import 'recording_providers.dart';
+import 'recording_state.dart';
 
-/// Estados de la pantalla de grabación:
-/// - [idle] → sin grabar.
-/// - [recording] → capturando audio.
-/// - [recorded] → audio listo para subir.
-/// - [uploading] → subiendo al back-end.
-/// - [error] → ver [errorMessage].
-enum RecordState { idle, recording, recorded, uploading, error }
+export 'recording_state.dart';
 
-/// ViewModel de la grabación. `@injectable`: recibe el servicio de audio y el
-/// caso de uso de subida. Captura audio real y lo sube como multipart.
-@injectable
-class RecordingViewModel extends ChangeNotifier {
-  final AudioRecorderService _recorder;
-  final SubirGrabacionUseCase _subir;
-  final ConnectivityService _connectivity;
-  final ObtenerProyectosUseCase _obtenerProyectos;
-  final SyncService _syncService;
+part 'recording_provider.g.dart';
 
-  RecordingViewModel(
-    this._recorder,
-    this._subir,
-    this._connectivity,
-    this._obtenerProyectos,
-    this._syncService,
-  ) {
-    checkConnectivity();
-    cargarProyectos();
-  }
-
-  RecordState _state = RecordState.idle;
-  Duration _elapsed = Duration.zero;
+/// Notifier de la grabación (Riverpod moderno). Reemplaza al `RecordingViewModel`
+/// (ChangeNotifier): captura audio real y lo sube como multipart, o lo encola
+/// offline vía [syncServiceProvider].
+@riverpod
+class Recording extends _$Recording {
   Timer? _timer;
   String? _audioPath;
-  String? _errorMessage;
-  bool? _online; // null = verificando
 
-  List<ProyectoEntity> _proyectos = const [];
-  ProyectoEntity? _selectedProyecto;
-  bool _loadingProyectos = false;
+  @override
+  RecordingState build() {
+    ref.onDispose(() => _timer?.cancel());
+    checkConnectivity();
+    cargarProyectos();
+    return const RecordingState();
+  }
 
-  RecordState get state => _state;
-  Duration get elapsed => _elapsed;
-  bool get isRecording => _state == RecordState.recording;
-  bool get isUploading => _state == RecordState.uploading;
-  bool get hasRecording => _state == RecordState.recorded;
-  String? get errorMessage => _errorMessage;
-
-  Stream<Amplitude>? get amplitudeStream => _recorder.onAmplitudeChanged;
-
-  List<ProyectoEntity> get proyectos => _proyectos;
-  ProyectoEntity? get selectedProyecto => _selectedProyecto;
-  bool get loadingProyectos => _loadingProyectos;
-
-  /// Solo se puede subir si hay grabación Y un proyecto elegido (obligatorio).
-  bool get canUpload => hasRecording && _selectedProyecto != null;
-
-  /// `null` mientras verifica, luego `true`/`false` según conectividad real.
-  bool? get online => _online;
-  bool get isOffline => _online == false;
+  Stream<Amplitude>? get amplitudeStream =>
+      ref.read(audioRecorderServiceProvider).onAmplitudeChanged;
 
   /// Verifica conexión real (ping al back-end) y actualiza el estado.
   Future<void> checkConnectivity() async {
-    _online = await _connectivity.isOnline();
-    notifyListeners();
+    final online = await ref.read(connectivityServiceProvider).isOnline();
+    state = state.copyWith(online: online);
   }
 
   /// Carga los proyectos del usuario (para elegir a cuál asociar el audio).
   Future<void> cargarProyectos() async {
-    _loadingProyectos = true;
-    notifyListeners();
+    state = state.copyWith(loadingProyectos: true);
     try {
-      _proyectos = await _obtenerProyectos();
-      _selectedProyecto ??= _proyectos.isNotEmpty ? _proyectos.first : null;
+      final proyectos = await ref.read(obtenerProyectosUseCaseProvider)();
+      state = state.copyWith(
+        proyectos: proyectos,
+        selectedProyecto: state.selectedProyecto ??
+            (proyectos.isNotEmpty ? proyectos.first : null),
+        loadingProyectos: false,
+      );
     } catch (_) {
       // Sin proyectos disponibles: el usuario podrá crear uno.
-    } finally {
-      _loadingProyectos = false;
-      notifyListeners();
+      state = state.copyWith(loadingProyectos: false);
     }
   }
 
-  void selectProyecto(ProyectoEntity? proyecto) {
-    _selectedProyecto = proyecto;
-    notifyListeners();
-  }
-
-  String get elapsedFormatted {
-    final m = _elapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final s = _elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
+  void selectProyecto(ProyectoEntity? proyecto) =>
+      state = state.copyWith(selectedProyecto: proyecto);
 
   Future<void> startRecording() async {
-    final allowed = await _recorder.hasPermission();
+    final recorder = ref.read(audioRecorderServiceProvider);
+    final allowed = await recorder.hasPermission();
     if (!allowed) {
-      _state = RecordState.error;
-      _errorMessage = 'Necesitamos permiso de micrófono para grabar.';
-      notifyListeners();
+      state = state.copyWith(
+        status: RecordStatus.error,
+        errorMessage: 'Necesitamos permiso de micrófono para grabar.',
+      );
       return;
     }
-    
-    // Reproducir evento de audio / haptic
+
     HapticFeedback.lightImpact();
     SystemSound.play(SystemSoundType.click);
 
-    await _recorder.start();
-    _state = RecordState.recording;
-    _elapsed = Duration.zero;
-    _errorMessage = null;
+    await recorder.start();
+    state = state.copyWith(
+      status: RecordStatus.recording,
+      elapsed: Duration.zero,
+      errorMessage: null,
+    );
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _elapsed += const Duration(seconds: 1);
-      notifyListeners();
+      state =
+          state.copyWith(elapsed: state.elapsed + const Duration(seconds: 1));
     });
-    notifyListeners();
   }
 
   Future<void> stopRecording() async {
-    // Reproducir evento de audio / haptic
     HapticFeedback.lightImpact();
     SystemSound.play(SystemSoundType.click);
 
     _timer?.cancel();
-    _audioPath = await _recorder.stop();
-    _state = _audioPath != null ? RecordState.recorded : RecordState.idle;
-    notifyListeners();
+    _audioPath = await ref.read(audioRecorderServiceProvider).stop();
+    state = state.copyWith(
+      status: _audioPath != null ? RecordStatus.recorded : RecordStatus.idle,
+    );
   }
 
   /// Sube el audio grabado. Invoca [onUploaded] con el id de la grabación
   /// (estado "procesando") para pasar a la pantalla de procesamiento.
-  double _uploadProgress = 0.0;
-  double get uploadProgress => _uploadProgress;
-
-  Future<void> upload({required void Function(int grabacionId) onUploaded}) async {
+  Future<void> upload(
+      {required void Function(int grabacionId) onUploaded}) async {
     if (_audioPath == null) return;
-    if (_selectedProyecto == null) {
-      _state = RecordState.error;
-      _errorMessage = 'Elige un proyecto antes de subir la grabación.';
-      notifyListeners();
+    final proyecto = state.selectedProyecto;
+    if (proyecto == null) {
+      state = state.copyWith(
+        status: RecordStatus.error,
+        errorMessage: 'Elige un proyecto antes de subir la grabación.',
+      );
       return;
     }
-    _state = RecordState.uploading;
-    _errorMessage = null;
-    _uploadProgress = 0.0;
-    notifyListeners();
+    state = state.copyWith(
+      status: RecordStatus.uploading,
+      errorMessage: null,
+      uploadProgress: 0.0,
+    );
     try {
-      if (isOffline) {
+      if (state.isOffline) {
         final localId = DateTime.now().millisecondsSinceEpoch.toString();
-        await _syncService.queueAudio(
-          localId: localId,
-          audioPath: _audioPath!,
-          proyectoId: _selectedProyecto!.id,
-          fechaGrabacion: DateTime.now().toIso8601String(),
-          duracionSegundos: _elapsed.inSeconds,
-        );
+        await ref.read(syncServiceProvider).queueAudio(
+              localId: localId,
+              audioPath: _audioPath!,
+              proyectoId: proyecto.id,
+              fechaGrabacion: DateTime.now().toIso8601String(),
+              duracionSegundos: state.elapsed.inSeconds,
+            );
         onUploaded(-1);
       } else {
-        final grabacion = await _subir(
+        final grabacion = await ref.read(subirGrabacionUseCaseProvider)(
           audioPath: _audioPath!,
-          duracionSegundos: _elapsed.inSeconds,
-          proyectoId: _selectedProyecto!.id,
+          duracionSegundos: state.elapsed.inSeconds,
+          proyectoId: proyecto.id,
           onProgress: (progress) {
-            _uploadProgress = progress;
-            notifyListeners();
+            state = state.copyWith(uploadProgress: progress);
           },
         );
         onUploaded(grabacion.id);
       }
     } catch (e) {
-      _state = RecordState.error;
-      _errorMessage =
-          e is ApiException ? e.message : 'No se pudo subir la grabación.';
-      notifyListeners();
+      state = state.copyWith(
+        status: RecordStatus.error,
+        errorMessage:
+            e is ApiException ? e.message : 'No se pudo subir la grabación.',
+      );
       // Si fue error de red, refresca el estado de conexión del chip.
       if (e is ApiException && e.isNetwork) checkConnectivity();
     }
@@ -192,17 +150,12 @@ class RecordingViewModel extends ChangeNotifier {
 
   Future<void> retry() async {
     _timer?.cancel();
-    await _recorder.cancel();
+    await ref.read(audioRecorderServiceProvider).cancel();
     _audioPath = null;
-    _elapsed = Duration.zero;
-    _state = RecordState.idle;
-    _errorMessage = null;
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+    state = state.copyWith(
+      status: RecordStatus.idle,
+      elapsed: Duration.zero,
+      errorMessage: null,
+    );
   }
 }

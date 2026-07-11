@@ -1,5 +1,4 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:injectable/injectable.dart';
 
 /// Coordenada simple.
 class LatLng {
@@ -10,7 +9,6 @@ class LatLng {
 
 /// Obtiene la ubicación actual del dispositivo (para buscar ferreterías
 /// cercanas). `@lazySingleton` reutilizable.
-@lazySingleton
 class LocationService {
   /// Centro de CDMX como respaldo si no hay permiso/ubicación disponible.
   static const LatLng fallback = LatLng(19.4326, -99.1332);

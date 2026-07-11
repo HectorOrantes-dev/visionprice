@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class SyncConnectedBanner extends StatelessWidget {
   const SyncConnectedBanner({super.key});
@@ -11,26 +11,26 @@ class SyncConnectedBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: context.colors.primaryLight,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          const Icon(Icons.wifi, size: 16, color: AppColors.primary),
+          Icon(Icons.wifi, size: 16, color: context.colors.primary),
           const SizedBox(width: 8),
           Expanded(
             child: RichText(
-              text: const TextSpan(
+              text: TextSpan(
                 style: TextStyle(fontSize: 13),
                 children: [
                   TextSpan(
                     text: 'Conexión detectada · ',
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: TextStyle(color: context.colors.textPrimary),
                   ),
                   TextSpan(
                     text: 'sincronizando automáticamente',
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: context.colors.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

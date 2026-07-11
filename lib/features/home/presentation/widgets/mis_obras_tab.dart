@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Pestaña "Mis Obras" (placeholder). Antes el privado `_MisObrasTab`.
 class MisObrasTab extends StatelessWidget {
@@ -8,13 +8,13 @@ class MisObrasTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
+    return SafeArea(
       child: Center(
         child: Text(
           'Mis Obras',
           style: TextStyle(
             fontSize: 18,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
       ),

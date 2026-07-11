@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/subscription_entity.dart';
 import 'subscription_info_row.dart';
 
@@ -11,29 +11,29 @@ class SubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = sub.activa ? AppColors.success : AppColors.textSecondary;
+    final color = sub.activa ? context.colors.success : context.colors.textSecondary;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.workspace_premium_outlined,
-                  color: AppColors.primary, size: 22),
+              Icon(Icons.workspace_premium_outlined,
+                  color: context.colors.primary, size: 22),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   sub.plan,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
               ),

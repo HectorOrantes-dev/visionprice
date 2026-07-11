@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Encabezado de la pantalla de resultado de cotización. Antes `_ResultAppBar`.
 class ResultAppBar extends StatelessWidget {
@@ -13,22 +13,22 @@ class ResultAppBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios,
-                size: 18, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back_ios,
+                size: 18, color: context.colors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: context.colors.primaryLight,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.receipt_long_outlined,
-                color: AppColors.primary, size: 20),
+            child: Icon(Icons.receipt_long_outlined,
+                color: context.colors.primary, size: 20),
           ),
           const SizedBox(width: 10),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -36,12 +36,12 @@ class ResultAppBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               Text(
                 'Materiales y precios',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
               ),
             ],
           ),

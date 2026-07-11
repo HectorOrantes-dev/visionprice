@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
@@ -8,7 +7,6 @@ import '../../domain/entities/register_result_entity.dart';
 import '../../domain/entities/role_entity.dart';
 import 'auth_remote_datasource.dart';
 
-@LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final ApiClient _client;
   AuthRemoteDataSourceImpl(this._client);

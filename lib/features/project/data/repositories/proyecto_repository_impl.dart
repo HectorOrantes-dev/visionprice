@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../core/storage/local_database.dart';
@@ -6,7 +5,6 @@ import '../../domain/entities/proyecto_entity.dart';
 import '../../domain/repositories/proyecto_repository.dart';
 import '../datasources/proyecto_remote_datasource.dart';
 
-@LazySingleton(as: ProyectoRepository)
 class ProyectoRepositoryImpl implements ProyectoRepository {
   final ProyectoRemoteDataSource _remote;
   final LocalDatabase _localDatabase;

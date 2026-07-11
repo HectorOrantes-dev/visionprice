@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
 
 /// Tarjeta de un proyecto del usuario en la home. Antes el privado `_ProjectCard`.
@@ -10,13 +10,13 @@ class HomeProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estadoColor = _estadoColor(proyecto.estado);
+    final estadoColor = _estadoColor(context, proyecto.estado);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Row(
         children: [
@@ -24,11 +24,11 @@ class HomeProjectCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: context.colors.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(Icons.folder_outlined,
-                size: 18, color: AppColors.textSecondary),
+                size: 18, color: context.colors.textSecondary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -39,10 +39,10 @@ class HomeProjectCard extends StatelessWidget {
                   proyecto.nombre,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -50,9 +50,9 @@ class HomeProjectCard extends StatelessWidget {
                   _subtitle(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -87,21 +87,21 @@ class HomeProjectCard extends StatelessWidget {
     return presupuestos;
   }
 
-  static Color _estadoColor(String estado) {
+  static Color _estadoColor(BuildContext context, String estado) {
     // Estados que devuelve el back-end: activo | finalizado | cancelado
     // (más algunos alias tolerados por compatibilidad).
     switch (estado.toLowerCase()) {
       case 'finalizado':
       case 'completado':
       case 'terminado':
-        return AppColors.success;
+        return context.colors.success;
       case 'cancelado':
-        return AppColors.error;
+        return context.colors.error;
       case 'borrador':
       case 'pausado':
-        return AppColors.textSecondary;
+        return context.colors.textSecondary;
       default:
-        return AppColors.primary; // activo / en proceso
+        return context.colors.primary; // activo / en proceso
     }
   }
 

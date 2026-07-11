@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../providers/login_provider.dart';
 
 /// Sección visible solo tras el paso 1: campo de código 2FA + botón verificar.
-class TwoFactorSection extends StatelessWidget {
+class TwoFactorSection extends ConsumerWidget {
   final TextEditingController codeController;
   const TwoFactorSection({super.key, required this.codeController});
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<LoginViewModel>();
-    if (!vm.requiresTwoFactor) return const SizedBox.shrink();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(loginProvider);
+    if (!state.requiresTwoFactor) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,7 +23,7 @@ class TwoFactorSection extends StatelessWidget {
           'Te enviamos un código a tu correo. Ingrésalo para continuar.',
           style: TextStyle(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             height: 1.5,
           ),
         ),
@@ -33,12 +33,12 @@ class TwoFactorSection extends StatelessWidget {
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             hintText: 'Código de verificación',
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.shield_outlined,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 20,
             ),
-            errorText: vm.codeError,
+            errorText: state.codeError,
           ),
         ),
         const SizedBox(height: 16),
@@ -46,16 +46,16 @@ class TwoFactorSection extends StatelessWidget {
           width: double.infinity,
           height: 52,
           child: ElevatedButton(
-            onPressed: vm.isLoading
+            onPressed: state.isLoading
                 ? null
-                : () => vm.verifyCode(
+                : () => ref.read(loginProvider.notifier).verifyCode(
                       code: codeController.text,
                       onSuccess: () => Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const HomeScreen()),
                       ),
                     ),
-            child: vm.isLoading
+            child: state.isLoading
                 ? const SizedBox(
                     width: 20,
                     height: 20,

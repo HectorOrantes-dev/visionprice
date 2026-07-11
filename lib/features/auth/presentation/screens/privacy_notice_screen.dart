@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Aviso de Privacidad Integral. Se muestra como pantalla completa desde el
 /// enlace ubicado en la vista de login (y reutilizable desde otras vistas).
@@ -10,14 +10,14 @@ class PrivacyNoticeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Aviso de Privacidad',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
       ),
@@ -50,10 +50,10 @@ class _Title extends _Block {
         padding: const EdgeInsets.only(bottom: 12),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
             height: 1.3,
           ),
         ),
@@ -69,10 +69,10 @@ class _Section extends _Block {
         padding: const EdgeInsets.only(top: 24, bottom: 8),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: AppColors.primary,
+            color: context.colors.primary,
             height: 1.4,
           ),
         ),
@@ -88,9 +88,9 @@ class _Paragraph extends _Block {
         padding: const EdgeInsets.only(bottom: 10),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             height: 1.6,
           ),
         ),
@@ -107,16 +107,16 @@ class _Bullet extends _Block {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(top: 7, right: 10),
-              child: Icon(Icons.circle, size: 6, color: AppColors.primary),
+              child: Icon(Icons.circle, size: 6, color: context.colors.primary),
             ),
             Expanded(
               child: Text(
                 text,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                   height: 1.5,
                 ),
               ),
@@ -137,15 +137,15 @@ class _Note extends _Block {
           width: double.infinity,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.primaryLight,
+            color: context.colors.primaryLight,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: context.colors.border),
           ),
           child: Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13.5,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
               height: 1.6,
             ),
           ),

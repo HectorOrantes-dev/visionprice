@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 import '../../../../core/storage/local_database.dart';
 import '../../domain/entities/sync_item_entity.dart';
 
-@lazySingleton
 class SyncLocalDataSource {
   final LocalDatabase _localDb;
 

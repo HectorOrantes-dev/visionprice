@@ -1,132 +1,104 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/infra_providers.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/validation_mixin.dart';
-import '../../../devices/data/services/device_registrar.dart';
 import '../../domain/entities/role_entity.dart';
-import '../../domain/usecases/auth_usecases.dart';
+import 'auth_providers.dart';
+import 'register_state.dart';
 
-/// Flujo del registro (refleja al del login):
-/// - [idle] → estado inicial.
-/// - [loading] → petición en curso.
-/// - [codeSent] → el back-end registró y mandó el código 2FA al correo.
-/// - [success] → 2FA verificado, token guardado.
-/// - [error] → ver [errorMessage].
-enum RegisterState { idle, loading, codeSent, success, error }
+export 'register_state.dart';
 
-/// ViewModel del registro. `@injectable` (factory). Carga los roles al crearse
-/// y reutiliza [VerifyTwoFactorUseCase] para el paso 2FA (mismo mecanismo que
-/// el login). Usa [ValidationMixin] para validar el formulario.
-@injectable
-class RegisterViewModel extends ChangeNotifier with ValidationMixin {
-  final RegisterUseCase _registerUseCase;
-  final VerifyTwoFactorUseCase _verifyUseCase;
-  final GetRolesUseCase _getRolesUseCase;
-  final DeviceRegistrar _deviceRegistrar;
+part 'register_provider.g.dart';
 
-  RegisterViewModel(
-    this._registerUseCase,
-    this._verifyUseCase,
-    this._getRolesUseCase,
-    this._deviceRegistrar,
-  ) {
-    loadRoles();
-  }
-
-  RegisterState _state = RegisterState.idle;
-  String? _errorMessage;
+/// Notifier del registro (Riverpod moderno). Reemplaza al `RegisterViewModel`
+/// (ChangeNotifier). Carga los roles al construirse y reutiliza el use case de
+/// verificación 2FA (mismo mecanismo que el login).
+@riverpod
+class Register extends _$Register with ValidationMixin {
   String _correo = '';
-  bool _obscurePassword = true;
 
-  List<RoleEntity> _roles = const [];
-  RoleEntity? _selectedRole;
-
-  String? nombreError;
-  String? emailError;
-  String? passwordError;
-  String? roleError;
-  String? codeError;
-
-  RegisterState get state => _state;
-  String? get errorMessage => _errorMessage;
-  bool get obscurePassword => _obscurePassword;
-  bool get isLoading => _state == RegisterState.loading;
-  bool get requiresTwoFactor => _state == RegisterState.codeSent;
-  List<RoleEntity> get roles => _roles;
-  RoleEntity? get selectedRole => _selectedRole;
+  @override
+  RegisterState build() {
+    // Carga inicial de roles (fire-and-forget: actualiza el state al terminar).
+    loadRoles();
+    return const RegisterState();
+  }
 
   /// Carga los roles del back-end. Si falla, deja un rol por defecto para que
   /// la pantalla siga siendo usable.
   Future<void> loadRoles() async {
     try {
-      final result = await _getRolesUseCase();
-      if (result.isNotEmpty) _roles = result;
+      final result = await ref.read(getRolesUseCaseProvider)();
+      if (result.isNotEmpty) state = state.copyWith(roles: result);
     } catch (_) {
-      _roles = const [RoleEntity(value: 'maestro_obra', label: 'Maestro obra')];
+      state = state.copyWith(
+        roles: const [RoleEntity(value: 'maestro_obra', label: 'Maestro obra')],
+      );
     }
-    notifyListeners();
   }
 
-  void toggleObscurePassword() {
-    _obscurePassword = !_obscurePassword;
-    notifyListeners();
-  }
+  void toggleObscurePassword() =>
+      state = state.copyWith(obscurePassword: !state.obscurePassword);
 
-  void selectRole(RoleEntity? role) {
-    _selectedRole = role;
-    roleError = null;
-    notifyListeners();
-  }
+  void selectRole(RoleEntity? role) =>
+      state = state.copyWith(selectedRole: role, roleError: null);
 
   void onNameChanged(String value) {
-    nombreError = value.isEmpty ? null : validateName(value);
-    notifyListeners();
+    state = state.copyWith(
+        nombreError: value.isEmpty ? null : validateName(value));
   }
 
   void onEmailChanged(String value) {
-    emailError = value.isEmpty ? null : validateEmail(value);
-    notifyListeners();
+    state = state.copyWith(
+        emailError: value.isEmpty ? null : validateEmail(value));
   }
 
   void onPasswordChanged(String value) {
-    passwordError = value.isEmpty ? null : validatePassword(value);
-    notifyListeners();
+    state = state.copyWith(
+        passwordError: value.isEmpty ? null : validatePassword(value));
   }
 
   /// Valida el formulario y registra. Si el back-end envió el código 2FA,
-  /// pasa a [RegisterState.codeSent].
+  /// pasa a [RegisterStatus.codeSent].
   Future<void> register({
     required String nombre,
     required String correo,
     required String contrasena,
     required String telefono,
   }) async {
-    nombreError = validateName(nombre);
-    emailError = validateEmail(correo);
-    passwordError = validatePassword(contrasena);
-    roleError = _selectedRole == null ? 'Selecciona un rol' : null;
+    final nombreError = validateName(nombre);
+    final emailError = validateEmail(correo);
+    final passwordError = validatePassword(contrasena);
+    final roleError = state.selectedRole == null ? 'Selecciona un rol' : null;
     if (nombreError != null ||
         emailError != null ||
         passwordError != null ||
         roleError != null) {
-      notifyListeners();
+      state = state.copyWith(
+        nombreError: nombreError,
+        emailError: emailError,
+        passwordError: passwordError,
+        roleError: roleError,
+      );
       return;
     }
 
     _correo = correo;
-    _setLoading();
+    state = state.copyWith(status: RegisterStatus.loading, errorMessage: null);
     try {
-      final result = await _registerUseCase(
+      final result = await ref.read(registerUseCaseProvider)(
         nombre: nombre,
         correo: correo,
         contrasena: contrasena,
-        rol: _selectedRole!.value,
+        rol: state.selectedRole!.value,
         telefono: telefono,
       );
-      _state = RegisterState.codeSent;
-      _errorMessage = result.message.isEmpty ? null : result.message;
-      notifyListeners();
+      state = state.copyWith(
+        status: RegisterStatus.codeSent,
+        errorMessage: result.message.isEmpty ? null : result.message,
+      );
     } catch (e) {
       _fail(e);
     }
@@ -137,34 +109,28 @@ class RegisterViewModel extends ChangeNotifier with ValidationMixin {
     required String code,
     required VoidCallback onSuccess,
   }) async {
-    codeError = validateCode(code);
+    final codeError = validateCode(code);
     if (codeError != null) {
-      notifyListeners();
+      state = state.copyWith(codeError: codeError);
       return;
     }
 
-    _setLoading();
+    state = state.copyWith(status: RegisterStatus.loading, errorMessage: null);
     try {
-      await _verifyUseCase(correo: _correo, code: code);
-      _state = RegisterState.success;
-      notifyListeners();
-      _deviceRegistrar.register();
+      await ref.read(verifyTwoFactorUseCaseProvider)(correo: _correo, code: code);
+      state = state.copyWith(status: RegisterStatus.success);
+      ref.read(deviceRegistrarProvider).register();
       onSuccess();
     } catch (e) {
       _fail(e);
     }
   }
 
-  void _setLoading() {
-    _state = RegisterState.loading;
-    _errorMessage = null;
-    notifyListeners();
-  }
-
   void _fail(Object error) {
-    _state = RegisterState.error;
-    _errorMessage =
-        error is ApiException ? error.message : 'Ocurrió un error inesperado';
-    notifyListeners();
+    state = state.copyWith(
+      status: RegisterStatus.error,
+      errorMessage:
+          error is ApiException ? error.message : 'Ocurrió un error inesperado',
+    );
   }
 }

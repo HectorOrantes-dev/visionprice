@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Fila de una advertencia del análisis. Antes el privado `_WarningItem`.
 class WarningItem extends StatelessWidget {
@@ -14,13 +14,13 @@ class WarningItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, size: 16, color: AppColors.warning),
+          Icon(Icons.info_outline, size: 16, color: context.colors.warning),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                  fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(
+                  fontSize: 13, color: context.colors.textSecondary),
             ),
           ),
         ],

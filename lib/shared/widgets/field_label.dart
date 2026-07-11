@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_palette.dart';
 
 /// Etiqueta de campo de formulario reutilizable (mayúsculas, espaciada).
 /// Compartida por las pantallas de login y registro.
@@ -12,10 +12,10 @@ class FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w600,
-        color: AppColors.textSecondary,
+        color: context.colors.textSecondary,
         letterSpacing: 1.0,
       ),
     );

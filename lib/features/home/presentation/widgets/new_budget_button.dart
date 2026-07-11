@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
 
 /// Botón principal "Nuevo presupuesto por voz" → abre la grabación.
@@ -21,12 +21,12 @@ class NewBudgetButton extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const RecordingScreen()),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: context.colors.primary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
             elevation: 2,
-            shadowColor: AppColors.primary.withValues(alpha: 0.4),
+            shadowColor: context.colors.primary.withValues(alpha: 0.4),
           ),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,

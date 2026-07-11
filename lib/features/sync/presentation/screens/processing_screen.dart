@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../recording/presentation/providers/processing_provider.dart';
 import '../../../budget/presentation/screens/parameters_review_screen.dart';
 import '../widgets/process_step.dart';
@@ -12,20 +11,17 @@ import '../widgets/processing_status_card.dart';
 import '../widgets/step_state.dart';
 import '../widgets/transcription_card.dart';
 
-class ProcessingScreen extends StatelessWidget {
+class ProcessingScreen extends ConsumerWidget {
   final int grabacionId;
   const ProcessingScreen({super.key, required this.grabacionId});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<ProcessingViewModel>()..start(grabacionId),
-      child: Consumer<ProcessingViewModel>(
-        builder: (context, vm, _) {
-          final transcripcion = vm.grabacion?.transcripcion;
-          final tieneTranscripcion = vm.grabacion?.tieneTranscripcion ?? false;
-          return Scaffold(
-            backgroundColor: AppColors.background,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(processingProvider(grabacionId));
+    final transcripcion = vm.grabacion?.transcripcion;
+    final tieneTranscripcion = vm.grabacion?.tieneTranscripcion ?? false;
+    return Scaffold(
+            backgroundColor: context.colors.background,
             body: SafeArea(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,7 +93,7 @@ class ProcessingScreen extends StatelessWidget {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.textSecondary,
+                                  color: context.colors.textSecondary,
                                 ),
                               ),
                             ),
@@ -136,8 +132,5 @@ class ProcessingScreen extends StatelessWidget {
               ),
             ),
           );
-        },
-      ),
-    );
   }
 }

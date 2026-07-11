@@ -1,94 +1,63 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/infra_providers.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/validation_mixin.dart';
-import '../../../devices/data/services/device_registrar.dart';
-import '../../domain/usecases/auth_usecases.dart';
+import 'auth_providers.dart';
+import 'forgot_password_state.dart';
 
-/// Pasos del flujo de "¿Olvidaste tu contraseña?":
-/// - [email] → pide el correo y envía el código.
-/// - [code] → el usuario ingresa y verifica el código recibido.
-/// - [password] → el usuario define su nueva contraseña.
-enum ForgotStep { email, code, password }
+export 'forgot_password_state.dart';
 
-@injectable
-class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
-  final ForgotPasswordUseCase _forgotUseCase;
-  final VerifyResetCodeUseCase _verifyUseCase;
-  final ResetPasswordUseCase _resetUseCase;
-  final DeviceRegistrar _deviceRegistrar;
+part 'forgot_password_provider.g.dart';
 
-  ForgotPasswordViewModel(
-    this._forgotUseCase,
-    this._verifyUseCase,
-    this._resetUseCase,
-    this._deviceRegistrar,
-  );
-
-  ForgotStep _step = ForgotStep.email;
-  bool _isLoading = false;
-  String? _errorMessage;
+/// Notifier del flujo "¿Olvidaste tu contraseña?" (Riverpod moderno). Reemplaza
+/// al antiguo `ForgotPasswordViewModel` (ChangeNotifier). Estado inmutable en
+/// [ForgotPasswordState]; dependencias resueltas vía `ref`.
+@riverpod
+class ForgotPassword extends _$ForgotPassword with ValidationMixin {
   String _correo = '';
   String _resetToken = '';
-  bool _sessionActive = false;
-  bool _obscurePassword = true;
 
-  String? emailError;
-  String? codeError;
-  String? passwordError;
+  @override
+  ForgotPasswordState build() => const ForgotPasswordState();
 
-  ForgotStep get step => _step;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  bool get obscurePassword => _obscurePassword;
-
-  /// `true` si tras el reset el back-end devolvió sesión (auto-login) → la UI
-  /// va directo al Home; `false` → cae al login manual (fallback).
-  bool get sessionActive => _sessionActive;
-
-  void toggleObscurePassword() {
-    _obscurePassword = !_obscurePassword;
-    notifyListeners();
-  }
+  void toggleObscurePassword() =>
+      state = state.copyWith(obscurePassword: !state.obscurePassword);
 
   void onEmailChanged(String value) {
-    emailError = value.isEmpty ? null : validateEmail(value);
-    notifyListeners();
+    state = state.copyWith(
+        emailError: value.isEmpty ? null : validateEmail(value));
   }
 
   void onCodeChanged(String value) {
-    codeError = value.isEmpty ? null : validateCode(value);
-    notifyListeners();
+    state = state.copyWith(
+        codeError: value.isEmpty ? null : validateCode(value));
   }
 
   /// Vuelve al paso anterior sin perder los datos ya capturados.
   void volverAtras() {
-    _errorMessage = null;
-    if (_step == ForgotStep.password) {
-      _step = ForgotStep.code;
-    } else if (_step == ForgotStep.code) {
-      _step = ForgotStep.email;
+    if (state.step == ForgotStep.password) {
+      state = state.copyWith(step: ForgotStep.code, errorMessage: null);
+    } else if (state.step == ForgotStep.code) {
+      state = state.copyWith(step: ForgotStep.email, errorMessage: null);
     }
-    notifyListeners();
   }
 
   /// Paso 1: envía el código de recuperación al correo. Por anti-enumeración
   /// el back-end responde igual exista o no el correo. Al terminar, avanza al
   /// paso de verificación de código.
   Future<void> enviarCodigo({required String correo}) async {
-    emailError = validateEmail(correo);
+    final emailError = validateEmail(correo);
     if (emailError != null) {
-      notifyListeners();
+      state = state.copyWith(emailError: emailError);
       return;
     }
     _correo = correo;
-    _setLoading();
+    state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      await _forgotUseCase(correo: correo);
-      _isLoading = false;
-      _step = ForgotStep.code;
-      notifyListeners();
+      await ref.read(forgotPasswordUseCaseProvider)(correo: correo);
+      state = state.copyWith(isLoading: false, step: ForgotStep.code);
     } catch (e) {
       _fail(e);
     }
@@ -97,17 +66,16 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
   /// Paso 2: verifica el código contra el back-end. Si es válido, guarda el
   /// `reset_token` recibido y avanza al paso de nueva contraseña.
   Future<void> verificarCodigo({required String code}) async {
-    codeError = validateCode(code);
+    final codeError = validateCode(code);
     if (codeError != null) {
-      notifyListeners();
+      state = state.copyWith(codeError: codeError);
       return;
     }
-    _setLoading();
+    state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      _resetToken = await _verifyUseCase(correo: _correo, code: code);
-      _isLoading = false;
-      _step = ForgotStep.password;
-      notifyListeners();
+      _resetToken =
+          await ref.read(verifyResetCodeUseCaseProvider)(correo: _correo, code: code);
+      state = state.copyWith(isLoading: false, step: ForgotStep.password);
     } catch (e) {
       _fail(e);
     }
@@ -115,44 +83,38 @@ class ForgotPasswordViewModel extends ChangeNotifier with ValidationMixin {
 
   /// Paso 3: establece la nueva contraseña usando el `reset_token` verificado.
   /// El back-end responde con la sesión iniciada → guarda el token (en el
-  /// repositorio) y marca [sessionActive] para que la UI vaya directo al Home.
+  /// repositorio) y marca [ForgotPasswordState.sessionActive] para ir al Home.
   Future<void> restablecer({
     required String nuevaContrasena,
     required VoidCallback onSuccess,
   }) async {
-    passwordError = validatePassword(nuevaContrasena);
+    final passwordError = validatePassword(nuevaContrasena);
     if (passwordError != null) {
-      notifyListeners();
+      state = state.copyWith(passwordError: passwordError);
       return;
     }
-    _setLoading();
+    state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final session = await _resetUseCase(
+      final session = await ref.read(resetPasswordUseCaseProvider)(
         correo: _correo,
         resetToken: _resetToken,
         nuevaContrasena: nuevaContrasena,
       );
-      _sessionActive = session != null;
-      _isLoading = false;
-      notifyListeners();
+      final sessionActive = session != null;
+      state = state.copyWith(isLoading: false, sessionActive: sessionActive);
       // Registra el device token para push (best-effort) si quedó logueado.
-      if (_sessionActive) _deviceRegistrar.register();
+      if (sessionActive) ref.read(deviceRegistrarProvider).register();
       onSuccess();
     } catch (e) {
       _fail(e);
     }
   }
 
-  void _setLoading() {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-  }
-
   void _fail(Object error) {
-    _isLoading = false;
-    _errorMessage =
-        error is ApiException ? error.message : 'Ocurrió un error inesperado';
-    notifyListeners();
+    state = state.copyWith(
+      isLoading: false,
+      errorMessage:
+          error is ApiException ? error.message : 'Ocurrió un error inesperado',
+    );
   }
 }

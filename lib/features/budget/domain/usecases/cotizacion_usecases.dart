@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/cotizacion_entity.dart';
 import '../entities/item_cotizacion.dart';
 import '../entities/producto_entity.dart';
 import '../repositories/cotizacion_repository.dart';
 
-@injectable
 class ObtenerProductosUseCase {
   final CotizacionRepository _repo;
   ObtenerProductosUseCase(this._repo);
@@ -20,7 +18,6 @@ class ObtenerProductosUseCase {
           lat: lat, lng: lng, radioKm: radioKm, categoria: categoria);
 }
 
-@injectable
 class CrearCotizacionUseCase {
   final CotizacionRepository _repo;
   CrearCotizacionUseCase(this._repo);
@@ -39,7 +36,6 @@ class CrearCotizacionUseCase {
       );
 }
 
-@injectable
 class ObtenerPdfUseCase {
   final CotizacionRepository _repo;
   ObtenerPdfUseCase(this._repo);

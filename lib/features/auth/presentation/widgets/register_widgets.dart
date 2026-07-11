@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../shared/widgets/field_label.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../domain/entities/role_entity.dart';
@@ -18,12 +18,12 @@ class RegisterHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Crear cuenta',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -32,7 +32,7 @@ class RegisterHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             height: 1.5,
           ),
         ),
@@ -41,7 +41,7 @@ class RegisterHeader extends StatelessWidget {
   }
 }
 
-class RegisterForm extends StatelessWidget {
+class RegisterForm extends ConsumerWidget {
   final TextEditingController nameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -56,8 +56,9 @@ class RegisterForm extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<RegisterViewModel>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(registerProvider);
+    final notifier = ref.read(registerProvider.notifier);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -66,15 +67,15 @@ class RegisterForm extends StatelessWidget {
         TextField(
           controller: nameController,
           textCapitalization: TextCapitalization.words,
-          onChanged: vm.onNameChanged,
+          onChanged: notifier.onNameChanged,
           decoration: InputDecoration(
             hintText: 'Tu nombre completo',
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.badge_outlined,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 20,
             ),
-            errorText: vm.nombreError,
+            errorText: state.nombreError,
           ),
         ),
         const SizedBox(height: 20),
@@ -83,15 +84,15 @@ class RegisterForm extends StatelessWidget {
         TextField(
           controller: emailController,
           keyboardType: TextInputType.emailAddress,
-          onChanged: vm.onEmailChanged,
+          onChanged: notifier.onEmailChanged,
           decoration: InputDecoration(
             hintText: 'tu@correo.mx',
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.person_outline,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 20,
             ),
-            errorText: vm.emailError,
+            errorText: state.emailError,
           ),
         ),
         const SizedBox(height: 20),
@@ -99,27 +100,27 @@ class RegisterForm extends StatelessWidget {
         const SizedBox(height: 8),
         TextField(
           controller: passwordController,
-          obscureText: vm.obscurePassword,
-          onChanged: vm.onPasswordChanged,
+          obscureText: state.obscurePassword,
+          onChanged: notifier.onPasswordChanged,
           decoration: InputDecoration(
             hintText: '••••••••',
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.lock_outline,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 20,
             ),
             suffixIcon: TextButton(
-              onPressed: vm.toggleObscurePassword,
+              onPressed: notifier.toggleObscurePassword,
               child: Text(
-                vm.obscurePassword ? 'MOSTRAR' : 'OCULTAR',
-                style: const TextStyle(
+                state.obscurePassword ? 'MOSTRAR' : 'OCULTAR',
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ),
-            errorText: vm.passwordError,
+            errorText: state.passwordError,
           ),
         ),
         const SizedBox(height: 20),
@@ -128,11 +129,11 @@ class RegisterForm extends StatelessWidget {
         TextField(
           controller: phoneController,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: '+52 55 1234 5678',
             prefixIcon: Icon(
               Icons.phone_outlined,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 20,
             ),
           ),
@@ -146,25 +147,26 @@ class RegisterForm extends StatelessWidget {
   }
 }
 
-class _RoleDropdown extends StatelessWidget {
+class _RoleDropdown extends ConsumerWidget {
   const _RoleDropdown();
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<RegisterViewModel>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(registerProvider);
+    final notifier = ref.read(registerProvider.notifier);
     return DropdownButtonFormField<RoleEntity>(
-      initialValue: vm.selectedRole,
+      initialValue: state.selectedRole,
       isExpanded: true,
       decoration: InputDecoration(
         hintText: 'Selecciona tu rol',
-        prefixIcon: const Icon(
+        prefixIcon: Icon(
           Icons.work_outline,
-          color: AppColors.textSecondary,
+          color: context.colors.textSecondary,
           size: 20,
         ),
-        errorText: vm.roleError,
+        errorText: state.roleError,
       ),
-      items: vm.roles
+      items: state.roles
           .map(
             (role) => DropdownMenuItem<RoleEntity>(
               value: role,
@@ -172,12 +174,12 @@ class _RoleDropdown extends StatelessWidget {
             ),
           )
           .toList(),
-      onChanged: vm.isLoading ? null : vm.selectRole,
+      onChanged: state.isLoading ? null : notifier.selectRole,
     );
   }
 }
 
-class RegisterButton extends StatelessWidget {
+class RegisterButton extends ConsumerWidget {
   final TextEditingController nameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -192,22 +194,22 @@ class RegisterButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<RegisterViewModel>();
-    if (vm.requiresTwoFactor) return const SizedBox.shrink();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(registerProvider);
+    if (state.requiresTwoFactor) return const SizedBox.shrink();
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: vm.isLoading
+        onPressed: state.isLoading
             ? null
-            : () => vm.register(
+            : () => ref.read(registerProvider.notifier).register(
                   nombre: nameController.text,
                   correo: emailController.text,
                   contrasena: passwordController.text,
                   telefono: phoneController.text,
                 ),
-        child: vm.isLoading
+        child: state.isLoading
             ? const SizedBox(
                 width: 20,
                 height: 20,
@@ -223,14 +225,14 @@ class RegisterButton extends StatelessWidget {
 }
 
 /// Sección visible solo tras el registro: campo de código 2FA + verificar.
-class RegisterTwoFactorSection extends StatelessWidget {
+class RegisterTwoFactorSection extends ConsumerWidget {
   final TextEditingController codeController;
   const RegisterTwoFactorSection({super.key, required this.codeController});
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<RegisterViewModel>();
-    if (!vm.requiresTwoFactor) return const SizedBox.shrink();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(registerProvider);
+    if (!state.requiresTwoFactor) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +242,7 @@ class RegisterTwoFactorSection extends StatelessWidget {
           'Te enviamos un código a tu correo para confirmar tu cuenta.',
           style: TextStyle(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             height: 1.5,
           ),
         ),
@@ -250,12 +252,12 @@ class RegisterTwoFactorSection extends StatelessWidget {
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             hintText: 'Código de verificación',
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.shield_outlined,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 20,
             ),
-            errorText: vm.codeError,
+            errorText: state.codeError,
           ),
         ),
         const SizedBox(height: 16),
@@ -263,9 +265,9 @@ class RegisterTwoFactorSection extends StatelessWidget {
           width: double.infinity,
           height: 52,
           child: ElevatedButton(
-            onPressed: vm.isLoading
+            onPressed: state.isLoading
                 ? null
-                : () => vm.verifyCode(
+                : () => ref.read(registerProvider.notifier).verifyCode(
                       code: codeController.text,
                       onSuccess: () => Navigator.pushAndRemoveUntil(
                         context,
@@ -273,7 +275,7 @@ class RegisterTwoFactorSection extends StatelessWidget {
                         (route) => false,
                       ),
                     ),
-            child: vm.isLoading
+            child: state.isLoading
                 ? const SizedBox(
                     width: 20,
                     height: 20,
@@ -291,13 +293,13 @@ class RegisterTwoFactorSection extends StatelessWidget {
 }
 
 /// Banner de error con el mensaje del back-end (incluye errores 422).
-class RegisterErrorBanner extends StatelessWidget {
+class RegisterErrorBanner extends ConsumerWidget {
   const RegisterErrorBanner({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<RegisterViewModel>();
-    if (vm.state != RegisterState.error || vm.errorMessage == null) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(registerProvider);
+    if (state.status != RegisterStatus.error || state.errorMessage == null) {
       return const SizedBox.shrink();
     }
     return Padding(
@@ -309,7 +311,7 @@ class RegisterErrorBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              vm.errorMessage!,
+              state.errorMessage!,
               style: const TextStyle(color: Colors.red, fontSize: 13),
             ),
           ),
@@ -329,18 +331,18 @@ class RegisterLoginRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
+        Text(
           '¿Ya tienes cuenta? ',
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 14, color: context.colors.textSecondary),
         ),
         GestureDetector(
           onTap: onTap,
-          child: const Text(
+          child: Text(
             'Inicia sesión',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: context.colors.primary,
             ),
           ),
         ),

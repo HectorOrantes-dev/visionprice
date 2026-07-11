@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import 'step_state.dart';
 
 /// Fila de un paso del procesamiento (transcribir, interpretar…).
@@ -24,9 +24,9 @@ class ProcessStep extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Row(
         children: [
@@ -34,18 +34,18 @@ class ProcessStep extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: _iconBg,
+              color: _iconBg(context),
               borderRadius: BorderRadius.circular(8),
             ),
             child: state == ProcessStepState.inProgress
-                ? const Padding(
+                ? Padding(
                     padding: EdgeInsets.all(8),
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: AppColors.primary,
+                      color: context.colors.primary,
                     ),
                   )
-                : Icon(icon, size: 18, color: _iconColor),
+                : Icon(icon, size: 18, color: _iconColor(context)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -54,10 +54,10 @@ class ProcessStep extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -66,8 +66,8 @@ class ProcessStep extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     color: state == ProcessStepState.waiting
-                        ? AppColors.textHint
-                        : AppColors.textSecondary,
+                        ? context.colors.textHint
+                        : context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -78,25 +78,25 @@ class ProcessStep extends StatelessWidget {
     );
   }
 
-  Color get _iconBg {
+  Color _iconBg(BuildContext context) {
     switch (state) {
       case ProcessStepState.done:
-        return AppColors.successLight;
+        return context.colors.successLight;
       case ProcessStepState.inProgress:
-        return AppColors.primaryLight;
+        return context.colors.primaryLight;
       case ProcessStepState.waiting:
-        return AppColors.surfaceVariant;
+        return context.colors.surfaceVariant;
     }
   }
 
-  Color get _iconColor {
+  Color _iconColor(BuildContext context) {
     switch (state) {
       case ProcessStepState.done:
-        return AppColors.success;
+        return context.colors.success;
       case ProcessStepState.inProgress:
-        return AppColors.primary;
+        return context.colors.primary;
       case ProcessStepState.waiting:
-        return AppColors.textHint;
+        return context.colors.textHint;
     }
   }
 }

@@ -1,51 +1,68 @@
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/perfil_entity.dart';
-import '../../domain/usecases/auth_usecases.dart';
+import 'auth_providers.dart';
 
-/// Estado de la pantalla de Perfil:
-/// - [loading] → cargando el perfil desde el back-end.
-/// - [success] → [perfil] disponible.
-/// - [error] → ver [errorMessage].
-enum PerfilState { loading, success, error }
+part 'perfil_provider.g.dart';
 
-/// ViewModel de la pantalla "Perfil". `@injectable` (factory): una instancia
-/// por pantalla, con el [GetPerfilUseCase] ya inyectado. Carga el perfil
-/// (`GET /api/v1/me/perfil`) al crearse.
-@injectable
-class PerfilViewModel extends ChangeNotifier {
-  final GetPerfilUseCase _getPerfilUseCase;
+/// Estado de la pantalla de Perfil.
+enum PerfilStatus { loading, success, error }
 
-  PerfilViewModel(this._getPerfilUseCase) {
-    load();
+class PerfilState {
+  final PerfilStatus status;
+  final String? errorMessage;
+  final PerfilEntity? perfil;
+
+  const PerfilState({
+    this.status = PerfilStatus.loading,
+    this.errorMessage,
+    this.perfil,
+  });
+
+  bool get isLoading => status == PerfilStatus.loading;
+
+  static const _keep = Object();
+
+  PerfilState copyWith({
+    PerfilStatus? status,
+    Object? errorMessage = _keep,
+    Object? perfil = _keep,
+  }) {
+    return PerfilState(
+      status: status ?? this.status,
+      errorMessage:
+          errorMessage == _keep ? this.errorMessage : errorMessage as String?,
+      perfil: perfil == _keep ? this.perfil : perfil as PerfilEntity?,
+    );
   }
+}
 
-  PerfilState _state = PerfilState.loading;
-  String? _errorMessage;
-  PerfilEntity? _perfil;
-
-  PerfilState get state => _state;
-  String? get errorMessage => _errorMessage;
-  PerfilEntity? get perfil => _perfil;
-  bool get isLoading => _state == PerfilState.loading;
+/// Notifier de la pantalla "Perfil" (Riverpod moderno). Carga el perfil
+/// (`GET /api/v1/me/perfil`) al observarse. Reemplaza al `PerfilViewModel`.
+@riverpod
+class Perfil extends _$Perfil {
+  @override
+  PerfilState build() {
+    load();
+    return const PerfilState();
+  }
 
   /// Carga el perfil. Tras la primera vez viene de la caché del repositorio
   /// (sin pegar a la red). Usa [forceRefresh] para forzar una recarga real.
   Future<void> load({bool forceRefresh = false}) async {
-    _state = PerfilState.loading;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(status: PerfilStatus.loading, errorMessage: null);
     try {
-      _perfil = await _getPerfilUseCase(forceRefresh: forceRefresh);
-      _state = PerfilState.success;
+      final perfil =
+          await ref.read(getPerfilUseCaseProvider)(forceRefresh: forceRefresh);
+      state = state.copyWith(status: PerfilStatus.success, perfil: perfil);
     } catch (e) {
-      _state = PerfilState.error;
-      _errorMessage =
-          e is ApiException ? e.message : 'No se pudo cargar el perfil';
+      state = state.copyWith(
+        status: PerfilStatus.error,
+        errorMessage:
+            e is ApiException ? e.message : 'No se pudo cargar el perfil',
+      );
     }
-    notifyListeners();
   }
 
   /// Fuerza una recarga desde el back-end (p. ej. pull-to-refresh).

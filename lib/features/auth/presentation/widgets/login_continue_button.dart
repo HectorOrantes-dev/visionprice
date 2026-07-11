@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../home/presentation/screens/home_screen.dart';
 import '../providers/login_provider.dart';
 
-class LoginContinueButton extends StatelessWidget {
+class LoginContinueButton extends ConsumerWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
 
@@ -15,18 +15,18 @@ class LoginContinueButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<LoginViewModel>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(loginProvider);
     // Una vez enviado el código 2FA, esta sección cede el paso a la de
     // verificación (TwoFactorSection).
-    if (vm.requiresTwoFactor) return const SizedBox.shrink();
+    if (state.requiresTwoFactor) return const SizedBox.shrink();
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: vm.isLoading
+        onPressed: state.isLoading
             ? null
-            : () => vm.login(
+            : () => ref.read(loginProvider.notifier).login(
                   email: emailController.text,
                   password: passwordController.text,
                   onSuccess: () => Navigator.pushReplacement(
@@ -34,7 +34,7 @@ class LoginContinueButton extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const HomeScreen()),
                   ),
                 ),
-        child: vm.isLoading
+        child: state.isLoading
             ? const SizedBox(
                 width: 20,
                 height: 20,

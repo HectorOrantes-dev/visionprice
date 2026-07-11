@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Enlace al PDF generado, con botón para copiar. Antes el privado `_PdfLink`.
 class PdfLink extends StatelessWidget {
@@ -14,23 +14,23 @@ class PdfLink extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.successLight,
+        color: context.colors.successLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          const Icon(Icons.check_circle, color: AppColors.success, size: 18),
+          Icon(Icons.check_circle, color: context.colors.success, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               url,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
+              style: TextStyle(fontSize: 12, color: context.colors.textPrimary),
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.copy, size: 18, color: AppColors.primary),
+            icon: Icon(Icons.copy, size: 18, color: context.colors.primary),
             onPressed: () {
               Clipboard.setData(ClipboardData(text: url));
               ScaffoldMessenger.of(context).showSnackBar(

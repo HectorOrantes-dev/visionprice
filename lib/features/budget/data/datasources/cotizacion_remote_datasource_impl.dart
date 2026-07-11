@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
@@ -7,7 +6,6 @@ import '../../domain/entities/cotizacion_entity.dart';
 import '../../domain/entities/producto_entity.dart';
 import 'cotizacion_remote_datasource.dart';
 
-@LazySingleton(as: CotizacionRemoteDataSource)
 class CotizacionRemoteDataSourceImpl implements CotizacionRemoteDataSource {
   final ApiClient _client;
   CotizacionRemoteDataSourceImpl(this._client);

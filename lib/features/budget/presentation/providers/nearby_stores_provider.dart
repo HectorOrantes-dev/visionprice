@@ -1,70 +1,35 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../../core/di/infra_providers.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/services/location_service.dart';
+import '../../../recording/domain/entities/superficie_entity.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../../domain/entities/item_cotizacion.dart';
-import '../../domain/entities/producto_entity.dart';
-import '../../domain/usecases/cotizacion_usecases.dart';
-import '../../../recording/domain/entities/superficie_entity.dart';
+import 'budget_providers.dart';
+import 'nearby_stores_state.dart';
 
-/// ViewModel de "Ferreterías cercanas": obtiene la ubicación, lista los
-/// productos cercanos y permite elegir a qué superficie (piso/paredes) se
-/// aplica cada uno para luego crear la cotización.
-@injectable
-class NearbyStoresViewModel extends ChangeNotifier {
-  final ObtenerProductosUseCase _obtenerProductos;
-  final CrearCotizacionUseCase _crearCotizacion;
-  final LocationService _location;
+export 'nearby_stores_state.dart';
 
-  NearbyStoresViewModel(
-    this._obtenerProductos,
-    this._crearCotizacion,
-    this._location,
-  );
+part 'nearby_stores_provider.g.dart';
 
+/// Notifier de "Ferreterías cercanas" (Riverpod moderno). Obtiene la ubicación,
+/// lista los productos cercanos y permite elegir a qué superficie se aplica cada
+/// uno para crear la cotización. Reemplaza al `NearbyStoresViewModel`.
+@riverpod
+class NearbyStores extends _$NearbyStores {
   int _proyectoId = 0;
   double? _pisoM2;
   double? _paredesM2;
-
-  bool _loading = true;
-  bool _creating = false;
-  bool _usandoUbicacionAprox = false;
-  String? _errorMessage;
-  List<ProductoEntity> _productos = const [];
-  List<SuperficieEntity>? _superficies;
-
   LatLng? _lastFetchPosition;
   StreamSubscription<LatLng>? _locationSub;
-  bool _showUpdatePrompt = false;
-
-  /// Legacy: producto_id (string) → 'piso' | 'paredes'
-  final Map<String, String> _seleccionLegacy = {};
-
-  /// Nuevo: SuperficieEntity → producto_id (string)
-  final Map<SuperficieEntity, String> _seleccionNueva = {};
-
-  bool get loading => _loading;
-  bool get creating => _creating;
-  bool get usandoUbicacionAprox => _usandoUbicacionAprox;
-  String? get errorMessage => _errorMessage;
-  List<ProductoEntity> get productos => _productos;
-  List<SuperficieEntity>? get superficies => _superficies;
-  bool get showUpdatePrompt => _showUpdatePrompt;
-  
-  int get seleccionados => _superficies != null && _superficies!.isNotEmpty 
-      ? _seleccionNueva.length 
-      : _seleccionLegacy.length;
-
-  bool isLegacySelected(String productoId, String aplicarA) => _seleccionLegacy[productoId] == aplicarA;
-  bool isNuevaSelected(String productoId, SuperficieEntity sup) => _seleccionNueva[sup] == productoId;
 
   @override
-  void dispose() {
-    _locationSub?.cancel();
-    super.dispose();
+  NearbyStoresState build() {
+    ref.onDispose(() => _locationSub?.cancel());
+    return const NearbyStoresState();
   }
 
   Future<void> load({
@@ -76,116 +41,113 @@ class NearbyStoresViewModel extends ChangeNotifier {
     _proyectoId = proyectoId;
     _pisoM2 = pisoM2;
     _paredesM2 = paredesM2;
-    _superficies = superficies;
-    _loading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(
+      superficies: superficies,
+      loading: true,
+      errorMessage: null,
+    );
+    await _fetchProductos(
+        onError: 'No se pudieron cargar las ferreterías.');
+    _listenLocation();
+  }
+
+  Future<void> _fetchProductos({required String onError}) async {
+    final location = ref.read(locationServiceProvider);
     try {
-      final ubic = await _location.current();
+      final ubic = await location.current();
       _lastFetchPosition = ubic;
-      _usandoUbicacionAprox = ubic == null;
       final pos = ubic ?? LocationService.fallback;
-      _productos = await _obtenerProductos(lat: pos.lat, lng: pos.lng);
+      final productos = await ref.read(obtenerProductosUseCaseProvider)(
+          lat: pos.lat, lng: pos.lng);
+      state = state.copyWith(
+        usandoUbicacionAprox: ubic == null,
+        productos: productos,
+        loading: false,
+      );
     } catch (e) {
-      _errorMessage = e is ApiException
-          ? e.message
-          : 'No se pudieron cargar las ferreterías.';
-    } finally {
-      _loading = false;
-      notifyListeners();
-      _listenLocation();
+      state = state.copyWith(
+        loading: false,
+        errorMessage: e is ApiException ? e.message : onError,
+      );
     }
   }
 
   void _listenLocation() {
     _locationSub?.cancel();
-    final stream = _location.getPositionStream();
+    final location = ref.read(locationServiceProvider);
+    final stream = location.getPositionStream();
     if (stream == null) return;
     _locationSub = stream.listen((newPos) {
       if (_lastFetchPosition != null) {
-        final dist = _location.distanceBetween(_lastFetchPosition!, newPos);
-        if (dist > 500 && !_showUpdatePrompt) {
-          _showUpdatePrompt = true;
-          notifyListeners();
+        final dist = location.distanceBetween(_lastFetchPosition!, newPos);
+        if (dist > 500 && !state.showUpdatePrompt) {
+          state = state.copyWith(showUpdatePrompt: true);
         }
       }
     });
   }
 
   Future<void> refetchLocation() async {
-    _showUpdatePrompt = false;
-    _loading = true;
-    _errorMessage = null;
-    notifyListeners();
-    try {
-      final ubic = await _location.current();
-      _lastFetchPosition = ubic;
-      _usandoUbicacionAprox = ubic == null;
-      final pos = ubic ?? LocationService.fallback;
-      _productos = await _obtenerProductos(lat: pos.lat, lng: pos.lng);
-    } catch (e) {
-      _errorMessage = e is ApiException
-          ? e.message
-          : 'No se pudo actualizar la ubicación.';
-    } finally {
-      _loading = false;
-      notifyListeners();
-    }
+    state = state.copyWith(
+        showUpdatePrompt: false, loading: true, errorMessage: null);
+    await _fetchProductos(onError: 'No se pudo actualizar la ubicación.');
   }
 
   void toggleLegacy(String productoId, String aplicarA) {
-    if (_seleccionLegacy[productoId] == aplicarA) {
-      _seleccionLegacy.remove(productoId);
+    final next = Map<String, String>.from(state.seleccionLegacy);
+    if (next[productoId] == aplicarA) {
+      next.remove(productoId);
     } else {
-      _seleccionLegacy[productoId] = aplicarA;
+      next[productoId] = aplicarA;
     }
-    notifyListeners();
+    state = state.copyWith(seleccionLegacy: next);
   }
 
   void toggleNueva(String productoId, SuperficieEntity sup) {
-    if (_seleccionNueva[sup] == productoId) {
-      _seleccionNueva.remove(sup);
+    final next = Map<SuperficieEntity, String>.from(state.seleccionNueva);
+    if (next[sup] == productoId) {
+      next.remove(sup);
     } else {
-      _seleccionNueva[sup] = productoId;
+      next[sup] = productoId;
     }
-    notifyListeners();
+    state = state.copyWith(seleccionNueva: next);
   }
 
   Future<void> generar({
     required void Function(CotizacionEntity) onCreated,
   }) async {
+    final usaNuevo = state.superficies != null && state.superficies!.isNotEmpty;
     List<ItemCotizacion> items;
-    final usaNuevo = _superficies != null && _superficies!.isNotEmpty;
 
     if (usaNuevo) {
-      if (_seleccionNueva.isEmpty) {
-        _errorMessage = 'Selecciona al menos un producto para una superficie.';
-        notifyListeners();
+      if (state.seleccionNueva.isEmpty) {
+        state = state.copyWith(
+            errorMessage:
+                'Selecciona al menos un producto para una superficie.');
         return;
       }
-      items = _seleccionNueva.entries
+      items = state.seleccionNueva.entries
           .map((e) => ItemCotizacion(
-                productoId: e.value, // ya es String
+                productoId: e.value,
                 areaM2: e.key.areaM2,
                 descripcion: e.key.descripcion,
               ))
           .toList();
     } else {
-      if (_seleccionLegacy.isEmpty) {
-        _errorMessage = 'Selecciona al menos un producto (piso o paredes).';
-        notifyListeners();
+      if (state.seleccionLegacy.isEmpty) {
+        state = state.copyWith(
+            errorMessage:
+                'Selecciona al menos un producto (piso o paredes).');
         return;
       }
-      items = _seleccionLegacy.entries
+      items = state.seleccionLegacy.entries
           .map((e) => ItemCotizacion(productoId: e.key, aplicarA: e.value))
           .toList();
     }
 
-    _creating = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(creating: true, errorMessage: null);
     try {
-      final cotizacion = await _crearCotizacion(
+      final cotizacion = await ref.read(crearCotizacionUseCaseProvider)(
         proyectoId: _proyectoId,
         pisoM2: _pisoM2,
         paredesM2: _paredesM2,
@@ -193,11 +155,12 @@ class NearbyStoresViewModel extends ChangeNotifier {
       );
       onCreated(cotizacion);
     } catch (e) {
-      _errorMessage =
-          e is ApiException ? e.message : 'No se pudo crear la cotización.';
+      state = state.copyWith(
+        errorMessage:
+            e is ApiException ? e.message : 'No se pudo crear la cotización.',
+      );
     } finally {
-      _creating = false;
-      notifyListeners();
+      state = state.copyWith(creating: false);
     }
   }
 }

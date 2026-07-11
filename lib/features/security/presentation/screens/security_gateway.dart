@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../rasp_checker.dart';
 import '../../security_checker.dart';
 import 'security_blocked_screen.dart';
@@ -77,19 +77,19 @@ class _SecurityGatewayState extends State<SecurityGateway>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: AppColors.background,
+      return Scaffold(
+        backgroundColor: context.colors.background,
         body: SafeArea(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(color: AppColors.primary),
+                CircularProgressIndicator(color: context.colors.primary),
                 SizedBox(height: 20),
                 Text(
                   'Verificando seguridad del dispositivo…',
                   style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                       fontWeight: FontWeight.w500),
                 ),
               ],

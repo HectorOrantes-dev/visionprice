@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:injectable/injectable.dart';
 
 /// Almacén del `access_token` JWT con **persistencia segura**
 /// (`flutter_secure_storage` → Keystore en Android / Keychain en iOS).
@@ -11,7 +10,6 @@ import 'package:injectable/injectable.dart';
 ///
 /// Mantiene además una copia en memoria ([_token]) para acceso síncrono desde
 /// el [ApiClient] al construir el header `Authorization`.
-@lazySingleton
 class TokenStorage extends ChangeNotifier {
   static const _kKey = 'access_token';
   static const _storage = FlutterSecureStorage(

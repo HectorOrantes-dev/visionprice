@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Aviso de baja confianza del análisis. Antes el privado `_LowConfidenceBanner`.
 class LowConfidenceBanner extends StatelessWidget {
@@ -14,20 +14,20 @@ class LowConfidenceBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.warningLight,
+        color: context.colors.warningLight,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+        border: Border.all(color: context.colors.warning.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_outlined,
-              size: 16, color: AppColors.warning),
+          Icon(Icons.warning_amber_outlined,
+              size: 16, color: context.colors.warning),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               'Confianza $pct — revisa las cantidades antes de continuar',
-              style: const TextStyle(
-                color: AppColors.warning,
+              style: TextStyle(
+                color: context.colors.warning,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Enlace al Aviso de Privacidad mostrado al pie de la vista de login.
 class LoginPrivacyNotice extends StatelessWidget {
@@ -13,9 +13,9 @@ class LoginPrivacyNotice extends StatelessWidget {
       child: Text.rich(
         TextSpan(
           text: 'Al continuar, aceptas nuestro ',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12.5,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             height: 1.5,
           ),
           children: [
@@ -23,12 +23,12 @@ class LoginPrivacyNotice extends StatelessWidget {
               alignment: PlaceholderAlignment.middle,
               child: GestureDetector(
                 onTap: onTap,
-                child: const Text(
+                child: Text(
                   'Aviso de Privacidad',
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    color: context.colors.primary,
                     height: 1.5,
                   ),
                 ),

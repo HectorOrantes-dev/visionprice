@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-@lazySingleton
 class LocalDatabase {
   Database? _database;
 

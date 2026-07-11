@@ -1,10 +1,8 @@
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/notificacion_entity.dart';
 import '../../domain/repositories/notificacion_repository.dart';
 import '../datasources/notificacion_remote_datasource.dart';
 
-@LazySingleton(as: NotificacionRepository)
 class NotificacionRepositoryImpl implements NotificacionRepository {
   final NotificacionRemoteDataSource _remote;
   NotificacionRepositoryImpl(this._remote);

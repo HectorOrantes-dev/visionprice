@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Encabezado de la pantalla de procesamiento. Antes `_ProcessingAppBar`.
 class ProcessingAppBar extends StatelessWidget {
@@ -22,37 +22,37 @@ class ProcessingAppBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios,
-                size: 18, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back_ios,
+                size: 18, color: context.colors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: context.colors.primaryLight,
               borderRadius: BorderRadius.circular(10),
             ),
             child:
-                const Icon(Icons.settings, color: AppColors.primary, size: 20),
+                Icon(Icons.settings, color: context.colors.primary, size: 20),
           ),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Procesando',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               Text(
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],

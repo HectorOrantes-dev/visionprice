@@ -1,10 +1,8 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/grabacion_entity.dart';
 import '../repositories/grabacion_repository.dart';
 
 /// Sube el audio grabado al back-end.
-@injectable
 class SubirGrabacionUseCase {
   final GrabacionRepository _repo;
   SubirGrabacionUseCase(this._repo);

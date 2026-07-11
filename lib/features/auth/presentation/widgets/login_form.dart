@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../shared/widgets/field_label.dart';
 import '../providers/login_provider.dart';
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends ConsumerWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
 
@@ -16,8 +16,9 @@ class LoginForm extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<LoginViewModel>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(loginProvider);
+    final notifier = ref.read(loginProvider.notifier);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -26,15 +27,15 @@ class LoginForm extends StatelessWidget {
         TextField(
           controller: emailController,
           keyboardType: TextInputType.emailAddress,
-          onChanged: vm.onEmailChanged,
+          onChanged: notifier.onEmailChanged,
           decoration: InputDecoration(
             hintText: 'tu@correo.mx',
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.person_outline,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 20,
             ),
-            errorText: vm.emailError,
+            errorText: state.emailError,
           ),
         ),
         const SizedBox(height: 20),
@@ -42,27 +43,27 @@ class LoginForm extends StatelessWidget {
         const SizedBox(height: 8),
         TextField(
           controller: passwordController,
-          obscureText: vm.obscurePassword,
-          onChanged: vm.onPasswordChanged,
+          obscureText: state.obscurePassword,
+          onChanged: notifier.onPasswordChanged,
           decoration: InputDecoration(
             hintText: '••••••••',
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.lock_outline,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               size: 20,
             ),
             suffixIcon: TextButton(
-              onPressed: vm.toggleObscurePassword,
+              onPressed: notifier.toggleObscurePassword,
               child: Text(
-                vm.obscurePassword ? 'MOSTRAR' : 'OCULTAR',
-                style: const TextStyle(
+                state.obscurePassword ? 'MOSTRAR' : 'OCULTAR',
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ),
-            errorText: vm.passwordError,
+            errorText: state.passwordError,
           ),
         ),
       ],

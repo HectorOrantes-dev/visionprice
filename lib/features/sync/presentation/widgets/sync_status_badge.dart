@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import 'sync_status.dart';
 
 /// Indicador visual del estado de un audio (porcentaje, "Pendiente", "Listo"
@@ -17,39 +17,39 @@ class SyncStatusBadge extends StatelessWidget {
       case SyncStatus.uploading:
         return Text(
           '${((progress ?? 0) * 100).toInt()}%',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.primary,
+            color: context.colors.primary,
           ),
         );
       case SyncStatus.pending:
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.warningLight,
+            color: context.colors.warningLight,
             borderRadius: BorderRadius.circular(6),
           ),
-          child: const Text(
+          child: Text(
             'Pendiente',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.warning,
+              color: context.colors.warning,
             ),
           ),
         );
       case SyncStatus.ready:
-        return const Row(
+        return Row(
           children: [
-            Icon(Icons.check, size: 16, color: AppColors.success),
+            Icon(Icons.check, size: 16, color: context.colors.success),
             SizedBox(width: 4),
             Text(
               'Listo',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.success,
+                color: context.colors.success,
               ),
             ),
           ],
@@ -58,21 +58,21 @@ class SyncStatusBadge extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const Text(
+            Text(
               'Error',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.error,
+                color: context.colors.error,
               ),
             ),
             GestureDetector(
               onTap: () {},
-              child: const Text(
+              child: Text(
                 'Reintentar',
                 style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.primary,
+                  color: context.colors.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),

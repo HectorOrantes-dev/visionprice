@@ -1,10 +1,8 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/grabacion_entity.dart';
 import '../repositories/grabacion_repository.dart';
 
 /// Detalle de una grabación por id.
-@injectable
 class ObtenerGrabacionUseCase {
   final GrabacionRepository _repo;
   ObtenerGrabacionUseCase(this._repo);

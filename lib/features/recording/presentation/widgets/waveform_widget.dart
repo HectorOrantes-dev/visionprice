@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Onda decorativa que reacciona a si se está grabando. Antes `_WaveformWidget`.
 class WaveformWidget extends StatelessWidget {
@@ -23,7 +23,7 @@ class WaveformWidget extends StatelessWidget {
             width: 3,
             height: heights[i],
             decoration: BoxDecoration(
-              color: isRecording ? AppColors.primary : AppColors.textHint,
+              color: isRecording ? context.colors.primary : context.colors.textHint,
               borderRadius: BorderRadius.circular(2),
             ),
           );

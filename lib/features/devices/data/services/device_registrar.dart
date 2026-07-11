@@ -1,6 +1,5 @@
 import 'dart:io' show Platform;
 
-import 'package:injectable/injectable.dart';
 
 import '../../../security/services/notification_service.dart';
 import '../../domain/usecases/dispositivo_usecases.dart';
@@ -8,7 +7,6 @@ import '../../domain/usecases/dispositivo_usecases.dart';
 /// Orquesta el registro/baja del device token FCM contra el back-end.
 /// `@lazySingleton`. Se llama tras iniciar sesión ([register]) y al cerrar
 /// sesión ([unregister]). Nunca lanza (el push es best-effort).
-@lazySingleton
 class DeviceRegistrar {
   final RegistrarDispositivoUseCase _registrar;
   final BorrarDispositivoUseCase _borrar;

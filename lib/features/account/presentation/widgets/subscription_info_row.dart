@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Fila etiqueta/valor dentro de una tarjeta de suscripción. Antes `_Row`.
 class SubscriptionInfoRow extends StatelessWidget {
@@ -19,14 +19,14 @@ class SubscriptionInfoRow extends StatelessWidget {
       child: Row(
         children: [
           Text(label,
-              style: const TextStyle(
-                  fontSize: 13, color: AppColors.textSecondary)),
+              style: TextStyle(
+                  fontSize: 13, color: context.colors.textSecondary)),
           const Spacer(),
           Text(value,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary)),
+                  color: context.colors.textPrimary)),
         ],
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_palette.dart';
 import 'monogram.dart';
 
 /// Logo de marca de VisionPrice: el monograma **VP** dentro de un cuadro
@@ -41,7 +41,7 @@ class VisionPriceLogo extends StatelessWidget {
             fontSize: size * 0.46,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
       ],

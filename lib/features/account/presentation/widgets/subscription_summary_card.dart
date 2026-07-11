@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/subscription_entity.dart';
 
 /// Tarjeta "Resumen de suscripción" con acento a la izquierda: plan, precio
@@ -19,9 +19,9 @@ class SubscriptionSummaryCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -36,7 +36,7 @@ class SubscriptionSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Acento vertical de marca a la izquierda.
-            Container(width: 4, color: AppColors.primary),
+            Container(width: 4, color: context.colors.primary),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -50,21 +50,21 @@ class SubscriptionSummaryCard extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Resumen de suscripción',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
+                                  color: context.colors.textSecondary,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 plan,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.primary,
+                                  color: context.colors.primary,
                                 ),
                               ),
                             ],
@@ -76,17 +76,17 @@ class SubscriptionSummaryCard extends StatelessWidget {
                           children: [
                             Text(
                               precio,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
+                                color: context.colors.textPrimary,
                               ),
                             ),
-                            const Text(
+                            Text(
                               'por mes',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
+                                color: context.colors.textSecondary,
                               ),
                             ),
                           ],
@@ -94,7 +94,7 @@ class SubscriptionSummaryCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 14),
-                    Divider(height: 1, color: AppColors.border),
+                    Divider(height: 1, color: context.colors.border),
                     const SizedBox(height: 14),
                     Row(
                       children: [
@@ -103,14 +103,14 @@ class SubscriptionSummaryCard extends StatelessWidget {
                             proximo != null
                                 ? 'Próximo cargo: $proximo'
                                 : 'Sin próximo cargo',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.textSecondary,
+                              color: context.colors.textSecondary,
                             ),
                           ),
                         ),
-                        const Icon(Icons.info_outline,
-                            size: 20, color: AppColors.info),
+                        Icon(Icons.info_outline,
+                            size: 20, color: context.colors.info),
                       ],
                     ),
                   ],

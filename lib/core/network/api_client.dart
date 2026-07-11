@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:injectable/injectable.dart';
 
 import '../storage/token_storage.dart';
 import '../utils/json_codec.dart';
@@ -14,7 +13,6 @@ import 'api_exception.dart';
 /// `@lazySingleton`: se comparte en toda la app y mantiene colaboradores
 /// pesados ([http.Client]). Inyecta [http.Client] (provisto por
 /// `RegisterModule`) y [TokenStorage] para adjuntar el `Bearer` token.
-@lazySingleton
 class ApiClient {
   final http.Client _client;
   final TokenStorage _tokenStorage;

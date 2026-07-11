@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../../../core/storage/token_storage.dart';
@@ -10,7 +9,6 @@ import '../../../../core/storage/local_database.dart';
 import '../data/datasources/sync_local_datasource.dart';
 import '../domain/entities/sync_item_entity.dart';
 
-@lazySingleton
 class SyncService extends ChangeNotifier {
   final SyncLocalDataSource _localDS;
   final ApiClient _apiClient;

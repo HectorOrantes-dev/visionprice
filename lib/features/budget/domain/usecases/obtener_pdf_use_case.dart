@@ -1,9 +1,7 @@
-import 'package:injectable/injectable.dart';
 
 import '../repositories/cotizacion_repository.dart';
 
 /// Obtiene el PDF de una cotización.
-@injectable
 class ObtenerPdfUseCase {
   final CotizacionRepository _repo;
   ObtenerPdfUseCase(this._repo);

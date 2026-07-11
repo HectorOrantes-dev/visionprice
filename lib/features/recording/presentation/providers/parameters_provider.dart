@@ -1,73 +1,68 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/calculo_entity.dart';
-import '../../domain/entities/grabacion_entity.dart';
-import '../../domain/usecases/grabacion_usecases.dart';
+import 'parameters_state.dart';
+import 'recording_providers.dart';
 
-/// ViewModel de la pantalla de parámetros: trae el detalle de la grabación
-/// (transcripción + confianza + extracción) y el cálculo de m².
-@injectable
-class ParametersViewModel extends ChangeNotifier {
-  final ObtenerGrabacionUseCase _obtener;
-  final CalcularMetrosUseCase _calcular;
-  final ActualizarTranscripcionUseCase _actualizar;
-  
-  ParametersViewModel(this._obtener, this._calcular, this._actualizar);
+export 'parameters_state.dart';
 
-  bool _loading = true;
-  String? _errorMessage;
-  GrabacionEntity? _grabacion;
-  CalculoEntity? _calculo;
-  String? _textoEditado;
+part 'parameters_provider.g.dart';
 
-  bool get loading => _loading;
-  String? get errorMessage => _errorMessage;
-  GrabacionEntity? get grabacion => _grabacion;
-  CalculoEntity? get calculo => _calculo;
-  String? get textoEditado => _textoEditado;
+/// Notifier `.family` (por `grabacionId`) de la pantalla de parámetros. Trae el
+/// detalle de la grabación (transcripción + confianza + extracción) y el
+/// cálculo de m². Reemplaza al antiguo `ParametersViewModel` (ChangeNotifier).
+@riverpod
+class Parameters extends _$Parameters {
+  @override
+  ParametersState build(int grabacionId) {
+    load(grabacionId);
+    return const ParametersState(loading: true);
+  }
 
   Future<void> load(int grabacionId) async {
-    _loading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(loading: true, errorMessage: null);
     try {
-      _grabacion = await _obtener(grabacionId);
-      if (_grabacion?.superficies.isEmpty ?? true) {
-        _calculo = await _calcular(grabacionId: grabacionId);
+      final grabacion = await ref.read(obtenerGrabacionUseCaseProvider)(grabacionId);
+      CalculoEntity? calculo = state.calculo;
+      if (grabacion.superficies.isEmpty) {
+        calculo = await ref.read(calcularMetrosUseCaseProvider)(
+            grabacionId: grabacionId);
       }
+      state = state.copyWith(
+          grabacion: grabacion, calculo: calculo, loading: false);
     } catch (e) {
-      _errorMessage =
-          e is ApiException ? e.message : 'No se pudo calcular los metros.';
-    } finally {
-      _loading = false;
-      notifyListeners();
+      state = state.copyWith(
+        loading: false,
+        errorMessage:
+            e is ApiException ? e.message : 'No se pudo calcular los metros.',
+      );
     }
   }
 
   Future<void> recalcular(String texto) async {
-    _textoEditado = texto;
-    _loading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(
+        textoEditado: texto, loading: true, errorMessage: null);
     try {
-      _calculo = await _calcular(texto: texto);
+      final calculo = await ref.read(calcularMetrosUseCaseProvider)(texto: texto);
+      state = state.copyWith(calculo: calculo, loading: false);
     } catch (e) {
-      _errorMessage =
-          e is ApiException ? e.message : 'No se pudo recalcular los metros.';
-    } finally {
-      _loading = false;
-      notifyListeners();
+      state = state.copyWith(
+        loading: false,
+        errorMessage:
+            e is ApiException ? e.message : 'No se pudo recalcular los metros.',
+      );
     }
   }
 
   Future<void> guardarEdicion(int grabacionId) async {
-    if (_textoEditado != null && _textoEditado != _grabacion?.transcripcion) {
+    final texto = state.textoEditado;
+    if (texto != null && texto != state.grabacion?.transcripcion) {
       try {
-        await _actualizar(grabacionId, _textoEditado!);
+        await ref.read(actualizarTranscripcionUseCaseProvider)(grabacionId, texto);
       } catch (e) {
-        // Si falla al guardar de forma silenciosa, podemos ignorarlo o hacer un log.
+        // Falla silenciosa al guardar: solo se registra.
         debugPrint('Error al guardar edición: $e');
       }
     }

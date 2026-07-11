@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class LoginHeader extends StatelessWidget {
   const LoginHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Inicia sesión',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: c.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -24,7 +25,7 @@ class LoginHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
+            color: c.textSecondary,
             height: 1.5,
           ),
         ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class LoginRegisterRow extends StatelessWidget {
   final VoidCallback onTap;
@@ -11,18 +11,18 @@ class LoginRegisterRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
+        Text(
           '¿No tienes cuenta? ',
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 14, color: context.colors.textSecondary),
         ),
         GestureDetector(
           onTap: onTap,
-          child: const Text(
+          child: Text(
             'Crear cuenta',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: context.colors.primary,
             ),
           ),
         ),

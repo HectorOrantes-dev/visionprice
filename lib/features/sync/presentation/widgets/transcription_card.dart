@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import 'processing_section_label.dart';
 
 /// Tarjeta con la transcripción del audio (o su carga). Antes `_TranscriptionCard`.
@@ -65,9 +65,9 @@ class _TranscriptionCardState extends State<TranscriptionCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +86,7 @@ class _TranscriptionCardState extends State<TranscriptionCard> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                     Text(
@@ -94,7 +94,7 @@ class _TranscriptionCardState extends State<TranscriptionCard> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        color: context.colors.primary,
                       ),
                     ),
                   ],
@@ -104,8 +104,8 @@ class _TranscriptionCardState extends State<TranscriptionCard> {
                   borderRadius: BorderRadius.circular(8),
                   child: LinearProgressIndicator(
                     value: _progress / 100,
-                    backgroundColor: AppColors.border,
-                    color: AppColors.primary,
+                    backgroundColor: context.colors.border,
+                    color: context.colors.primary,
                     minHeight: 8,
                   ),
                 ),
@@ -116,9 +116,9 @@ class _TranscriptionCardState extends State<TranscriptionCard> {
               widget.transcripcion == null || widget.transcripcion!.isEmpty
                   ? 'Sin transcripción'
                   : '"${widget.transcripcion}"',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 height: 1.6,
               ),
             ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import 'sync_status.dart';
 import 'sync_status_badge.dart';
 
@@ -29,9 +29,9 @@ class SyncItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.border),
         ),
         child: Column(
           children: [
@@ -41,10 +41,10 @@ class SyncItem extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: _iconBg,
+                    color: _iconBg(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.mic, size: 18, color: _iconColor),
+                  child: Icon(Icons.mic, size: 18, color: _iconColor(context)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -53,17 +53,17 @@ class SyncItem extends StatelessWidget {
                     children: [
                       Text(
                         name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: context.colors.textPrimary,
                         ),
                       ),
                       Text(
                         '$duration · $date · $time',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     ],
@@ -78,8 +78,8 @@ class SyncItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: AppColors.border,
-                  color: AppColors.primary,
+                  backgroundColor: context.colors.border,
+                  color: context.colors.primary,
                   minHeight: 4,
                 ),
               ),
@@ -90,29 +90,29 @@ class SyncItem extends StatelessWidget {
     );
   }
 
-  Color get _iconBg {
+  Color _iconBg(BuildContext context) {
     switch (status) {
       case SyncStatus.uploading:
-        return AppColors.primaryLight;
+        return context.colors.primaryLight;
       case SyncStatus.pending:
-        return AppColors.warningLight;
+        return context.colors.warningLight;
       case SyncStatus.ready:
-        return AppColors.successLight;
+        return context.colors.successLight;
       case SyncStatus.error:
-        return AppColors.errorLight;
+        return context.colors.errorLight;
     }
   }
 
-  Color get _iconColor {
+  Color _iconColor(BuildContext context) {
     switch (status) {
       case SyncStatus.uploading:
-        return AppColors.primary;
+        return context.colors.primary;
       case SyncStatus.pending:
-        return AppColors.warning;
+        return context.colors.warning;
       case SyncStatus.ready:
-        return AppColors.success;
+        return context.colors.success;
       case SyncStatus.error:
-        return AppColors.error;
+        return context.colors.error;
     }
   }
 }

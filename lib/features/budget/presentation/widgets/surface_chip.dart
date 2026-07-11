@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Chip "Piso"/"Paredes" para asignar un material a una superficie.
 /// Antes el privado `_SurfaceChip`.
@@ -22,10 +22,10 @@ class SurfaceChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.surfaceVariant,
+          color: selected ? context.colors.primary : context.colors.surfaceVariant,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.border,
+            color: selected ? context.colors.primary : context.colors.border,
           ),
         ),
         child: Text(
@@ -33,7 +33,7 @@ class SurfaceChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : AppColors.textSecondary,
+            color: selected ? Colors.white : context.colors.textSecondary,
           ),
         ),
       ),

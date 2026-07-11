@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../budget/presentation/screens/parameters_review_screen.dart';
-import '../../services/sync_service.dart';
+import '../../../recording/presentation/providers/recording_providers.dart';
 
-class SyncQueueScreen extends StatelessWidget {
+class SyncQueueScreen extends ConsumerWidget {
   const SyncQueueScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final syncService = getIt<SyncService>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final syncService = ref.watch(syncServiceProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: ListenableBuilder(
           listenable: syncService,
@@ -30,10 +30,10 @@ class SyncQueueScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 Expanded(
                   child: items.isEmpty
-                      ? const Center(
+                      ? Center(
                           child: Text(
                             'No hay audios en cola',
-                            style: TextStyle(color: AppColors.textSecondary),
+                            style: TextStyle(color: context.colors.textSecondary),
                           ),
                         )
                       : Padding(
@@ -96,7 +96,7 @@ class SyncQueueScreen extends StatelessWidget {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.textSecondary,
+                                    color: context.colors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -125,13 +125,13 @@ class _SyncAppBar extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: context.colors.primaryLight,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.sync, color: AppColors.primary, size: 20),
+            child: Icon(Icons.sync, color: context.colors.primary, size: 20),
           ),
           const SizedBox(width: 12),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -139,14 +139,14 @@ class _SyncAppBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               Text(
                 'Subiendo audios al servidor',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],
@@ -164,26 +164,26 @@ class _ConnectedBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: context.colors.primaryLight,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          const Icon(Icons.wifi, size: 16, color: AppColors.primary),
+          Icon(Icons.wifi, size: 16, color: context.colors.primary),
           const SizedBox(width: 8),
           Expanded(
             child: RichText(
-              text: const TextSpan(
+              text: TextSpan(
                 style: TextStyle(fontSize: 13),
                 children: [
                   TextSpan(
                     text: 'Conexión detectada · ',
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: TextStyle(color: context.colors.textPrimary),
                   ),
                   TextSpan(
                     text: 'sincronizando automáticamente',
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: context.colors.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -204,7 +204,7 @@ class _OfflineBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.1),
+        color: Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -213,12 +213,12 @@ class _OfflineBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: RichText(
-              text: const TextSpan(
+              text: TextSpan(
                 style: TextStyle(fontSize: 13),
                 children: [
                   TextSpan(
                     text: 'Sin conexión · ',
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: TextStyle(color: context.colors.textPrimary),
                   ),
                   TextSpan(
                     text: 'esperando red para subir',
@@ -265,9 +265,9 @@ class _SyncItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.border),
         ),
         child: Column(
           children: [
@@ -277,10 +277,10 @@ class _SyncItem extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: _iconBg,
+                    color: _iconBg(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.mic, size: 18, color: _iconColor),
+                  child: Icon(Icons.mic, size: 18, color: _iconColor(context)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -289,17 +289,17 @@ class _SyncItem extends StatelessWidget {
                     children: [
                       Text(
                         name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: context.colors.textPrimary,
                         ),
                       ),
                       Text(
                         '$duration · $date · $time',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     ],
@@ -314,27 +314,27 @@ class _SyncItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: AppColors.border,
-                  color: AppColors.primary,
+                  backgroundColor: context.colors.border,
+                  color: context.colors.primary,
                   minHeight: 4,
                 ),
               ),
             ],
             if (onTap != null) ...[
               const SizedBox(height: 10),
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
                     'Ver transcripción y resultado',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.primary,
+                      color: context.colors.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   SizedBox(width: 4),
-                  Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.primary),
+                  Icon(Icons.arrow_forward_rounded, size: 14, color: context.colors.primary),
                 ],
               ),
             ],
@@ -344,33 +344,33 @@ class _SyncItem extends StatelessWidget {
     );
   }
 
-  Color get _iconBg {
+  Color _iconBg(BuildContext context) {
     switch (status) {
       case _SyncStatus.uploading:
-        return AppColors.primaryLight;
+        return context.colors.primaryLight;
       case _SyncStatus.processing:
-        return Colors.blue.withOpacity(0.1);
+        return Colors.blue.withValues(alpha: 0.1);
       case _SyncStatus.pending:
-        return AppColors.warningLight;
+        return context.colors.warningLight;
       case _SyncStatus.ready:
-        return AppColors.successLight;
+        return context.colors.successLight;
       case _SyncStatus.error:
-        return AppColors.errorLight;
+        return context.colors.errorLight;
     }
   }
 
-  Color get _iconColor {
+  Color _iconColor(BuildContext context) {
     switch (status) {
       case _SyncStatus.uploading:
-        return AppColors.primary;
+        return context.colors.primary;
       case _SyncStatus.processing:
         return Colors.blue;
       case _SyncStatus.pending:
-        return AppColors.warning;
+        return context.colors.warning;
       case _SyncStatus.ready:
-        return AppColors.success;
+        return context.colors.success;
       case _SyncStatus.error:
-        return AppColors.error;
+        return context.colors.error;
     }
   }
 }
@@ -387,17 +387,17 @@ class _StatusWidget extends StatelessWidget {
       case _SyncStatus.uploading:
         return Text(
           '${((progress ?? 0) * 100).toInt()}%',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.primary,
+            color: context.colors.primary,
           ),
         );
       case _SyncStatus.processing:
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(6),
           ),
           child: const Row(
@@ -423,29 +423,29 @@ class _StatusWidget extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.warningLight,
+            color: context.colors.warningLight,
             borderRadius: BorderRadius.circular(6),
           ),
-          child: const Text(
+          child: Text(
             'Pendiente',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.warning,
+              color: context.colors.warning,
             ),
           ),
         );
       case _SyncStatus.ready:
-        return const Row(
+        return Row(
           children: [
-            Icon(Icons.check, size: 16, color: AppColors.success),
+            Icon(Icons.check, size: 16, color: context.colors.success),
             SizedBox(width: 4),
             Text(
               'Listo',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.success,
+                color: context.colors.success,
               ),
             ),
           ],
@@ -454,21 +454,21 @@ class _StatusWidget extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const Text(
+            Text(
               'Error',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.error,
+                color: context.colors.error,
               ),
             ),
             GestureDetector(
               onTap: () {},
-              child: const Text(
+              child: Text(
                 'Reintentar',
                 style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.primary,
+                  color: context.colors.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),

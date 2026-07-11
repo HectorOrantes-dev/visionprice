@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Fila de acción del perfil (con chevron). Antes el privado `_ProfileItem`.
 class ProfileItem extends StatelessWidget {
@@ -19,16 +19,16 @@ class ProfileItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = danger ? AppColors.error : AppColors.textPrimary;
+    final color = danger ? context.colors.error : context.colors.textPrimary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.border),
         ),
         child: Row(
           children: [
@@ -40,7 +40,7 @@ class ProfileItem extends StatelessWidget {
                   fontSize: 15, fontWeight: FontWeight.w600, color: color),
             ),
             const Spacer(),
-            Icon(Icons.chevron_right, size: 20, color: AppColors.textHint),
+            Icon(Icons.chevron_right, size: 20, color: context.colors.textHint),
           ],
         ),
       ),

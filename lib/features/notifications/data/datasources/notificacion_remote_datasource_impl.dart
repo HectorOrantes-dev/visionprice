@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../domain/entities/notificacion_entity.dart';
 import 'notificacion_remote_datasource.dart';
 
-@LazySingleton(as: NotificacionRemoteDataSource)
 class NotificacionRemoteDataSourceImpl implements NotificacionRemoteDataSource {
   final ApiClient _client;
   NotificacionRemoteDataSourceImpl(this._client);

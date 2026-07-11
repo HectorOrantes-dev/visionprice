@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../sync/presentation/screens/processing_screen.dart';
 import '../providers/recording_provider.dart';
 import '../widgets/audio_visualizer.dart';
@@ -11,27 +10,25 @@ class RecordingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<RecordingViewModel>(),
-      child: const _RecordingView(),
-    );
+    return const _RecordingView();
   }
 }
 
-class _RecordingView extends StatelessWidget {
+class _RecordingView extends ConsumerWidget {
   const _RecordingView();
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<RecordingViewModel>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(recordingProvider);
+    final notifier = ref.read(recordingProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           children: [
             _RecordingAppBar(),
-            _ProjectSelector(vm: vm),
+            _ProjectSelector(state: state),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -44,37 +41,37 @@ class _RecordingView extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                         height: 1.5,
                       ),
                     ),
                   ),
                   const SizedBox(height: 40),
                   AudioVisualizer(
-                    amplitudeStream: vm.amplitudeStream,
-                    isRecording: vm.isRecording,
+                    amplitudeStream: notifier.amplitudeStream,
+                    isRecording: state.isRecording,
                   ),
                   const SizedBox(height: 32),
-                  _MicButton(vm: vm),
+                  _MicButton(state: state, notifier: notifier),
                   const SizedBox(height: 24),
-                  _TimerDisplay(elapsed: vm.elapsedFormatted),
+                  _TimerDisplay(elapsed: state.elapsedFormatted),
                   const SizedBox(height: 12),
-                  if (vm.isRecording) _RecordingIndicator(),
-                  if (vm.hasRecording)
-                    const Text(
+                  if (state.isRecording) _RecordingIndicator(),
+                  if (state.hasRecording)
+                    Text(
                       'Grabación lista para subir',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.success,
+                        color: context.colors.success,
                       ),
                     ),
-                  if (vm.errorMessage != null)
+                  if (state.errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 32, vertical: 8),
                       child: Text(
-                        vm.errorMessage!,
+                        state.errorMessage!,
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Colors.red, fontSize: 13),
                       ),
@@ -82,9 +79,9 @@ class _RecordingView extends StatelessWidget {
                 ],
               ),
             ),
-            _BottomActions(vm: vm),
+            _BottomActions(state: state, notifier: notifier),
             const SizedBox(height: 16),
-            _ConnectivityChip(vm: vm),
+            _ConnectivityChip(state: state, notifier: notifier),
             const SizedBox(height: 24),
           ],
         ),
@@ -101,26 +98,26 @@ class _RecordingAppBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios,
-                size: 18, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back_ios,
+                size: 18, color: context.colors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Nueva grabación',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               Text(
                 'Funciona sin internet',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],
@@ -132,38 +129,41 @@ class _RecordingAppBar extends StatelessWidget {
 }
 
 class _MicButton extends StatelessWidget {
-  final RecordingViewModel vm;
-  const _MicButton({required this.vm});
+  final RecordingState state;
+  final Recording notifier;
+  const _MicButton({required this.state, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: vm.isUploading
+      onTap: state.isUploading
           ? null
           : () {
-              if (vm.isRecording) {
-                vm.stopRecording();
-              } else if (!vm.hasRecording) {
-                vm.startRecording();
+              if (state.isRecording) {
+                notifier.stopRecording();
+              } else if (!state.hasRecording) {
+                notifier.startRecording();
               }
             },
       child: Container(
         width: 88,
         height: 88,
         decoration: BoxDecoration(
-          color: vm.isRecording ? AppColors.recordingRed : AppColors.primary,
+          color:
+              state.isRecording ? context.colors.recordingRed : context.colors.primary,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: (vm.isRecording ? AppColors.recordingRed : AppColors.primary)
-                  .withValues(alpha: 0.3),
+              color:
+                  (state.isRecording ? context.colors.recordingRed : context.colors.primary)
+                      .withValues(alpha: 0.3),
               blurRadius: 20,
               spreadRadius: 4,
             ),
           ],
         ),
         child: Icon(
-          vm.isRecording ? Icons.stop : Icons.mic,
+          state.isRecording ? Icons.stop : Icons.mic,
           color: Colors.white,
           size: 36,
         ),
@@ -180,10 +180,10 @@ class _TimerDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       elapsed,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 40,
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
         letterSpacing: 2,
       ),
     );
@@ -199,18 +199,18 @@ class _RecordingIndicator extends StatelessWidget {
         Container(
           width: 8,
           height: 8,
-          decoration: const BoxDecoration(
-            color: AppColors.recordingRed,
+          decoration: BoxDecoration(
+            color: context.colors.recordingRed,
             shape: BoxShape.circle,
           ),
         ),
         const SizedBox(width: 6),
-        const Text(
+        Text(
           'Grabando...',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: AppColors.recordingRed,
+            color: context.colors.recordingRed,
           ),
         ),
       ],
@@ -219,8 +219,9 @@ class _RecordingIndicator extends StatelessWidget {
 }
 
 class _BottomActions extends StatelessWidget {
-  final RecordingViewModel vm;
-  const _BottomActions({required this.vm});
+  final RecordingState state;
+  final Recording notifier;
+  const _BottomActions({required this.state, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
@@ -228,15 +229,15 @@ class _BottomActions extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          if (vm.isRecording)
+          if (state.isRecording)
             SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.recordingRed,
+                  backgroundColor: context.colors.recordingRed,
                 ),
-                onPressed: vm.stopRecording,
+                onPressed: notifier.stopRecording,
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -247,40 +248,42 @@ class _BottomActions extends StatelessWidget {
                 ),
               ),
             ),
-          if (vm.hasRecording || vm.isUploading) ...[
+          if (state.hasRecording || state.isUploading) ...[
             SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: vm.isUploading
+                onPressed: state.isUploading
                     ? null
                     : () {
-                        if (vm.selectedProyecto == null) {
-                          showProjectSheet(context, vm);
+                        if (state.selectedProyecto == null) {
+                          showProjectSheet(context);
                           return;
                         }
-                        vm.upload(
+                        notifier.upload(
                           onUploaded: (id) {
                             if (id == -1) {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Guardado localmente. Se subirá al conectarse a internet.'),
-                                  backgroundColor: AppColors.primary,
+                                SnackBar(
+                                  content: Text(
+                                      'Guardado localmente. Se subirá al conectarse a internet.'),
+                                  backgroundColor: context.colors.primary,
                                 ),
                               );
                             } else {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => ProcessingScreen(grabacionId: id),
+                                  builder: (_) =>
+                                      ProcessingScreen(grabacionId: id),
                                 ),
                               );
                             }
                           },
                         );
                       },
-                child: vm.isUploading
+                child: state.isUploading
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -288,8 +291,9 @@ class _BottomActions extends StatelessWidget {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(4),
                               child: LinearProgressIndicator(
-                                value: vm.uploadProgress,
-                                backgroundColor: Colors.white.withValues(alpha: 0.3),
+                                value: state.uploadProgress,
+                                backgroundColor:
+                                    Colors.white.withValues(alpha: 0.3),
                                 color: Colors.white,
                                 minHeight: 4,
                               ),
@@ -297,7 +301,7 @@ class _BottomActions extends StatelessWidget {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            '${(vm.uploadProgress * 100).toInt()}%',
+                            '${(state.uploadProgress * 100).toInt()}%',
                             style: const TextStyle(color: Colors.white),
                           ),
                         ],
@@ -314,12 +318,12 @@ class _BottomActions extends StatelessWidget {
             ),
             const SizedBox(height: 10),
           ],
-          if (!vm.isRecording && !vm.isUploading)
+          if (!state.isRecording && !state.isUploading)
             SizedBox(
               width: double.infinity,
               height: 48,
               child: OutlinedButton(
-                onPressed: vm.retry,
+                onPressed: notifier.retry,
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -339,65 +343,64 @@ class _BottomActions extends StatelessWidget {
 /// Selector de proyecto (obligatorio): muestra el proyecto elegido y abre el
 /// bottom sheet para elegir/crear.
 class _ProjectSelector extends StatelessWidget {
-  final RecordingViewModel vm;
-  const _ProjectSelector({required this.vm});
+  final RecordingState state;
+  const _ProjectSelector({required this.state});
 
   @override
   Widget build(BuildContext context) {
-    final proyecto = vm.selectedProyecto;
+    final proyecto = state.selectedProyecto;
     final tieneProyecto = proyecto != null;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: GestureDetector(
-        onTap: () => showProjectSheet(context, vm),
+        onTap: () => showProjectSheet(context),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: tieneProyecto ? AppColors.border : AppColors.warning,
+              color: tieneProyecto ? context.colors.border : context.colors.warning,
             ),
           ),
           child: Row(
             children: [
               Icon(Icons.folder_outlined,
                   size: 20,
-                  color: tieneProyecto
-                      ? AppColors.primary
-                      : AppColors.warning),
+                  color:
+                      tieneProyecto ? context.colors.primary : context.colors.warning),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'PROYECTO',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                         letterSpacing: 1,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      vm.loadingProyectos
+                      state.loadingProyectos
                           ? 'Cargando proyectos...'
                           : (proyecto?.nombre ?? 'Selecciona un proyecto'),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: tieneProyecto
-                            ? AppColors.textPrimary
-                            : AppColors.warning,
+                            ? context.colors.textPrimary
+                            : context.colors.warning,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.unfold_more,
-                  size: 18, color: AppColors.textSecondary),
+              Icon(Icons.unfold_more,
+                  size: 18, color: context.colors.textSecondary),
             ],
           ),
         ),
@@ -407,27 +410,25 @@ class _ProjectSelector extends StatelessWidget {
 }
 
 /// Abre el bottom sheet para elegir un proyecto existente o crear uno nuevo.
-void showProjectSheet(BuildContext context, RecordingViewModel vm) {
+void showProjectSheet(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.surface,
+    backgroundColor: context.colors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) => ListenableBuilder(
-      listenable: vm,
-      builder: (ctx, _) => _ProjectSheet(vm: vm),
-    ),
+    builder: (_) => const _ProjectSheet(),
   );
 }
 
-class _ProjectSheet extends StatelessWidget {
-  final RecordingViewModel vm;
-  const _ProjectSheet({required this.vm});
+class _ProjectSheet extends ConsumerWidget {
+  const _ProjectSheet();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(recordingProvider);
+    final notifier = ref.read(recordingProvider.notifier);
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -444,27 +445,27 @@ class _ProjectSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: context.colors.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Elige un proyecto',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
-          if (vm.loadingProyectos)
+          if (state.loadingProyectos)
             const Padding(
               padding: EdgeInsets.all(16),
               child: Center(child: CircularProgressIndicator()),
             )
-          else if (vm.proyectos.isEmpty)
+          else if (state.proyectos.isEmpty)
             // El alta de proyectos ahora vive en la pantalla de inicio; aquí
             // solo se selecciona uno existente.
             Padding(
@@ -475,26 +476,26 @@ class _ProjectSheet extends StatelessWidget {
                   Row(
                     children: [
                       Icon(Icons.info_outline,
-                          size: 18, color: AppColors.textSecondary),
+                          size: 18, color: context.colors.textSecondary),
                       const SizedBox(width: 8),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Aún no tienes proyectos.',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: context.colors.textPrimary,
                           ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     'Créalos desde la pantalla de Inicio con "Crear nuevo proyecto" y vuelve aquí para seleccionarlo.',
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                 ],
@@ -505,22 +506,20 @@ class _ProjectSheet extends StatelessWidget {
               constraints: const BoxConstraints(maxHeight: 320),
               child: ListView(
                 shrinkWrap: true,
-                children: vm.proyectos.map((p) {
-                  final selected = vm.selectedProyecto?.id == p.id;
+                children: state.proyectos.map((p) {
+                  final selected = state.selectedProyecto?.id == p.id;
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(
                       selected
                           ? Icons.radio_button_checked
                           : Icons.radio_button_off,
-                      color: selected
-                          ? AppColors.primary
-                          : AppColors.textHint,
+                      color: selected ? context.colors.primary : context.colors.textHint,
                     ),
                     title: Text(p.nombre),
                     subtitle: p.direccion != null ? Text(p.direccion!) : null,
                     onTap: () {
-                      vm.selectProyecto(p);
+                      notifier.selectProyecto(p);
                       Navigator.pop(context);
                     },
                   );
@@ -538,12 +537,13 @@ class _ProjectSheet extends StatelessWidget {
 /// - en línea → verde "Conectado"
 /// - offline → naranja "Sin internet · audio guardado localmente"
 class _ConnectivityChip extends StatelessWidget {
-  final RecordingViewModel vm;
-  const _ConnectivityChip({required this.vm});
+  final RecordingState state;
+  final Recording notifier;
+  const _ConnectivityChip({required this.state, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
-    final online = vm.online;
+    final online = state.online;
 
     late final Color bg;
     late final Color fg;
@@ -551,24 +551,24 @@ class _ConnectivityChip extends StatelessWidget {
     late final String label;
 
     if (online == null) {
-      bg = AppColors.surfaceVariant;
-      fg = AppColors.textSecondary;
+      bg = context.colors.surfaceVariant;
+      fg = context.colors.textSecondary;
       icon = Icons.wifi_find_outlined;
       label = 'Verificando conexión...';
     } else if (online) {
-      bg = AppColors.successLight;
-      fg = AppColors.success;
+      bg = context.colors.successLight;
+      fg = context.colors.success;
       icon = Icons.wifi;
       label = 'Conectado · listo para subir';
     } else {
-      bg = AppColors.warningLight;
-      fg = AppColors.warning;
+      bg = context.colors.warningLight;
+      fg = context.colors.warning;
       icon = Icons.wifi_off;
       label = 'Sin internet · audio guardado localmente';
     }
 
     return GestureDetector(
-      onTap: vm.checkConnectivity,
+      onTap: notifier.checkConnectivity,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 24),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../security/services/notification_service.dart';
-import '../providers/login_provider.dart';
 import '../widgets/login_widgets.dart';
 import 'forgot_password_screen.dart';
 import 'privacy_notice_screen.dart';
@@ -38,12 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // El ViewModel se resuelve desde la DI automatizada (getIt), con sus use
-    // cases ya inyectados. Una instancia nueva (factory) por pantalla.
-    return ChangeNotifierProvider(
-      create: (_) => getIt<LoginViewModel>(),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+    // El estado del login vive en `loginProvider` (Riverpod, autoDispose): se
+    // crea al observarlo desde los widgets hijos y se limpia al salir.
+    return Scaffold(
+        backgroundColor: context.colors.background,
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -98,7 +93,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
     );
   }
 }

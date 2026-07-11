@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../core/storage/local_database.dart';
@@ -12,7 +11,6 @@ import '../datasources/auth_remote_datasource.dart';
 
 /// Implementación del contrato de dominio. Orquesta el datasource remoto y la
 /// persistencia local del token. Registrada como la interfaz `AuthRepository`.
-@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remote;
   final TokenStorage _tokenStorage;

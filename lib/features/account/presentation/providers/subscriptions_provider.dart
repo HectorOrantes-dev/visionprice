@@ -1,38 +1,60 @@
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/subscription_entity.dart';
-import '../../domain/usecases/account_usecases.dart';
+import 'account_providers.dart';
 
-@injectable
-class SubscriptionsViewModel extends ChangeNotifier {
-  final ObtenerSuscripcionesUseCase _obtener;
-  SubscriptionsViewModel(this._obtener) {
+part 'subscriptions_provider.g.dart';
+
+/// Estado inmutable de la lista de suscripciones.
+class SubscriptionsState {
+  final bool loading;
+  final String? errorMessage;
+  final List<SubscriptionEntity> items;
+
+  const SubscriptionsState({
+    this.loading = true,
+    this.errorMessage,
+    this.items = const [],
+  });
+
+  static const _keep = Object();
+
+  SubscriptionsState copyWith({
+    bool? loading,
+    Object? errorMessage = _keep,
+    List<SubscriptionEntity>? items,
+  }) {
+    return SubscriptionsState(
+      loading: loading ?? this.loading,
+      errorMessage:
+          errorMessage == _keep ? this.errorMessage : errorMessage as String?,
+      items: items ?? this.items,
+    );
+  }
+}
+
+/// Notifier de suscripciones. Reemplaza al `SubscriptionsViewModel`.
+@riverpod
+class Subscriptions extends _$Subscriptions {
+  @override
+  SubscriptionsState build() {
     load();
+    return const SubscriptionsState();
   }
 
-  bool _loading = true;
-  String? _errorMessage;
-  List<SubscriptionEntity> _items = const [];
-
-  bool get loading => _loading;
-  String? get errorMessage => _errorMessage;
-  List<SubscriptionEntity> get items => _items;
-
   Future<void> load() async {
-    _loading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(loading: true, errorMessage: null);
     try {
-      _items = await _obtener();
+      final items = await ref.read(obtenerSuscripcionesUseCaseProvider)();
+      state = state.copyWith(items: items, loading: false);
     } catch (e) {
-      _errorMessage = e is ApiException
-          ? e.message
-          : 'No se pudieron cargar las suscripciones.';
-    } finally {
-      _loading = false;
-      notifyListeners();
+      state = state.copyWith(
+        loading: false,
+        errorMessage: e is ApiException
+            ? e.message
+            : 'No se pudieron cargar las suscripciones.',
+      );
     }
   }
 }

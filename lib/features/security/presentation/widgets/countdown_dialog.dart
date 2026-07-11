@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Diálogo modal con cuenta regresiva (tema claro). Devuelve `true` si el
 /// usuario elige "Seguir conectado"; `false` al agotarse el tiempo.
@@ -47,20 +47,20 @@ class _CountdownDialogState extends State<CountdownDialog> {
   Widget build(BuildContext context) {
     final double progress = _remaining / widget.seconds;
     final Color ringColor =
-        progress > 0.33 ? AppColors.primary : AppColors.error;
+        progress > 0.33 ? context.colors.primary : context.colors.error;
 
     return AlertDialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.colors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: Row(
         children: [
-          Icon(Icons.timer_outlined, color: AppColors.primary),
+          Icon(Icons.timer_outlined, color: context.colors.primary),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
               '¿Sigues ahí?',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
@@ -71,9 +71,9 @@ class _CountdownDialogState extends State<CountdownDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
+          Text(
             'Tu sesión se cerrará por inactividad en:',
-            style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+            style: TextStyle(color: context.colors.textSecondary, height: 1.4),
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -88,14 +88,14 @@ class _CountdownDialogState extends State<CountdownDialog> {
                   child: CircularProgressIndicator(
                     value: progress,
                     strokeWidth: 6,
-                    backgroundColor: AppColors.border,
+                    backgroundColor: context.colors.border,
                     valueColor: AlwaysStoppedAnimation<Color>(ringColor),
                   ),
                 ),
                 Text(
                   '$_remaining',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: context.colors.textPrimary,
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),

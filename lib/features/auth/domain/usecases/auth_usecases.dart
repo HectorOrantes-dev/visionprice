@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/auth_session_entity.dart';
 import '../entities/perfil_entity.dart';
@@ -11,7 +10,6 @@ import '../repositories/auth_repository.dart';
 /// y sin estado, baratas de recrear. Injectable las inyecta automáticamente
 /// resolviendo el `AuthRepository` registrado.
 
-@injectable
 class LoginUseCase {
   final AuthRepository _repo;
   LoginUseCase(this._repo);
@@ -25,7 +23,6 @@ class LoginUseCase {
       _repo.login(correo: correo, contrasena: contrasena);
 }
 
-@injectable
 class VerifyTwoFactorUseCase {
   final AuthRepository _repo;
   VerifyTwoFactorUseCase(this._repo);
@@ -37,7 +34,6 @@ class VerifyTwoFactorUseCase {
       _repo.verifyTwoFactor(correo: correo, code: code);
 }
 
-@injectable
 class GetRolesUseCase {
   final AuthRepository _repo;
   GetRolesUseCase(this._repo);
@@ -45,7 +41,6 @@ class GetRolesUseCase {
   Future<List<RoleEntity>> call() => _repo.getRoles();
 }
 
-@injectable
 class RegisterUseCase {
   final AuthRepository _repo;
   RegisterUseCase(this._repo);
@@ -66,7 +61,6 @@ class RegisterUseCase {
       );
 }
 
-@injectable
 class GoogleLoginUseCase {
   final AuthRepository _repo;
   GoogleLoginUseCase(this._repo);
@@ -75,7 +69,6 @@ class GoogleLoginUseCase {
       _repo.googleLogin(idToken: idToken);
 }
 
-@injectable
 class GoogleRegisterUseCase {
   final AuthRepository _repo;
   GoogleRegisterUseCase(this._repo);
@@ -87,7 +80,6 @@ class GoogleRegisterUseCase {
       _repo.googleRegister(idToken: idToken, rol: rol);
 }
 
-@injectable
 class ForgotPasswordUseCase {
   final AuthRepository _repo;
   ForgotPasswordUseCase(this._repo);
@@ -96,7 +88,6 @@ class ForgotPasswordUseCase {
       _repo.forgotPassword(correo: correo);
 }
 
-@injectable
 class VerifyResetCodeUseCase {
   final AuthRepository _repo;
   VerifyResetCodeUseCase(this._repo);
@@ -108,7 +99,6 @@ class VerifyResetCodeUseCase {
       _repo.verifyResetCode(correo: correo, code: code);
 }
 
-@injectable
 class ResetPasswordUseCase {
   final AuthRepository _repo;
   ResetPasswordUseCase(this._repo);
@@ -125,7 +115,6 @@ class ResetPasswordUseCase {
       );
 }
 
-@injectable
 class GetPerfilUseCase {
   final AuthRepository _repo;
   GetPerfilUseCase(this._repo);
@@ -134,7 +123,6 @@ class GetPerfilUseCase {
       _repo.getPerfil(forceRefresh: forceRefresh);
 }
 
-@injectable
 class LogoutUseCase {
   final AuthRepository _repo;
   LogoutUseCase(this._repo);

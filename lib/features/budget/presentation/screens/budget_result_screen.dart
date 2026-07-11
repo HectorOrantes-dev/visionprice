@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import 'export_pdf_screen.dart';
 
@@ -12,7 +12,7 @@ class BudgetResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final money = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -30,8 +30,8 @@ class BudgetResultScreen extends StatelessWidget {
                   const _SectionLabel('DESGLOSE DE MATERIALES'),
                   const SizedBox(height: 8),
                   if (cotizacion.lineas.isEmpty)
-                    const Text('Sin líneas',
-                        style: TextStyle(color: AppColors.textSecondary))
+                    Text('Sin líneas',
+                        style: TextStyle(color: context.colors.textSecondary))
                   else
                     ...cotizacion.lineas.map(
                       (l) => _LineaCard(linea: l, money: money),
@@ -71,22 +71,22 @@ class _ResultAppBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios,
-                size: 18, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back_ios,
+                size: 18, color: context.colors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: context.colors.primaryLight,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.receipt_long_outlined,
-                color: AppColors.primary, size: 20),
+            child: Icon(Icons.receipt_long_outlined,
+                color: context.colors.primary, size: 20),
           ),
           const SizedBox(width: 10),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -94,12 +94,12 @@ class _ResultAppBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               Text(
                 'Materiales y precios',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
               ),
             ],
           ),
@@ -117,10 +117,10 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w700,
-        color: AppColors.textSecondary,
+        color: context.colors.textSecondary,
         letterSpacing: 1.0,
       ),
     );
@@ -143,8 +143,8 @@ class _TotalCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.info, AppColors.primaryDark],
+        gradient: LinearGradient(
+          colors: [context.colors.info, context.colors.primaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -191,9 +191,9 @@ class _LineaCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Row(
         children: [
@@ -203,18 +203,18 @@ class _LineaCard extends StatelessWidget {
               children: [
                 Text(
                   linea.descripcion,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${linea.cantidad.toStringAsFixed(2)} ${linea.unidad} × ${money.format(linea.precioUnitario)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -222,10 +222,10 @@ class _LineaCard extends StatelessWidget {
           ),
           Text(
             money.format(linea.subtotal),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
         ],

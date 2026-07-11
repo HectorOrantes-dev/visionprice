@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../providers/export_pdf_provider.dart';
 import '../widgets/pdf_link.dart';
 
-class ExportPdfScreen extends StatelessWidget {
+class ExportPdfScreen extends ConsumerWidget {
   final CotizacionEntity cotizacion;
   const ExportPdfScreen({super.key, required this.cotizacion});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<ExportPdfViewModel>(),
-      child: Consumer<ExportPdfViewModel>(
-        builder: (context, vm, _) => Scaffold(
-          backgroundColor: AppColors.background,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(exportPdfProvider);
+    final notifier = ref.read(exportPdfProvider.notifier);
+    return Scaffold(
+          backgroundColor: context.colors.background,
           appBar: AppBar(
-            backgroundColor: AppColors.background,
+            backgroundColor: context.colors.background,
             elevation: 0,
-            leading: const BackButton(color: AppColors.textPrimary),
-            title: const Text('Exportar PDF',
+            leading: BackButton(color: context.colors.textPrimary),
+            title: Text('Exportar PDF',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                 )),
@@ -37,27 +35,27 @@ class ExportPdfScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: context.colors.surface,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: context.colors.border),
                     ),
                     child: Column(
                       children: [
-                        const Icon(Icons.picture_as_pdf_outlined,
-                            size: 48, color: AppColors.primary),
+                        Icon(Icons.picture_as_pdf_outlined,
+                            size: 48, color: context.colors.primary),
                         const SizedBox(height: 12),
                         Text(
                           'Cotización #${cotizacion.id}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: context.colors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${cotizacion.lineas.length} materiales',
-                          style: const TextStyle(color: AppColors.textSecondary),
+                          style: TextStyle(color: context.colors.textSecondary),
                         ),
                       ],
                     ),
@@ -73,8 +71,9 @@ class ExportPdfScreen extends StatelessWidget {
                   SizedBox(
                     height: 52,
                     child: ElevatedButton.icon(
-                      onPressed:
-                          vm.loading ? null : () => vm.descargar(cotizacion.id),
+                      onPressed: vm.loading
+                          ? null
+                          : () => notifier.descargar(cotizacion.id),
                       icon: vm.loading
                           ? const SizedBox(
                               width: 18,
@@ -90,8 +89,6 @@ class ExportPdfScreen extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 }

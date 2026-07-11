@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Mensaje centrado para estados vacío/error. Antes el privado `_Message`.
 class NotifMessage extends StatelessWidget {
@@ -15,7 +15,7 @@ class NotifMessage extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: context.colors.textSecondary),
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Estado de error de la carga del perfil, con reintento. Antes `_PerfilError`.
 class PerfilError extends StatelessWidget {
@@ -14,7 +14,7 @@ class PerfilError extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.errorLight,
+        color: context.colors.errorLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -22,7 +22,7 @@ class PerfilError extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, color: AppColors.error),
+            style: TextStyle(fontSize: 13, color: context.colors.error),
           ),
           const SizedBox(height: 8),
           TextButton(

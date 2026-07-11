@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Tarjeta de error del procesamiento. Antes el privado `_ErrorCard`.
 class ProcessingErrorCard extends StatelessWidget {
@@ -12,18 +12,18 @@ class ProcessingErrorCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.errorLight,
+        color: context.colors.errorLight,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+        border: Border.all(color: context.colors.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+          Icon(Icons.error_outline, color: context.colors.error, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               'El procesamiento falló. Vuelve a intentar la grabación.',
-              style: TextStyle(fontSize: 13, color: AppColors.error),
+              style: TextStyle(fontSize: 13, color: context.colors.error),
             ),
           ),
         ],

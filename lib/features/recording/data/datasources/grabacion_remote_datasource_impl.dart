@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/network/api_client.dart';
@@ -9,7 +8,6 @@ import '../../domain/entities/calculo_entity.dart';
 import '../../domain/entities/grabacion_entity.dart';
 import 'grabacion_remote_datasource.dart';
 
-@LazySingleton(as: GrabacionRemoteDataSource)
 class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
   final ApiClient _client;
   final TokenStorage _tokenStorage;

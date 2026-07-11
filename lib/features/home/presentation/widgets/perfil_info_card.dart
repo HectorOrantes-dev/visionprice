@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../auth/domain/entities/perfil_entity.dart';
 import 'perfil_info_row.dart';
 
@@ -16,9 +16,9 @@ class PerfilInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         children: [
@@ -38,7 +38,7 @@ class PerfilInfoCard extends StatelessWidget {
             label: 'Plan',
             value: perfil.tienePlan ? perfil.planActivo! : 'Sin plan activo',
             valueColor:
-                perfil.tienePlan ? AppColors.primary : AppColors.textSecondary,
+                perfil.tienePlan ? context.colors.primary : context.colors.textSecondary,
           ),
           if (perfil.vigenciaHasta != null)
             PerfilInfoRow(

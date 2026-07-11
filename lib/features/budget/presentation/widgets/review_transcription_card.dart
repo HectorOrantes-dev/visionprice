@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import 'budget_section_label.dart';
 
 /// Tarjeta "Lo que dijiste" en la revisión de parámetros. Antes el privado
@@ -14,9 +14,9 @@ class ReviewTranscriptionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,9 +25,9 @@ class ReviewTranscriptionCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             '"$texto"',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
               height: 1.6,
             ),
           ),

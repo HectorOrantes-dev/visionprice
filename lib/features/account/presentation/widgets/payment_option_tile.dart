@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Tarjeta seleccionable de método de pago (estilo radio) con logo/ícono,
 /// título, descripción y check cuando está seleccionada.
@@ -27,10 +27,10 @@ class PaymentOptionTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primaryLight : AppColors.surface,
+          color: selected ? context.colors.primaryLight : context.colors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.border,
+            color: selected ? context.colors.primary : context.colors.border,
             width: selected ? 1.4 : 1,
           ),
         ),
@@ -43,7 +43,7 @@ class PaymentOptionTile extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected ? AppColors.primary : AppColors.border,
+                  color: selected ? context.colors.primary : context.colors.border,
                   width: 2,
                 ),
               ),
@@ -52,8 +52,8 @@ class PaymentOptionTile extends StatelessWidget {
                       child: Container(
                         width: 10,
                         height: 10,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
+                        decoration: BoxDecoration(
+                          color: context.colors.primary,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -66,11 +66,11 @@ class PaymentOptionTile extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: context.colors.border),
               ),
-              child: Icon(logo, size: 24, color: AppColors.primary),
+              child: Icon(logo, size: 24, color: context.colors.primary),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -79,18 +79,18 @@ class PaymentOptionTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                       height: 1.35,
                     ),
                   ),
@@ -99,7 +99,7 @@ class PaymentOptionTile extends StatelessWidget {
             ),
             if (selected) ...[
               const SizedBox(width: 8),
-              const Icon(Icons.check_circle, color: AppColors.primary, size: 22),
+              Icon(Icons.check_circle, color: context.colors.primary, size: 22),
             ],
           ],
         ),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/perfil_entity.dart';
@@ -9,7 +8,6 @@ import '../../domain/entities/perfil_entity.dart';
 ///
 /// Hace que los datos de perfil **sobrevivan al cierre de la app** y se puedan
 /// mostrar aunque no haya red. Se limpia solo al cerrar sesión.
-@lazySingleton
 class PerfilStorage {
   static const _kKey = 'perfil_cache';
 

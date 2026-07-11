@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/cotizacion_entity.dart';
 import '../../domain/entities/item_cotizacion.dart';
@@ -6,7 +5,6 @@ import '../../domain/entities/producto_entity.dart';
 import '../../domain/repositories/cotizacion_repository.dart';
 import '../datasources/cotizacion_remote_datasource.dart';
 
-@LazySingleton(as: CotizacionRepository)
 class CotizacionRepositoryImpl implements CotizacionRepository {
   final CotizacionRemoteDataSource _remote;
   CotizacionRepositoryImpl(this._remote);

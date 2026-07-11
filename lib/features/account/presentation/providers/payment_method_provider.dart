@@ -1,70 +1,93 @@
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/subscription_entity.dart';
-import '../../domain/usecases/account_usecases.dart';
 import '../widgets/payment_method.dart';
+import 'account_providers.dart';
 
-/// ViewModel de la pantalla "Método de Pago". `@injectable` (factory).
-///
-/// Carga la suscripción activa (real, desde `GET /me/subscriptions`) para el
-/// resumen, y gestiona el método de pago seleccionado. El cobro en sí lo hace
-/// el microservicio de Pagos (Conekta/PayPal), que hoy no está expuesto para
-/// iniciar un checkout desde esta API — por eso [confirmar] es un placeholder.
-@injectable
-class PaymentMethodViewModel extends ChangeNotifier {
-  final ObtenerSuscripcionesUseCase _obtenerSuscripciones;
+part 'payment_method_provider.g.dart';
 
-  PaymentMethodViewModel(this._obtenerSuscripciones) {
+/// Estado inmutable de la pantalla "Método de Pago".
+class PaymentMethodState {
+  final bool loading;
+  final String? errorMessage;
+  final SubscriptionEntity? subscription;
+  final PaymentMethod selected;
+  final String? confirmMessage;
+
+  const PaymentMethodState({
+    this.loading = true,
+    this.errorMessage,
+    this.subscription,
+    this.selected = PaymentMethod.conekta,
+    this.confirmMessage,
+  });
+
+  static const _keep = Object();
+
+  PaymentMethodState copyWith({
+    bool? loading,
+    Object? errorMessage = _keep,
+    Object? subscription = _keep,
+    PaymentMethod? selected,
+    Object? confirmMessage = _keep,
+  }) {
+    return PaymentMethodState(
+      loading: loading ?? this.loading,
+      errorMessage:
+          errorMessage == _keep ? this.errorMessage : errorMessage as String?,
+      subscription: subscription == _keep
+          ? this.subscription
+          : subscription as SubscriptionEntity?,
+      selected: selected ?? this.selected,
+      confirmMessage: confirmMessage == _keep
+          ? this.confirmMessage
+          : confirmMessage as String?,
+    );
+  }
+}
+
+/// Notifier de "Método de Pago". Carga la suscripción activa para el resumen y
+/// gestiona el método seleccionado. Reemplaza al `PaymentMethodViewModel`.
+@riverpod
+class PaymentMethodNotifier extends _$PaymentMethodNotifier {
+  @override
+  PaymentMethodState build() {
     load();
+    return const PaymentMethodState();
   }
 
-  bool _loading = true;
-  String? _errorMessage;
-  SubscriptionEntity? _subscription;
-  PaymentMethod _selected = PaymentMethod.conekta;
-  String? _confirmMessage;
-
-  bool get loading => _loading;
-  String? get errorMessage => _errorMessage;
-  SubscriptionEntity? get subscription => _subscription;
-  PaymentMethod get selected => _selected;
-  String? get confirmMessage => _confirmMessage;
-
-  /// Carga la suscripción activa (o la primera) para el resumen.
   Future<void> load() async {
-    _loading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(loading: true, errorMessage: null);
     try {
-      final subs = await _obtenerSuscripciones();
-      _subscription = subs.where((s) => s.activa).isNotEmpty
-          ? subs.firstWhere((s) => s.activa)
-          : (subs.isNotEmpty ? subs.first : null);
+      final subs = await ref.read(obtenerSuscripcionesUseCaseProvider)();
+      final activa = subs.where((s) => s.activa);
+      state = state.copyWith(
+        loading: false,
+        subscription: activa.isNotEmpty
+            ? activa.first
+            : (subs.isNotEmpty ? subs.first : null),
+      );
     } catch (e) {
-      _errorMessage = e is ApiException
-          ? e.message
-          : 'No se pudo cargar la suscripción.';
-    } finally {
-      _loading = false;
-      notifyListeners();
+      state = state.copyWith(
+        loading: false,
+        errorMessage:
+            e is ApiException ? e.message : 'No se pudo cargar la suscripción.',
+      );
     }
   }
 
   void seleccionar(PaymentMethod method) {
-    if (_selected == method) return;
-    _selected = method;
-    _confirmMessage = null;
-    notifyListeners();
+    if (state.selected == method) return;
+    state = state.copyWith(selected: method, confirmMessage: null);
   }
 
   /// Confirma el pago. TODO(back-end): cuando exista el endpoint de checkout
-  /// (micro de Pagos / Conekta), aquí se iniciaría el cobro con [_selected].
-  /// Por ahora informa que el checkout aún no está disponible.
+  /// (micro de Pagos / Conekta), aquí se iniciaría el cobro con [selected].
   Future<void> confirmar() async {
-    _confirmMessage =
-        'Pago aún no disponible: falta el endpoint de checkout en el back-end.';
-    notifyListeners();
+    state = state.copyWith(
+      confirmMessage:
+          'Pago aún no disponible: falta el endpoint de checkout en el back-end.',
+    );
   }
 }

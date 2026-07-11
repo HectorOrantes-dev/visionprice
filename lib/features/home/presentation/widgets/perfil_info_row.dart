@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Fila etiqueta/valor de la tarjeta de perfil. Antes el privado `_InfoRow`.
 class PerfilInfoRow extends StatelessWidget {
@@ -27,12 +27,12 @@ class PerfilInfoRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.textSecondary),
+              Icon(icon, size: 18, color: context.colors.textSecondary),
               const SizedBox(width: 12),
               Text(
                 label,
-                style: const TextStyle(
-                    fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(
+                    fontSize: 13, color: context.colors.textSecondary),
               ),
               const Spacer(),
               Flexible(
@@ -43,7 +43,7 @@ class PerfilInfoRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: valueColor ?? AppColors.textPrimary,
+                    color: valueColor ?? context.colors.textPrimary,
                   ),
                 ),
               ),
@@ -51,7 +51,7 @@ class PerfilInfoRow extends StatelessWidget {
           ),
         ),
         if (showDivider)
-          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.6)),
+          Divider(height: 1, color: context.colors.border.withValues(alpha: 0.6)),
       ],
     );
   }

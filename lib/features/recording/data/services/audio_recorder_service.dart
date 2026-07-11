@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
 /// Envuelve el plugin `record` para capturar el audio del maestro de obra.
 /// `@lazySingleton`: una sola instancia que mantiene el estado del grabador
 /// (un recurso del sistema → buen candidato a singleton).
-@lazySingleton
 class AudioRecorderService {
   final AudioRecorder _recorder = AudioRecorder();
   String? _path;
@@ -44,6 +42,5 @@ class AudioRecorderService {
   Stream<Amplitude> get onAmplitudeChanged => 
       _recorder.onAmplitudeChanged(const Duration(milliseconds: 100));
 
-  @disposeMethod
   Future<void> dispose() => _recorder.dispose();
 }

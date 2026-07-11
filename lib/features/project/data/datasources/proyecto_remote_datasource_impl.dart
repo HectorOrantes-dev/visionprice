@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../domain/entities/proyecto_entity.dart';
 import 'proyecto_remote_datasource.dart';
 
-@LazySingleton(as: ProyectoRemoteDataSource)
 class ProyectoRemoteDataSourceImpl implements ProyectoRemoteDataSource {
   final ApiClient _client;
   ProyectoRemoteDataSourceImpl(this._client);

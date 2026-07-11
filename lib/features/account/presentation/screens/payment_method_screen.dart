@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../providers/payment_method_provider.dart';
 import '../widgets/payment_method.dart';
 import '../widgets/payment_option_tile.dart';
@@ -10,32 +9,32 @@ import '../widgets/trust_badges.dart';
 
 /// Pantalla "Método de Pago": resumen de suscripción + selección de método
 /// (Conekta / PayPal) + confirmar. Basada en el maquetado de VisionPrice.
-class PaymentMethodScreen extends StatelessWidget {
+class PaymentMethodScreen extends ConsumerWidget {
   const PaymentMethodScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<PaymentMethodViewModel>(),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(paymentMethodNotifierProvider);
+    final notifier = ref.read(paymentMethodNotifierProvider.notifier);
+    return Scaffold(
+        backgroundColor: context.colors.background,
         appBar: AppBar(
-          backgroundColor: AppColors.background,
+          backgroundColor: context.colors.background,
           elevation: 0,
           scrolledUnderElevation: 0.5,
-          leading: const BackButton(color: AppColors.primary),
-          title: const Text(
+          leading: BackButton(color: context.colors.primary),
+          title: Text(
             'Método de Pago',
             style: TextStyle(
-              color: AppColors.primary,
+              color: context.colors.primary,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
           ),
         ),
         body: SafeArea(
-          child: Consumer<PaymentMethodViewModel>(
-            builder: (context, vm, _) {
+          child: Builder(
+            builder: (context) {
               // Muestra el mensaje de confirmación (placeholder) como snackbar.
               if (vm.confirmMessage != null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -59,12 +58,12 @@ class PaymentMethodScreen extends StatelessWidget {
                     else
                       SubscriptionSummaryCard(sub: vm.subscription),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       'Selecciona tu método de pago',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -73,7 +72,7 @@ class PaymentMethodScreen extends StatelessWidget {
                       title: 'Conekta',
                       subtitle: 'Tarjeta de Crédito / Débito o Efectivo',
                       selected: vm.selected == PaymentMethod.conekta,
-                      onTap: () => vm.seleccionar(PaymentMethod.conekta),
+                      onTap: () => notifier.seleccionar(PaymentMethod.conekta),
                     ),
                     const SizedBox(height: 12),
                     PaymentOptionTile(
@@ -82,21 +81,21 @@ class PaymentMethodScreen extends StatelessWidget {
                       subtitle:
                           'Paga de forma rápida y segura con tu cuenta PayPal',
                       selected: vm.selected == PaymentMethod.paypal,
-                      onTap: () => vm.seleccionar(PaymentMethod.paypal),
+                      onTap: () => notifier.seleccionar(PaymentMethod.paypal),
                     ),
                     const SizedBox(height: 28),
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: vm.loading ? null : vm.confirmar,
+                        onPressed: vm.loading ? null : notifier.confirmar,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: context.colors.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
                           elevation: 2,
-                          shadowColor: AppColors.primary.withValues(alpha: 0.4),
+                          shadowColor: context.colors.primary.withValues(alpha: 0.4),
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -124,7 +123,6 @@ class PaymentMethodScreen extends StatelessWidget {
             },
           ),
         ),
-      ),
     );
   }
 }

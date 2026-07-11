@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../recording/domain/entities/calculo_entity.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../recording/domain/entities/superficie_entity.dart';
 import '../../../recording/presentation/providers/parameters_provider.dart';
 import 'nearby_stores_screen.dart';
@@ -12,25 +10,23 @@ class ParametersReviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<ParametersViewModel>()..load(grabacionId),
-      child: const _ParametersView(),
-    );
+    return _ParametersView(grabacionId: grabacionId);
   }
 }
 
-class _ParametersView extends StatelessWidget {
-  const _ParametersView();
+class _ParametersView extends ConsumerWidget {
+  final int grabacionId;
+  const _ParametersView({required this.grabacionId});
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<ParametersViewModel>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(parametersProvider(grabacionId));
     final calculo = vm.calculo;
     final confianza = vm.grabacion?.confianza;
     final lowConfidence = confianza != null && confianza < 0.7;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -49,6 +45,7 @@ class _ParametersView extends StatelessWidget {
                   children: [
                     if (vm.grabacion?.tieneTranscripcion ?? false) ...[
                       _TranscriptionCard(
+                        grabacionId: grabacionId,
                         textoOriginal: vm.grabacion!.transcripcion!,
                         textoEditado: vm.textoEditado,
                       ),
@@ -56,7 +53,7 @@ class _ParametersView extends StatelessWidget {
                     ],
                     _SectionLabel('MEDIDAS DETECTADAS'),
                     const SizedBox(height: 8),
-                    ..._buildMetrics(vm),
+                    ..._buildMetrics(context, vm),
                     if ((calculo?.advertencias ?? const []).isNotEmpty) ...[
                       const SizedBox(height: 16),
                       _SectionLabel('ADVERTENCIAS'),
@@ -80,7 +77,7 @@ class _ParametersView extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildMetrics(ParametersViewModel vm) {
+  List<Widget> _buildMetrics(BuildContext context, ParametersState vm) {
     final superficies = vm.grabacion?.superficies;
     final c = vm.calculo;
 
@@ -102,8 +99,8 @@ class _ParametersView extends StatelessWidget {
 
     if (c == null) {
       return [
-        const Text('Sin medidas calculadas',
-            style: TextStyle(color: AppColors.textSecondary)),
+        Text('Sin medidas calculadas',
+            style: TextStyle(color: context.colors.textSecondary)),
       ];
     }
     String dim(double? v) => v != null ? '${v.toStringAsFixed(2)} m' : '—';
@@ -140,22 +137,22 @@ class _ReviewAppBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios,
-                size: 18, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back_ios,
+                size: 18, color: context.colors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: context.colors.primaryLight,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.edit_note,
-                color: AppColors.primary, size: 20),
+            child: Icon(Icons.edit_note,
+                color: context.colors.primary, size: 20),
           ),
           const SizedBox(width: 10),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -163,14 +160,14 @@ class _ReviewAppBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               Text(
                 'Revisa antes de calcular',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],
@@ -189,30 +186,32 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w700,
-        color: AppColors.textSecondary,
+        color: context.colors.textSecondary,
         letterSpacing: 1.0,
       ),
     );
   }
 }
 
-class _TranscriptionCard extends StatefulWidget {
+class _TranscriptionCard extends ConsumerStatefulWidget {
+  final int grabacionId;
   final String textoOriginal;
   final String? textoEditado;
 
   const _TranscriptionCard({
+    required this.grabacionId,
     required this.textoOriginal,
     this.textoEditado,
   });
 
   @override
-  State<_TranscriptionCard> createState() => _TranscriptionCardState();
+  ConsumerState<_TranscriptionCard> createState() => _TranscriptionCardState();
 }
 
-class _TranscriptionCardState extends State<_TranscriptionCard> {
+class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
   late TextEditingController _controller;
   bool _showRecalcular = false;
 
@@ -256,9 +255,9 @@ class _TranscriptionCardState extends State<_TranscriptionCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,9 +267,9 @@ class _TranscriptionCardState extends State<_TranscriptionCard> {
           TextField(
             controller: _controller,
             maxLines: null,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
               height: 1.6,
             ),
             decoration: const InputDecoration(
@@ -286,14 +285,14 @@ class _TranscriptionCardState extends State<_TranscriptionCard> {
               child: TextButton.icon(
                 onPressed: () {
                   FocusScope.of(context).unfocus();
-                  context
-                      .read<ParametersViewModel>()
+                  ref
+                      .read(parametersProvider(widget.grabacionId).notifier)
                       .recalcular(_controller.text);
                 },
                 icon: const Icon(Icons.refresh, size: 18),
                 label: const Text('Recalcular'),
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
+                  foregroundColor: context.colors.primary,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   minimumSize: Size.zero,
@@ -319,20 +318,20 @@ class _LowConfidenceBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.warningLight,
+        color: context.colors.warningLight,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+        border: Border.all(color: context.colors.warning.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_outlined,
-              size: 16, color: AppColors.warning),
+          Icon(Icons.warning_amber_outlined,
+              size: 16, color: context.colors.warning),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               'Confianza $pct — revisa las cantidades antes de continuar',
-              style: const TextStyle(
-                color: AppColors.warning,
+              style: TextStyle(
+                color: context.colors.warning,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
@@ -362,9 +361,9 @@ class _MetricItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Row(
         children: [
@@ -372,19 +371,19 @@ class _MetricItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: context.colors.surfaceVariant,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 20, color: AppColors.textSecondary),
+            child: Icon(icon, size: 20, color: context.colors.textSecondary),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
           ),
@@ -393,7 +392,7 @@ class _MetricItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: highlight ? AppColors.primary : AppColors.textPrimary,
+              color: highlight ? context.colors.primary : context.colors.textPrimary,
             ),
           ),
         ],
@@ -413,12 +412,12 @@ class _WarningItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, size: 16, color: AppColors.warning),
+          Icon(Icons.info_outline, size: 16, color: context.colors.warning),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 13, color: context.colors.textSecondary),
             ),
           ),
         ],
@@ -439,12 +438,12 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: AppColors.error, size: 40),
+            Icon(Icons.error_outline, color: context.colors.error, size: 40),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: context.colors.textSecondary),
             ),
           ],
         ),
@@ -453,7 +452,7 @@ class _ErrorView extends StatelessWidget {
   }
 }
 
-class _ConfirmButton extends StatelessWidget {
+class _ConfirmButton extends ConsumerWidget {
   final int? grabacionId;
   final int? proyectoId;
   final double? pisoM2;
@@ -468,7 +467,7 @@ class _ConfirmButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Necesitamos el proyecto (obligatorio para crear la cotización) y al menos
     // una superficie calculada.
     final hasNewFormat = superficies != null && superficies!.isNotEmpty;
@@ -482,9 +481,11 @@ class _ConfirmButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: enabled
               ? () async {
-                  final vm = context.read<ParametersViewModel>();
-                  if (grabacionId != null) {
-                    await vm.guardarEdicion(grabacionId!);
+                  final id = grabacionId;
+                  if (id != null) {
+                    await ref
+                        .read(parametersProvider(id).notifier)
+                        .guardarEdicion(id);
                   }
                   if (context.mounted) {
                     Navigator.push(

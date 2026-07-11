@@ -1,44 +1,30 @@
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/infra_providers.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/network/connectivity_service.dart';
-import '../../../auth/domain/usecases/auth_usecases.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
-import '../../../project/domain/usecases/proyecto_usecases.dart';
+import '../../../project/presentation/providers/project_providers.dart';
 
-/// ViewModel de la pantalla de inicio (Dashboard). `@injectable` (factory).
-///
-/// Reúne los datos de la home: la lista de proyectos del usuario (desde el
-/// back-end), el estado de conectividad **real** (ping) y la creación de
-/// nuevos proyectos — que ahora vive aquí, no en la pantalla de grabación.
-@injectable
-class HomeViewModel extends ChangeNotifier {
-  final ObtenerProyectosUseCase _obtenerProyectos;
-  final CrearProyectoUseCase _crearProyecto;
-  final ConnectivityService _connectivity;
-  final GetPerfilUseCase _getPerfil;
+part 'home_provider.g.dart';
 
-  HomeViewModel(
-    this._obtenerProyectos,
-    this._crearProyecto,
-    this._connectivity,
-    this._getPerfil,
-  ) {
-    checkConnectivity();
-    cargarProyectos();
-    cargarNombre();
-  }
+/// Estado inmutable de la pantalla de inicio (Dashboard).
+class HomeState {
+  final bool loading;
+  final String? error;
+  final List<ProyectoEntity> proyectos;
+  final bool? online; // null = verificando
+  final String? nombre;
 
-  bool _loading = false;
-  String? _error;
-  List<ProyectoEntity> _proyectos = const [];
-  bool? _online; // null = verificando
-  String? _nombre;
+  const HomeState({
+    this.loading = false,
+    this.error,
+    this.proyectos = const [],
+    this.online,
+    this.nombre,
+  });
 
-  bool get loading => _loading;
-  String? get error => _error;
-  List<ProyectoEntity> get proyectos => _proyectos;
+  bool get isOffline => online == false;
 
   /// Saludo dependiente de la hora local del dispositivo.
   String get saludo {
@@ -50,46 +36,71 @@ class HomeViewModel extends ChangeNotifier {
 
   /// Primer nombre del usuario (o `null` mientras carga el perfil).
   String? get nombreCorto {
-    final n = _nombre?.trim();
+    final n = nombre?.trim();
     if (n == null || n.isEmpty) return null;
     return n.split(' ').first;
+  }
+
+  static const _keep = Object();
+
+  HomeState copyWith({
+    bool? loading,
+    Object? error = _keep,
+    List<ProyectoEntity>? proyectos,
+    Object? online = _keep,
+    Object? nombre = _keep,
+  }) {
+    return HomeState(
+      loading: loading ?? this.loading,
+      error: error == _keep ? this.error : error as String?,
+      proyectos: proyectos ?? this.proyectos,
+      online: online == _keep ? this.online : online as bool?,
+      nombre: nombre == _keep ? this.nombre : nombre as String?,
+    );
+  }
+}
+
+/// Notifier de la pantalla de inicio (Riverpod moderno). Reúne proyectos,
+/// conectividad real (ping) y creación de proyectos. Reemplaza al
+/// `HomeViewModel` (ChangeNotifier).
+@riverpod
+class Home extends _$Home {
+  @override
+  HomeState build() {
+    checkConnectivity();
+    cargarProyectos();
+    cargarNombre();
+    return const HomeState();
   }
 
   /// Trae el nombre del usuario desde `/me/perfil` para el saludo.
   Future<void> cargarNombre() async {
     try {
-      final perfil = await _getPerfil();
-      _nombre = perfil.nombre;
-      notifyListeners();
+      final perfil = await ref.read(getPerfilUseCaseProvider)();
+      state = state.copyWith(nombre: perfil.nombre);
     } catch (_) {
       // Si falla, el saludo se muestra sin nombre.
     }
   }
 
-  /// `null` mientras verifica; luego `true`/`false` según conectividad real.
-  bool? get online => _online;
-  bool get isOffline => _online == false;
-
   /// Verifica conexión real (ping al back-end) y actualiza el estado.
   Future<void> checkConnectivity() async {
-    _online = await _connectivity.isOnline();
-    notifyListeners();
+    final online = await ref.read(connectivityServiceProvider).isOnline();
+    state = state.copyWith(online: online);
   }
 
   /// Carga los proyectos del usuario desde el back-end.
   Future<void> cargarProyectos() async {
-    _loading = true;
-    _error = null;
-    notifyListeners();
+    state = state.copyWith(loading: true, error: null);
     try {
-      _proyectos = await _obtenerProyectos();
+      final proyectos = await ref.read(obtenerProyectosUseCaseProvider)();
+      state = state.copyWith(proyectos: proyectos, loading: false);
     } catch (e) {
-      _error = e is ApiException
-          ? e.message
-          : 'No se pudieron cargar los proyectos';
-    } finally {
-      _loading = false;
-      notifyListeners();
+      state = state.copyWith(
+        loading: false,
+        error:
+            e is ApiException ? e.message : 'No se pudieron cargar los proyectos',
+      );
     }
   }
 
@@ -104,10 +115,9 @@ class HomeViewModel extends ChangeNotifier {
     required String nombre,
     String? direccion,
   }) async {
-    final proyecto =
-        await _crearProyecto(nombre: nombre, direccion: direccion);
-    _proyectos = [proyecto, ..._proyectos];
-    notifyListeners();
+    final proyecto = await ref.read(crearProyectoUseCaseProvider)(
+        nombre: nombre, direccion: direccion);
+    state = state.copyWith(proyectos: [proyecto, ...state.proyectos]);
     return proyecto;
   }
 }

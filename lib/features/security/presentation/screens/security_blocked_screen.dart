@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../security_checker.dart';
 import '../../rasp_checker.dart';
 
@@ -55,7 +55,7 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: AppColors.error,
+          backgroundColor: context.colors.error,
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -74,7 +74,7 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
     final bool isFakeGps = widget.status == SecurityStatus.fakeGpsDetected;
     final bool isUsbDebugging = widget.status == SecurityStatus.usbDebuggingDetected;
     
-    final Color accent = isFakeGps || isUsbDebugging ? AppColors.error : AppColors.warning;
+    final Color accent = isFakeGps || isUsbDebugging ? context.colors.error : context.colors.warning;
 
     String title = 'Acceso restringido';
     String description = 'VisionPrice requiere permisos de ubicación precisos para validar la integridad del dispositivo.';
@@ -91,7 +91,7 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -99,9 +99,9 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
             child: Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: context.colors.border),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -130,8 +130,8 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
                   Text(
                     title,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: context.colors.textPrimary,
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                     ),
@@ -140,8 +140,8 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
                   Text(
                     description,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: context.colors.textSecondary,
                       fontSize: 14,
                       height: 1.5,
                     ),

@@ -1,56 +1,80 @@
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/notificacion_entity.dart';
-import '../../domain/usecases/notificacion_usecases.dart';
+import 'notificacion_providers.dart';
 
-@injectable
-class NotificationsViewModel extends ChangeNotifier {
-  final ObtenerNotificacionesUseCase _obtener;
-  final MarcarNotificacionLeidaUseCase _marcarLeida;
+part 'notifications_provider.g.dart';
 
-  NotificationsViewModel(this._obtener, this._marcarLeida) {
+/// Estado inmutable de la lista de notificaciones.
+class NotificationsState {
+  final bool loading;
+  final String? errorMessage;
+  final List<NotificacionEntity> items;
+
+  const NotificationsState({
+    this.loading = true,
+    this.errorMessage,
+    this.items = const [],
+  });
+
+  int get noLeidas => items.where((n) => !n.leida).length;
+
+  static const _keep = Object();
+
+  NotificationsState copyWith({
+    bool? loading,
+    Object? errorMessage = _keep,
+    List<NotificacionEntity>? items,
+  }) {
+    return NotificationsState(
+      loading: loading ?? this.loading,
+      errorMessage:
+          errorMessage == _keep ? this.errorMessage : errorMessage as String?,
+      items: items ?? this.items,
+    );
+  }
+}
+
+/// Notifier de notificaciones (Riverpod moderno). Reemplaza al
+/// `NotificationsViewModel` (ChangeNotifier).
+@riverpod
+class Notifications extends _$Notifications {
+  @override
+  NotificationsState build() {
     load();
+    return const NotificationsState();
   }
 
-  bool _loading = true;
-  String? _errorMessage;
-  List<NotificacionEntity> _items = const [];
-
-  bool get loading => _loading;
-  String? get errorMessage => _errorMessage;
-  List<NotificacionEntity> get items => _items;
-  int get noLeidas => _items.where((n) => !n.leida).length;
-
   Future<void> load() async {
-    _loading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(loading: true, errorMessage: null);
     try {
-      _items = await _obtener();
+      final items = await ref.read(obtenerNotificacionesUseCaseProvider)();
+      state = state.copyWith(items: items, loading: false);
     } catch (e) {
-      _errorMessage = e is ApiException
-          ? e.message
-          : 'No se pudieron cargar las notificaciones.';
-    } finally {
-      _loading = false;
-      notifyListeners();
+      state = state.copyWith(
+        loading: false,
+        errorMessage: e is ApiException
+            ? e.message
+            : 'No se pudieron cargar las notificaciones.',
+      );
     }
   }
 
   /// Marca como leída (optimista: actualiza la UI y llama al back-end).
   Future<void> marcarLeida(int id) async {
-    final i = _items.indexWhere((n) => n.id == id);
-    if (i == -1 || _items[i].leida) return;
-    _items[i] = _items[i].copyWith(leida: true);
-    notifyListeners();
+    final i = state.items.indexWhere((n) => n.id == id);
+    if (i == -1 || state.items[i].leida) return;
+    final original = state.items[i];
+    final optimista = List<NotificacionEntity>.from(state.items)
+      ..[i] = original.copyWith(leida: true);
+    state = state.copyWith(items: optimista);
     try {
-      await _marcarLeida(id);
+      await ref.read(marcarNotificacionLeidaUseCaseProvider)(id);
     } catch (_) {
       // Revertir si falla.
-      _items[i] = _items[i].copyWith(leida: false);
-      notifyListeners();
+      final revert = List<NotificacionEntity>.from(state.items)..[i] = original;
+      state = state.copyWith(items: revert);
     }
   }
 }

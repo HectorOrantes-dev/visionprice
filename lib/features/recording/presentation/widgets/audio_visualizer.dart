@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'dart:math' as math;
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class AudioVisualizer extends StatefulWidget {
   final Stream<Amplitude>? amplitudeStream;
@@ -58,7 +58,7 @@ class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     if (!widget.isRecording) {
-      return const SizedBox(height: 50, child: Center(child: Text('Presiona el micrófono para hablar', style: TextStyle(color: AppColors.textSecondary))));
+      return SizedBox(height: 50, child: Center(child: Text('Presiona el micrófono para hablar', style: TextStyle(color: context.colors.textSecondary))));
     }
 
     return SizedBox(
@@ -74,7 +74,7 @@ class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProv
             width: 4,
             height: height,
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: context.colors.primary,
               borderRadius: BorderRadius.circular(2),
             ),
           );

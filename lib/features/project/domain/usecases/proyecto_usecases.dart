@@ -1,9 +1,7 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/proyecto_entity.dart';
 import '../repositories/proyecto_repository.dart';
 
-@injectable
 class ObtenerProyectosUseCase {
   final ProyectoRepository _repo;
   ObtenerProyectosUseCase(this._repo);
@@ -11,7 +9,6 @@ class ObtenerProyectosUseCase {
   Future<List<ProyectoEntity>> call() => _repo.listar();
 }
 
-@injectable
 class CrearProyectoUseCase {
   final ProyectoRepository _repo;
   CrearProyectoUseCase(this._repo);

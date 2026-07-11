@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Tarjeta de estado/confianza del procesamiento. Antes `_StatusCard`.
 class ProcessingStatusCard extends StatelessWidget {
@@ -15,15 +15,15 @@ class ProcessingStatusCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         children: [
           Text(
             isDone ? 'Estado' : 'Procesando',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: context.colors.textSecondary),
           ),
           const SizedBox(height: 4),
           Text(
@@ -33,7 +33,7 @@ class ProcessingStatusCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: isDone ? AppColors.success : AppColors.primary,
+              color: isDone ? context.colors.success : context.colors.primary,
             ),
           ),
         ],

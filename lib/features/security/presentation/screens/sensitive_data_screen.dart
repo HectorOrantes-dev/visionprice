@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Pantalla de gestión de datos sensibles guardados localmente
 /// (SharedPreferences). La señal remota WIPE_DATA los borra (ver
@@ -83,10 +83,10 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       appBar: AppBar(
         title: const Text('Datos sensibles'),
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.colors.surface,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -94,12 +94,12 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-            const Text(
+            Text(
               'Ingresar nuevos datos',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -117,21 +117,21 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
               child: const Text('Guardar'),
             ),
             const SizedBox(height: 28),
-            const Text(
+            Text(
               'Datos guardados en local',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: context.colors.border),
               ),
               child: Column(
                 children: _storedData.entries.map((entry) {
@@ -142,9 +142,9 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
                       children: [
                         Text(
                           entry.key,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: context.colors.textPrimary,
                           ),
                         ),
                         Flexible(
@@ -152,8 +152,8 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
                             entry.value,
                             textAlign: TextAlign.right,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                color: AppColors.textSecondary),
+                            style: TextStyle(
+                                color: context.colors.textSecondary),
                           ),
                         ),
                       ],
@@ -166,18 +166,18 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.warningLight,
+                color: context.colors.warningLight,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.info_outline,
-                      size: 16, color: AppColors.warning),
+                      size: 16, color: context.colors.warning),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Si llega la señal WIPE_DATA por push, estos datos se borran.',
-                      style: TextStyle(fontSize: 12, color: AppColors.warning),
+                      style: TextStyle(fontSize: 12, color: context.colors.warning),
                     ),
                   ),
                 ],
@@ -197,7 +197,7 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
       obscureText: obscure,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, size: 20, color: AppColors.textSecondary),
+        prefixIcon: Icon(icon, size: 20, color: context.colors.textSecondary),
       ),
     );
   }

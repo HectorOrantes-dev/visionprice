@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/di/infra_providers.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
 import '../../../sync/presentation/screens/sync_queue_screen.dart';
 import '../../../security/presentation/screens/inactivity_detector.dart';
 import '../../../security/presentation/screens/sensitive_data_screen.dart';
 import '../../../auth/domain/entities/perfil_entity.dart';
-import '../../../auth/domain/usecases/auth_usecases.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../auth/presentation/providers/perfil_provider.dart';
-import '../../../devices/data/services/device_registrar.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../account/presentation/screens/subscriptions_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
@@ -18,14 +17,14 @@ import '../../../project/domain/entities/proyecto_entity.dart';
 import '../providers/home_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
 
   @override
@@ -50,9 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final messenger = ScaffoldMessenger.of(context);
     // Borra el device token de push y limpia la sesión (token + caché perfil).
     // Se hace en orden: unregister primero (necesita el JWT) y luego logout.
+    final deviceRegistrar = ref.read(deviceRegistrarProvider);
+    final logoutUseCase = ref.read(logoutUseCaseProvider);
     () async {
-      await getIt<DeviceRegistrar>().unregister();
-      await getIt<LogoutUseCase>().call();
+      await deviceRegistrar.unregister();
+      await logoutUseCase.call();
     }();
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return InactivityDetector(
       onTimeout: () => _logout(reason: 'Sesión cerrada por inactividad.'),
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.colors.background,
         body: _currentIndex == 3
             ? _PerfilTab(onLogout: () => _logout())
             : _pages[_currentIndex],
@@ -90,44 +91,33 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
-      items: [
-        const BottomNavigationBarItem(
+    return NavigationBar(
+      selectedIndex: currentIndex,
+      onDestinationSelected: onTap,
+      destinations: [
+        NavigationDestination(
           icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
+          selectedIcon: Icon(Icons.home),
           label: 'Inicio',
         ),
-        const BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(Icons.description_outlined),
-          activeIcon: Icon(Icons.description),
+          selectedIcon: Icon(Icons.description),
           label: 'Mis Obras',
         ),
-        BottomNavigationBarItem(
-          icon: Stack(
-            children: [
-              const Icon(Icons.sync_outlined),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.error,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
+        NavigationDestination(
+          // Badge de M3: punto rojo indicando audios en cola por sincronizar.
+          icon: Badge(
+            backgroundColor: context.colors.error,
+            smallSize: 8,
+            child: Icon(Icons.sync_outlined),
           ),
-          activeIcon: const Icon(Icons.sync),
+          selectedIcon: Icon(Icons.sync),
           label: 'Sync',
         ),
-        const BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
+          selectedIcon: Icon(Icons.person),
           label: 'Perfil',
         ),
       ],
@@ -142,24 +132,22 @@ class _DashboardTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // El Dashboard resuelve su ViewModel desde getIt: carga proyectos del
-    // back-end y la conectividad real al construirse.
-    return ChangeNotifierProvider(
-      create: (_) => getIt<HomeViewModel>(),
-      child: const _DashboardView(),
-    );
+    // El estado del Dashboard vive en `homeProvider` (Riverpod): carga proyectos
+    // y conectividad real al observarse.
+    return const _DashboardView();
   }
 }
 
-class _DashboardView extends StatelessWidget {
+class _DashboardView extends ConsumerWidget {
   const _DashboardView();
 
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<HomeViewModel>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(homeProvider);
+    final notifier = ref.read(homeProvider.notifier);
     return SafeArea(
       child: RefreshIndicator(
-        onRefresh: vm.refresh,
+        onRefresh: notifier.refresh,
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
@@ -172,14 +160,14 @@ class _DashboardView extends StatelessWidget {
                   const SizedBox(height: 16),
                   _newBudgetButton(context),
                   const SizedBox(height: 12),
-                  _createProjectButton(context, vm),
+                  _createProjectButton(context, notifier),
                   const SizedBox(height: 24),
                   _SectionTitle('MIS PROYECTOS'),
                   const SizedBox(height: 12),
                 ],
               ),
             ),
-            _ProjectsSliver(vm: vm),
+            _ProjectsSliver(state: vm, notifier: notifier),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),
@@ -191,11 +179,13 @@ class _DashboardView extends StatelessWidget {
 /// Lista de proyectos del usuario (desde el back-end) con sus estados de
 /// carga / error / vacío.
 class _ProjectsSliver extends StatelessWidget {
-  final HomeViewModel vm;
-  const _ProjectsSliver({required this.vm});
+  final HomeState state;
+  final Home notifier;
+  const _ProjectsSliver({required this.state, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
+    final vm = state;
     if (vm.error != null && vm.proyectos.isEmpty) {
       return SliverToBoxAdapter(
         child: Padding(
@@ -205,12 +195,12 @@ class _ProjectsSliver extends StatelessWidget {
               Text(
                 vm.error!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(
+                    fontSize: 13, color: context.colors.textSecondary),
               ),
               const SizedBox(height: 8),
               TextButton(
-                onPressed: vm.cargarProyectos,
+                onPressed: notifier.cargarProyectos,
                 child: const Text('Reintentar'),
               ),
             ],
@@ -244,21 +234,21 @@ class _EmptyProjects extends StatelessWidget {
       child: Column(
         children: [
           Icon(Icons.folder_open_outlined,
-              size: 40, color: AppColors.textHint),
+              size: 40, color: context.colors.textHint),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Aún no tienes proyectos',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Crea tu primer proyecto con el botón de arriba para empezar a grabar presupuestos.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: context.colors.textSecondary),
           ),
         ],
       ),
@@ -266,34 +256,34 @@ class _EmptyProjects extends StatelessWidget {
   }
 }
 
-class _AppBar extends StatelessWidget {
+class _AppBar extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<HomeViewModel>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(homeProvider);
     final nombre = vm.nombreCorto;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
         children: [
-          Icon(Icons.home_outlined, color: AppColors.primary, size: 28),
+          Icon(Icons.home_outlined, color: context.colors.primary, size: 28),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'VisionPrice',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 RichText(
                   text: TextSpan(
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                     children: [
                       TextSpan(text: '${vm.saludo}, '),
@@ -301,7 +291,7 @@ class _AppBar extends StatelessWidget {
                         text: nombre != null ? '$nombre 👋' : '👋',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary.withValues(alpha: 0.8),
+                          color: context.colors.textPrimary.withValues(alpha: 0.8),
                         ),
                       ),
                     ],
@@ -314,15 +304,15 @@ class _AppBar extends StatelessWidget {
           Stack(
             children: [
               Icon(Icons.notifications_outlined,
-                  color: AppColors.textSecondary, size: 26),
+                  color: context.colors.textSecondary, size: 26),
               Positioned(
                 right: 2,
                 top: 2,
                 child: Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.error,
+                  decoration: BoxDecoration(
+                    color: context.colors.error,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -342,19 +332,19 @@ class _OfflineBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.warningLight.withValues(alpha: 0.6),
+        color: context.colors.warningLight.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          Icon(Icons.wifi_off_rounded, size: 18, color: AppColors.warning),
+          Icon(Icons.wifi_off_rounded, size: 18, color: context.colors.warning),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Text(
               'Sin conexión — los audios se guardan localmente',
               style: TextStyle(
                 fontSize: 13,
-                color: AppColors.warning,
+                color: context.colors.warning,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -377,12 +367,12 @@ Widget _newBudgetButton(BuildContext context) {
           MaterialPageRoute(builder: (_) => const RecordingScreen()),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: context.colors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           elevation: 2,
-          shadowColor: AppColors.primary.withValues(alpha: 0.4),
+          shadowColor: context.colors.primary.withValues(alpha: 0.4),
         ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -406,17 +396,17 @@ Widget _newBudgetButton(BuildContext context) {
 
 /// Botón de la home para crear un proyecto (el alta ahora vive aquí, no en la
 /// pantalla de grabación).
-Widget _createProjectButton(BuildContext context, HomeViewModel vm) {
+Widget _createProjectButton(BuildContext context, Home notifier) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: SizedBox(
       width: double.infinity,
       height: 52,
       child: OutlinedButton(
-        onPressed: () => showCreateProjectSheet(context, vm),
+        onPressed: () => showCreateProjectSheet(context, notifier),
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary),
+          foregroundColor: context.colors.primary,
+          side: BorderSide(color: context.colors.primary),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -438,21 +428,21 @@ Widget _createProjectButton(BuildContext context, HomeViewModel vm) {
 }
 
 /// Bottom sheet para dar de alta un proyecto desde la home.
-void showCreateProjectSheet(BuildContext context, HomeViewModel vm) {
+void showCreateProjectSheet(BuildContext context, Home notifier) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.surface,
+    backgroundColor: context.colors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) => _CreateProjectSheet(vm: vm),
+    builder: (_) => _CreateProjectSheet(notifier: notifier),
   );
 }
 
 class _CreateProjectSheet extends StatefulWidget {
-  final HomeViewModel vm;
-  const _CreateProjectSheet({required this.vm});
+  final Home notifier;
+  const _CreateProjectSheet({required this.notifier});
 
   @override
   State<_CreateProjectSheet> createState() => _CreateProjectSheetState();
@@ -482,7 +472,7 @@ class _CreateProjectSheetState extends State<_CreateProjectSheet> {
       _error = null;
     });
     try {
-      await widget.vm.crearProyecto(
+      await widget.notifier.crearProyecto(
         nombre: nombre,
         direccion: _direccionController.text.trim(),
       );
@@ -512,18 +502,18 @@ class _CreateProjectSheetState extends State<_CreateProjectSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: context.colors.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Nuevo proyecto',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -533,8 +523,8 @@ class _CreateProjectSheetState extends State<_CreateProjectSheet> {
             decoration: InputDecoration(
               labelText: 'Nombre',
               hintText: 'Ej. Casa Polanco',
-              prefixIcon: const Icon(Icons.create_new_folder_outlined,
-                  size: 20, color: AppColors.textSecondary),
+              prefixIcon: Icon(Icons.create_new_folder_outlined,
+                  size: 20, color: context.colors.textSecondary),
               errorText: _error,
             ),
           ),
@@ -542,11 +532,11 @@ class _CreateProjectSheetState extends State<_CreateProjectSheet> {
           TextField(
             controller: _direccionController,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Dirección (opcional)',
               hintText: 'Ej. Col. Del Valle',
               prefixIcon: Icon(Icons.location_on_outlined,
-                  size: 20, color: AppColors.textSecondary),
+                  size: 20, color: context.colors.textSecondary),
             ),
           ),
           const SizedBox(height: 16),
@@ -581,10 +571,10 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: AppColors.textSecondary,
+          color: context.colors.textSecondary,
           letterSpacing: 1.0,
         ),
       ),
@@ -599,13 +589,13 @@ class _ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estadoColor = _estadoColor(proyecto.estado);
+    final estadoColor = _estadoColor(context, proyecto.estado);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Row(
         children: [
@@ -613,11 +603,11 @@ class _ProjectCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: context.colors.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(Icons.folder_outlined,
-                size: 18, color: AppColors.textSecondary),
+                size: 18, color: context.colors.textSecondary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -628,10 +618,10 @@ class _ProjectCard extends StatelessWidget {
                   proyecto.nombre,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -639,9 +629,9 @@ class _ProjectCard extends StatelessWidget {
                   _subtitle(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -676,16 +666,16 @@ class _ProjectCard extends StatelessWidget {
     return presupuestos;
   }
 
-  static Color _estadoColor(String estado) {
+  static Color _estadoColor(BuildContext context, String estado) {
     switch (estado.toLowerCase()) {
       case 'completado':
       case 'terminado':
-        return AppColors.success;
+        return context.colors.success;
       case 'borrador':
       case 'pausado':
-        return AppColors.textSecondary;
+        return context.colors.textSecondary;
       default:
-        return AppColors.primary; // activo / en proceso
+        return context.colors.primary; // activo / en proceso
     }
   }
 
@@ -699,13 +689,13 @@ class _MisObrasTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
+    return SafeArea(
       child: Center(
         child: Text(
           'Mis Obras',
           style: TextStyle(
             fontSize: 18,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
       ),
@@ -713,21 +703,18 @@ class _MisObrasTab extends StatelessWidget {
   }
 }
 
-class _PerfilTab extends StatelessWidget {
+class _PerfilTab extends ConsumerWidget {
   final VoidCallback onLogout;
 
   const _PerfilTab({required this.onLogout});
 
   @override
-  Widget build(BuildContext context) {
-    // El perfil se carga desde `GET /api/v1/me/perfil` a través del ViewModel
-    // (resuelto por getIt). Una instancia nueva por entrada a la pestaña.
-    return ChangeNotifierProvider(
-      create: (_) => getIt<PerfilViewModel>(),
-      child: Consumer<PerfilViewModel>(
-        builder: (context, vm, _) {
-          final perfil = vm.perfil;
-          return SafeArea(
+  Widget build(BuildContext context, WidgetRef ref) {
+    // El perfil se carga desde `GET /api/v1/me/perfil` a través de perfilProvider.
+    final vm = ref.watch(perfilProvider);
+    final notifier = ref.read(perfilProvider.notifier);
+    final perfil = vm.perfil;
+    return SafeArea(
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -735,9 +722,9 @@ class _PerfilTab extends StatelessWidget {
                 Center(
                   child: CircleAvatar(
                     radius: 36,
-                    backgroundColor: AppColors.primaryLight,
-                    child: const Icon(Icons.person,
-                        size: 40, color: AppColors.primary),
+                    backgroundColor: context.colors.primaryLight,
+                    child: Icon(Icons.person,
+                        size: 40, color: context.colors.primary),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -746,10 +733,10 @@ class _PerfilTab extends StatelessWidget {
                     perfil?.nombre.isNotEmpty == true
                         ? perfil!.nombre
                         : (vm.isLoading ? 'Cargando…' : 'Mi perfil'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                 ),
@@ -757,8 +744,8 @@ class _PerfilTab extends StatelessWidget {
                   Center(
                     child: Text(
                       perfil!.correo,
-                      style: const TextStyle(
-                          fontSize: 13, color: AppColors.textSecondary),
+                      style: TextStyle(
+                          fontSize: 13, color: context.colors.textSecondary),
                     ),
                   ),
                 const SizedBox(height: 28),
@@ -767,10 +754,10 @@ class _PerfilTab extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 24),
                     child: Center(child: CircularProgressIndicator()),
                   )
-                else if (vm.state == PerfilState.error)
+                else if (vm.status == PerfilStatus.error)
                   _PerfilError(
                     message: vm.errorMessage ?? 'No se pudo cargar el perfil',
-                    onRetry: vm.load,
+                    onRetry: notifier.load,
                   )
                 else if (perfil != null)
                   _PerfilInfoCard(perfil: perfil),
@@ -814,9 +801,6 @@ class _PerfilTab extends StatelessWidget {
               ],
             ),
           );
-        },
-      ),
-    );
   }
 }
 
@@ -830,9 +814,9 @@ class _PerfilInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         children: [
@@ -852,7 +836,7 @@ class _PerfilInfoCard extends StatelessWidget {
             label: 'Plan',
             value: perfil.tienePlan ? perfil.planActivo! : 'Sin plan activo',
             valueColor:
-                perfil.tienePlan ? AppColors.primary : AppColors.textSecondary,
+                perfil.tienePlan ? context.colors.primary : context.colors.textSecondary,
           ),
           if (perfil.vigenciaHasta != null)
             _InfoRow(
@@ -908,12 +892,12 @@ class _InfoRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.textSecondary),
+              Icon(icon, size: 18, color: context.colors.textSecondary),
               const SizedBox(width: 12),
               Text(
                 label,
-                style: const TextStyle(
-                    fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(
+                    fontSize: 13, color: context.colors.textSecondary),
               ),
               const Spacer(),
               Flexible(
@@ -924,7 +908,7 @@ class _InfoRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: valueColor ?? AppColors.textPrimary,
+                    color: valueColor ?? context.colors.textPrimary,
                   ),
                 ),
               ),
@@ -932,7 +916,7 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
         if (showDivider)
-          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.6)),
+          Divider(height: 1, color: context.colors.border.withValues(alpha: 0.6)),
       ],
     );
   }
@@ -949,7 +933,7 @@ class _PerfilError extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.errorLight,
+        color: context.colors.errorLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -957,7 +941,7 @@ class _PerfilError extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, color: AppColors.error),
+            style: TextStyle(fontSize: 13, color: context.colors.error),
           ),
           const SizedBox(height: 8),
           TextButton(
@@ -985,16 +969,16 @@ class _ProfileItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = danger ? AppColors.error : AppColors.textPrimary;
+    final color = danger ? context.colors.error : context.colors.textPrimary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.border),
         ),
         child: Row(
           children: [
@@ -1006,7 +990,7 @@ class _ProfileItem extends StatelessWidget {
                   fontSize: 15, fontWeight: FontWeight.w600, color: color),
             ),
             const Spacer(),
-            Icon(Icons.chevron_right, size: 20, color: AppColors.textHint),
+            Icon(Icons.chevron_right, size: 20, color: context.colors.textHint),
           ],
         ),
       ),

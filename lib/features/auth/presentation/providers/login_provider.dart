@@ -1,72 +1,42 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/infra_providers.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/utils/validation_mixin.dart';
-import '../../../devices/data/services/device_registrar.dart';
-import '../../domain/usecases/auth_usecases.dart';
+import 'auth_providers.dart';
+import 'login_state.dart';
 
-/// Flujo del login:
-/// - [idle] → estado inicial.
-/// - [loading] → petición en curso.
-/// - [codeSent] → el back-end mandó el código 2FA al correo (paso 1 ok).
-/// - [success] → 2FA verificado, token guardado.
-/// - [error] → ver [errorMessage].
-enum LoginState { idle, loading, codeSent, success, error }
+export 'login_state.dart';
 
-/// ViewModel del login. `@injectable` (factory): `getIt<LoginViewModel>()`
-/// crea una instancia nueva por pantalla, con sus use cases ya inyectados.
+part 'login_provider.g.dart';
+
+/// Notifier del login (enfoque moderno de Riverpod). Reemplaza al antiguo
+/// `LoginViewModel` (ChangeNotifier). El estado vive en [LoginState] inmutable;
+/// las dependencias (use cases, device registrar) se resuelven vía `ref`.
 ///
 /// Usa [ValidationMixin] para la validación de formularios (sin duplicar).
-@injectable
-class LoginViewModel extends ChangeNotifier with ValidationMixin {
-  final LoginUseCase _loginUseCase;
-  final VerifyTwoFactorUseCase _verifyUseCase;
-  final GoogleLoginUseCase _googleLoginUseCase;
-  final DeviceRegistrar _deviceRegistrar;
-
-  LoginViewModel(
-    this._loginUseCase,
-    this._verifyUseCase,
-    this._googleLoginUseCase,
-    this._deviceRegistrar,
-  );
-
-  LoginState _state = LoginState.idle;
-  String? _errorMessage;
+@riverpod
+class Login extends _$Login with ValidationMixin {
   String _correo = '';
-  bool _keepSession = true;
-  bool _obscurePassword = true;
 
-  String? emailError;
-  String? passwordError;
-  String? codeError;
+  @override
+  LoginState build() => const LoginState();
 
-  LoginState get state => _state;
-  String? get errorMessage => _errorMessage;
-  bool get keepSession => _keepSession;
-  bool get obscurePassword => _obscurePassword;
-  bool get isLoading => _state == LoginState.loading;
-  bool get requiresTwoFactor => _state == LoginState.codeSent;
+  void toggleKeepSession() =>
+      state = state.copyWith(keepSession: !state.keepSession);
 
-  void toggleKeepSession() {
-    _keepSession = !_keepSession;
-    notifyListeners();
-  }
-
-  void toggleObscurePassword() {
-    _obscurePassword = !_obscurePassword;
-    notifyListeners();
-  }
+  void toggleObscurePassword() =>
+      state = state.copyWith(obscurePassword: !state.obscurePassword);
 
   void onEmailChanged(String value) {
-    emailError = value.isEmpty ? null : validateEmail(value);
-    notifyListeners();
+    state = state.copyWith(
+        emailError: value.isEmpty ? null : validateEmail(value));
   }
 
   void onPasswordChanged(String value) {
-    passwordError = value.isEmpty ? null : validatePassword(value);
-    notifyListeners();
+    state = state.copyWith(
+        passwordError: value.isEmpty ? null : validatePassword(value));
   }
 
   /// Paso 1: valida y hace login. Si el back-end responde con token (2FA
@@ -77,26 +47,28 @@ class LoginViewModel extends ChangeNotifier with ValidationMixin {
     required String password,
     required VoidCallback onSuccess,
   }) async {
-    emailError = validateEmail(email);
-    passwordError = validatePassword(password);
+    final emailError = validateEmail(email);
+    final passwordError = validatePassword(password);
     if (emailError != null || passwordError != null) {
-      notifyListeners();
+      state = state.copyWith(
+          emailError: emailError, passwordError: passwordError);
       return;
     }
 
     _correo = email;
-    _setLoading();
+    state = state.copyWith(status: LoginStatus.loading, errorMessage: null);
     try {
-      final session = await _loginUseCase(correo: email, contrasena: password);
+      final session = await ref.read(loginUseCaseProvider)(
+        correo: email,
+        contrasena: password,
+      );
       if (session != null) {
         // Login directo: no hace falta código de verificación.
-        _state = LoginState.success;
-        notifyListeners();
-        _deviceRegistrar.register();
+        state = state.copyWith(status: LoginStatus.success);
+        ref.read(deviceRegistrarProvider).register();
         onSuccess();
       } else {
-        _state = LoginState.codeSent;
-        notifyListeners();
+        state = state.copyWith(status: LoginStatus.codeSent);
       }
     } catch (e) {
       _fail(e);
@@ -108,19 +80,20 @@ class LoginViewModel extends ChangeNotifier with ValidationMixin {
     required String code,
     required VoidCallback onSuccess,
   }) async {
-    codeError = validateCode(code);
+    final codeError = validateCode(code);
     if (codeError != null) {
-      notifyListeners();
+      state = state.copyWith(codeError: codeError);
       return;
     }
 
-    _setLoading();
+    state = state.copyWith(status: LoginStatus.loading, errorMessage: null);
     try {
-      await _verifyUseCase(correo: _correo, code: code);
-      _state = LoginState.success;
-      notifyListeners();
-      // Registra el device token para push (best-effort, no bloquea).
-      _deviceRegistrar.register();
+      await ref.read(verifyTwoFactorUseCaseProvider)(
+        correo: _correo,
+        code: code,
+      );
+      state = state.copyWith(status: LoginStatus.success);
+      ref.read(deviceRegistrarProvider).register();
       onSuccess();
     } catch (e) {
       _fail(e);
@@ -134,17 +107,15 @@ class LoginViewModel extends ChangeNotifier with ValidationMixin {
     required VoidCallback onSuccess,
     required VoidCallback onNeedsRegister,
   }) async {
-    _setLoading();
+    state = state.copyWith(status: LoginStatus.loading, errorMessage: null);
     try {
-      await _googleLoginUseCase(idToken: idToken);
-      _state = LoginState.success;
-      notifyListeners();
-      _deviceRegistrar.register();
+      await ref.read(googleLoginUseCaseProvider)(idToken: idToken);
+      state = state.copyWith(status: LoginStatus.success);
+      ref.read(deviceRegistrarProvider).register();
       onSuccess();
     } on ApiException catch (e) {
       if (e.isNotFound) {
-        _state = LoginState.idle;
-        notifyListeners();
+        state = state.copyWith(status: LoginStatus.idle);
         onNeedsRegister();
       } else {
         _fail(e);
@@ -154,25 +125,11 @@ class LoginViewModel extends ChangeNotifier with ValidationMixin {
     }
   }
 
-  void reset() {
-    _state = LoginState.idle;
-    _errorMessage = null;
-    emailError = null;
-    passwordError = null;
-    codeError = null;
-    notifyListeners();
-  }
-
-  void _setLoading() {
-    _state = LoginState.loading;
-    _errorMessage = null;
-    notifyListeners();
-  }
-
   void _fail(Object error) {
-    _state = LoginState.error;
-    _errorMessage =
-        error is ApiException ? error.message : 'Ocurrió un error inesperado';
-    notifyListeners();
+    state = state.copyWith(
+      status: LoginStatus.error,
+      errorMessage:
+          error is ApiException ? error.message : 'Ocurrió un error inesperado',
+    );
   }
 }

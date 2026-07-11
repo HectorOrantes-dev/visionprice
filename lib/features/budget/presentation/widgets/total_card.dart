@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Tarjeta destacada con el total estimado. Antes el privado `_TotalCard`.
 class TotalCard extends StatelessWidget {
@@ -20,8 +20,8 @@ class TotalCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.info, AppColors.primaryDark],
+        gradient: LinearGradient(
+          colors: [context.colors.info, context.colors.primaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_palette.dart';
 import 'vp_painter.dart';
 
 /// Cuadro redondeado con degradado de marca que contiene el monograma "VP".
@@ -16,14 +16,14 @@ class Monogram extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(size * 0.27),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.info, AppColors.primaryDark],
+          colors: [context.colors.info, context.colors.primaryDark],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.35),
+            color: context.colors.primary.withValues(alpha: 0.35),
             blurRadius: size * 0.30,
             offset: Offset(0, size * 0.12),
           ),

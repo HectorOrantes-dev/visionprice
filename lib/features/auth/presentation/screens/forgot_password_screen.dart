@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../shared/widgets/field_label.dart';
 import '../../../../shared/widgets/vision_price_logo.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../providers/forgot_password_provider.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
   final _codeController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -30,107 +30,105 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<ForgotPasswordViewModel>(),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          leading: const BackButton(color: AppColors.textPrimary),
-        ),
-        body: SafeArea(
-          child: Consumer<ForgotPasswordViewModel>(
-            builder: (context, vm, _) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    const VisionPriceLogo(size: 40, showWordmark: true),
-                    const SizedBox(height: 32),
-                    const Text(
-                      'Recupera tu contraseña',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      switch (vm.step) {
-                        ForgotStep.email =>
-                          'Escribe tu correo y te enviaremos un código para restablecerla.',
-                        ForgotStep.code =>
-                          'Ingresa el código de verificación que enviamos a tu correo.',
-                        ForgotStep.password =>
-                          'Código verificado. Define tu nueva contraseña.',
-                      },
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: AppColors.textSecondary,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    switch (vm.step) {
-                      ForgotStep.email => _EmailStep(
-                          controller: _emailController,
-                          vm: vm,
-                        ),
-                      ForgotStep.code => _CodeStep(
-                          controller: _codeController,
-                          vm: vm,
-                        ),
-                      ForgotStep.password => _PasswordStep(
-                          controller: _passwordController,
-                          vm: vm,
-                          onSuccess: () {
-                            if (vm.sessionActive) {
-                              // Auto-login tras el reset: directo al Home,
-                              // limpiando la pila de auth.
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const HomeScreen()),
-                                (route) => false,
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'Contraseña actualizada. Inicia sesión.'),
-                                ),
-                              );
-                              Navigator.pop(context);
-                            }
-                          },
-                        ),
-                    },
-                    if (vm.errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.error_outline,
-                                color: Colors.red, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                vm.errorMessage!,
-                                style: const TextStyle(
-                                    color: Colors.red, fontSize: 13),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
+    final state = ref.watch(forgotPasswordProvider);
+    final notifier = ref.read(forgotPasswordProvider.notifier);
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      appBar: AppBar(
+        backgroundColor: context.colors.background,
+        elevation: 0,
+        leading: BackButton(color: context.colors.textPrimary),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              const VisionPriceLogo(size: 40, showWordmark: true),
+              const SizedBox(height: 32),
+              Text(
+                'Recupera tu contraseña',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textPrimary,
                 ),
-              );
-            },
+              ),
+              const SizedBox(height: 8),
+              Text(
+                switch (state.step) {
+                  ForgotStep.email =>
+                    'Escribe tu correo y te enviaremos un código para restablecerla.',
+                  ForgotStep.code =>
+                    'Ingresa el código de verificación que enviamos a tu correo.',
+                  ForgotStep.password =>
+                    'Código verificado. Define tu nueva contraseña.',
+                },
+                style: TextStyle(
+                  fontSize: 15,
+                  color: context.colors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 28),
+              switch (state.step) {
+                ForgotStep.email => _EmailStep(
+                    controller: _emailController,
+                    state: state,
+                    notifier: notifier,
+                  ),
+                ForgotStep.code => _CodeStep(
+                    controller: _codeController,
+                    state: state,
+                    notifier: notifier,
+                  ),
+                ForgotStep.password => _PasswordStep(
+                    controller: _passwordController,
+                    state: state,
+                    notifier: notifier,
+                    onSuccess: () {
+                      if (state.sessionActive) {
+                        // Auto-login tras el reset: directo al Home,
+                        // limpiando la pila de auth.
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const HomeScreen()),
+                          (route) => false,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Contraseña actualizada. Inicia sesión.'),
+                          ),
+                        );
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+              },
+              if (state.errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline,
+                          color: Colors.red, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          state.errorMessage!,
+                          style: const TextStyle(
+                              color: Colors.red, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -183,10 +181,10 @@ class _BackStepLink extends StatelessWidget {
         onPressed: onTap,
         child: Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
       ),
@@ -197,9 +195,14 @@ class _BackStepLink extends StatelessWidget {
 /// Paso 1: captura del correo y envío del código.
 class _EmailStep extends StatelessWidget {
   final TextEditingController controller;
-  final ForgotPasswordViewModel vm;
+  final ForgotPasswordState state;
+  final ForgotPassword notifier;
 
-  const _EmailStep({required this.controller, required this.vm});
+  const _EmailStep({
+    required this.controller,
+    required this.state,
+    required this.notifier,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -211,19 +214,19 @@ class _EmailStep extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: TextInputType.emailAddress,
-          onChanged: vm.onEmailChanged,
+          onChanged: notifier.onEmailChanged,
           decoration: InputDecoration(
             hintText: 'tu@correo.mx',
-            prefixIcon: const Icon(Icons.person_outline,
-                color: AppColors.textSecondary, size: 20),
-            errorText: vm.emailError,
+            prefixIcon: Icon(Icons.person_outline,
+                color: context.colors.textSecondary, size: 20),
+            errorText: state.emailError,
           ),
         ),
         const SizedBox(height: 24),
         _PrimaryButton(
-          loading: vm.isLoading,
+          loading: state.isLoading,
           label: 'Enviar código',
-          onPressed: () => vm.enviarCodigo(correo: controller.text),
+          onPressed: () => notifier.enviarCodigo(correo: controller.text),
         ),
       ],
     );
@@ -233,9 +236,14 @@ class _EmailStep extends StatelessWidget {
 /// Paso 2: verificación del código recibido.
 class _CodeStep extends StatelessWidget {
   final TextEditingController controller;
-  final ForgotPasswordViewModel vm;
+  final ForgotPasswordState state;
+  final ForgotPassword notifier;
 
-  const _CodeStep({required this.controller, required this.vm});
+  const _CodeStep({
+    required this.controller,
+    required this.state,
+    required this.notifier,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -247,22 +255,22 @@ class _CodeStep extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          onChanged: vm.onCodeChanged,
+          onChanged: notifier.onCodeChanged,
           decoration: InputDecoration(
             hintText: 'Código de verificación',
-            prefixIcon: const Icon(Icons.shield_outlined,
-                color: AppColors.textSecondary, size: 20),
-            errorText: vm.codeError,
+            prefixIcon: Icon(Icons.shield_outlined,
+                color: context.colors.textSecondary, size: 20),
+            errorText: state.codeError,
           ),
         ),
         const SizedBox(height: 24),
         _PrimaryButton(
-          loading: vm.isLoading,
+          loading: state.isLoading,
           label: 'Verificar código',
-          onPressed: () => vm.verificarCodigo(code: controller.text),
+          onPressed: () => notifier.verificarCodigo(code: controller.text),
         ),
         const SizedBox(height: 8),
-        _BackStepLink(label: 'Cambiar correo', onTap: vm.volverAtras),
+        _BackStepLink(label: 'Cambiar correo', onTap: notifier.volverAtras),
       ],
     );
   }
@@ -271,12 +279,14 @@ class _CodeStep extends StatelessWidget {
 /// Paso 3: definición de la nueva contraseña.
 class _PasswordStep extends StatelessWidget {
   final TextEditingController controller;
-  final ForgotPasswordViewModel vm;
+  final ForgotPasswordState state;
+  final ForgotPassword notifier;
   final VoidCallback onSuccess;
 
   const _PasswordStep({
     required this.controller,
-    required this.vm,
+    required this.state,
+    required this.notifier,
     required this.onSuccess,
   });
 
@@ -289,36 +299,36 @@ class _PasswordStep extends StatelessWidget {
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          obscureText: vm.obscurePassword,
+          obscureText: state.obscurePassword,
           decoration: InputDecoration(
             hintText: '••••••••',
-            prefixIcon: const Icon(Icons.lock_outline,
-                color: AppColors.textSecondary, size: 20),
+            prefixIcon: Icon(Icons.lock_outline,
+                color: context.colors.textSecondary, size: 20),
             suffixIcon: TextButton(
-              onPressed: vm.toggleObscurePassword,
+              onPressed: notifier.toggleObscurePassword,
               child: Text(
-                vm.obscurePassword ? 'MOSTRAR' : 'OCULTAR',
-                style: const TextStyle(
+                state.obscurePassword ? 'MOSTRAR' : 'OCULTAR',
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ),
-            errorText: vm.passwordError,
+            errorText: state.passwordError,
           ),
         ),
         const SizedBox(height: 24),
         _PrimaryButton(
-          loading: vm.isLoading,
+          loading: state.isLoading,
           label: 'Restablecer contraseña',
-          onPressed: () => vm.restablecer(
+          onPressed: () => notifier.restablecer(
             nuevaContrasena: controller.text,
             onSuccess: onSuccess,
           ),
         ),
         const SizedBox(height: 8),
-        _BackStepLink(label: 'Volver al código', onTap: vm.volverAtras),
+        _BackStepLink(label: 'Volver al código', onTap: notifier.volverAtras),
       ],
     );
   }

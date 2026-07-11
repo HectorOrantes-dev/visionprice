@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Cronómetro grande de la grabación. Antes el privado `_TimerDisplay`.
 class TimerDisplay extends StatelessWidget {
@@ -11,10 +11,10 @@ class TimerDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       elapsed,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 40,
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
         letterSpacing: 2,
       ),
     );

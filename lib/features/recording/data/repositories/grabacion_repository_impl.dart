@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/calculo_entity.dart';
 import '../../domain/entities/grabacion_entity.dart';
 import '../../domain/repositories/grabacion_repository.dart';
 import '../datasources/grabacion_remote_datasource.dart';
 
-@LazySingleton(as: GrabacionRepository)
 class GrabacionRepositoryImpl implements GrabacionRepository {
   final GrabacionRemoteDataSource _remote;
   GrabacionRepositoryImpl(this._remote);

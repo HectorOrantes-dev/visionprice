@@ -1,35 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../providers/subscriptions_provider.dart';
 import '../widgets/account_message.dart';
 import '../widgets/subscription_card.dart';
 import 'payment_method_screen.dart';
 
-class SubscriptionsScreen extends StatelessWidget {
+class SubscriptionsScreen extends ConsumerWidget {
   const SubscriptionsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<SubscriptionsViewModel>(),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(subscriptionsProvider);
+    final notifier = ref.read(subscriptionsProvider.notifier);
+    return Scaffold(
+        backgroundColor: context.colors.background,
         appBar: AppBar(
-          backgroundColor: AppColors.background,
+          backgroundColor: context.colors.background,
           elevation: 0,
-          leading: const BackButton(color: AppColors.textPrimary),
-          title: const Text('Mis suscripciones',
+          leading: BackButton(color: context.colors.textPrimary),
+          title: Text('Mis suscripciones',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
               )),
           actions: [
             IconButton(
               tooltip: 'Método de pago',
-              icon: const Icon(Icons.credit_card, color: AppColors.primary),
+              icon: Icon(Icons.credit_card, color: context.colors.primary),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -39,8 +38,8 @@ class SubscriptionsScreen extends StatelessWidget {
           ],
         ),
         body: SafeArea(
-          child: Consumer<SubscriptionsViewModel>(
-            builder: (context, vm, _) {
+          child: Builder(
+            builder: (context) {
               if (vm.loading) {
                 return const Center(child: CircularProgressIndicator());
               }
@@ -52,7 +51,7 @@ class SubscriptionsScreen extends StatelessWidget {
                     text: 'No tienes suscripciones activas.');
               }
               return RefreshIndicator(
-                onRefresh: vm.load,
+                onRefresh: notifier.load,
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: vm.items.length,
@@ -63,7 +62,6 @@ class SubscriptionsScreen extends StatelessWidget {
             },
           ),
         ),
-      ),
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 
 class OrDivider extends StatelessWidget {
   const OrDivider({super.key});
@@ -16,7 +16,7 @@ class OrDivider extends StatelessWidget {
             'O CONTINÚA CON',
             style: TextStyle(
               fontSize: 11,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               letterSpacing: 1.0,
             ),
           ),

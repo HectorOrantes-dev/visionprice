@@ -1,44 +1,39 @@
-import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
-import '../../domain/usecases/cotizacion_usecases.dart';
+import 'budget_providers.dart';
+import 'export_pdf_state.dart';
 
-/// ViewModel de "Exportar PDF": pide el PDF de la cotización. El back-end
-/// responde JSON; se busca defensivamente un enlace de descarga.
-@injectable
-class ExportPdfViewModel extends ChangeNotifier {
-  final ObtenerPdfUseCase _obtenerPdf;
-  ExportPdfViewModel(this._obtenerPdf);
+export 'export_pdf_state.dart';
 
-  bool _loading = false;
-  String? _errorMessage;
-  String? _pdfUrl;
-  Map<String, dynamic>? _raw;
+part 'export_pdf_provider.g.dart';
 
-  bool get loading => _loading;
-  String? get errorMessage => _errorMessage;
-  String? get pdfUrl => _pdfUrl;
-  Map<String, dynamic>? get raw => _raw;
+/// Notifier de "Exportar PDF" (Riverpod moderno). Pide el PDF de la cotización;
+/// el back-end responde JSON y se busca defensivamente un enlace de descarga.
+@riverpod
+class ExportPdf extends _$ExportPdf {
+  @override
+  ExportPdfState build() => const ExportPdfState();
 
   Future<void> descargar(int cotizacionId) async {
-    _loading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(loading: true, errorMessage: null);
     try {
-      final data = await _obtenerPdf(cotizacionId);
-      _raw = data;
-      _pdfUrl = (data['url'] ??
-              data['pdf_url'] ??
-              data['download_url'] ??
-              data['link'])
-          ?.toString();
+      final data = await ref.read(obtenerPdfUseCaseProvider)(cotizacionId);
+      state = state.copyWith(
+        loading: false,
+        raw: data,
+        pdfUrl: (data['url'] ??
+                data['pdf_url'] ??
+                data['download_url'] ??
+                data['link'])
+            ?.toString(),
+      );
     } catch (e) {
-      _errorMessage =
-          e is ApiException ? e.message : 'No se pudo generar el PDF.';
-    } finally {
-      _loading = false;
-      notifyListeners();
+      state = state.copyWith(
+        loading: false,
+        errorMessage:
+            e is ApiException ? e.message : 'No se pudo generar el PDF.',
+      );
     }
   }
 }

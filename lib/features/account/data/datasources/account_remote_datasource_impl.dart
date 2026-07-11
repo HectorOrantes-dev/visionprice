@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../domain/entities/subscription_entity.dart';
 import 'account_remote_datasource.dart';
 
-@LazySingleton(as: AccountRemoteDataSource)
 class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   final ApiClient _client;
   AccountRemoteDataSourceImpl(this._client);
