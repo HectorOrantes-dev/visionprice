@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../devices/data/providers/device_providers.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/gradient_button.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
 import '../../../sync/presentation/screens/sync_queue_screen.dart';
 import '../../../security/presentation/screens/inactivity_detector.dart';
@@ -273,9 +275,9 @@ class _AppBar extends ConsumerWidget {
               children: [
                 Text(
                   'VisionPrice',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                  style: AppTextStyles.heading(
+                    size: 18,
+                    weight: FontWeight.w700,
                     color: context.colors.textPrimary,
                   ),
                 ),
@@ -358,37 +360,27 @@ class _OfflineBanner extends StatelessWidget {
 Widget _newBudgetButton(BuildContext context) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: SizedBox(
-      width: double.infinity,
+    child: GradientButton(
       height: 56,
-      child: ElevatedButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const RecordingScreen()),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: context.colors.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 2,
-          shadowColor: context.colors.primary.withValues(alpha: 0.4),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.mic_rounded, size: 22, color: Colors.white),
-            SizedBox(width: 12),
-            Text(
-              'Nuevo presupuesto por voz',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
+      borderRadius: BorderRadius.circular(16),
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const RecordingScreen()),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.mic_rounded, size: 22, color: Colors.white),
+          SizedBox(width: 12),
+          Text(
+            'Nuevo presupuesto por voz',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     ),
   );
@@ -510,9 +502,9 @@ class _CreateProjectSheetState extends State<_CreateProjectSheet> {
           const SizedBox(height: 16),
           Text(
             'Nuevo proyecto',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+            style: AppTextStyles.heading(
+              size: 20,
+              weight: FontWeight.w800,
               color: context.colors.textPrimary,
             ),
           ),
@@ -540,20 +532,17 @@ class _CreateProjectSheetState extends State<_CreateProjectSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
+          GradientButton(
             height: 48,
-            child: ElevatedButton(
-              onPressed: _creating ? null : _crear,
-              child: _creating
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Text('Crear proyecto'),
-            ),
+            onPressed: _creating ? null : _crear,
+            child: _creating
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
+                  )
+                : const Text('Crear proyecto'),
           ),
         ],
       ),
@@ -733,9 +722,9 @@ class _PerfilTab extends ConsumerWidget {
                     perfil?.nombre.isNotEmpty == true
                         ? perfil!.nombre
                         : (vm.isLoading ? 'Cargando…' : 'Mi perfil'),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                    style: AppTextStyles.heading(
+                      size: 18,
+                      weight: FontWeight.w700,
                       color: context.colors.textPrimary,
                     ),
                   ),

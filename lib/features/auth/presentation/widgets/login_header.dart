@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class LoginHeader extends StatelessWidget {
   const LoginHeader({super.key});
@@ -13,11 +14,7 @@ class LoginHeader extends StatelessWidget {
       children: [
         Text(
           'Inicia sesión',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
+          style: AppTextStyles.heading(size: 28, color: c.textPrimary),
         ),
         const SizedBox(height: 8),
         Text(

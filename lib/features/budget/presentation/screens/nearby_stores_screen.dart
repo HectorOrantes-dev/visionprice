@@ -163,7 +163,7 @@ class _StoresAppBar extends StatelessWidget {
                 ),
               ),
               Text(
-                '${count} productos · elige los adecuados',
+                '$count productos · elige los adecuados',
                 style: TextStyle(
                   fontSize: 12,
                   color: context.colors.textSecondary,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/gradient_button.dart';
 
 /// Pantalla de gestión de datos sensibles guardados localmente
 /// (SharedPreferences). La señal remota WIPE_DATA los borra (ver
@@ -96,9 +98,9 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
             children: [
             Text(
               'Ingresar nuevos datos',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
+              style: AppTextStyles.heading(
+                size: 16,
+                weight: FontWeight.w700,
                 color: context.colors.textPrimary,
               ),
             ),
@@ -112,16 +114,16 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
             _field(_keyController, 'Clave privada', Icons.lock_outline,
                 obscure: true),
             const SizedBox(height: 16),
-            ElevatedButton(
+            GradientButton(
               onPressed: _saveData,
               child: const Text('Guardar'),
             ),
             const SizedBox(height: 28),
             Text(
               'Datos guardados en local',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
+              style: AppTextStyles.heading(
+                size: 16,
+                weight: FontWeight.w700,
                 color: context.colors.textPrimary,
               ),
             ),
@@ -130,7 +132,7 @@ class _SensitiveDataScreenState extends State<SensitiveDataScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: context.colors.surface,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: context.colors.border),
               ),
               child: Column(

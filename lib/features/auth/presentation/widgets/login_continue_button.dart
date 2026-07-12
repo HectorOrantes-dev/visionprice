@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/widgets/gradient_button.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../providers/login_provider.dart';
 
@@ -20,38 +21,34 @@ class LoginContinueButton extends ConsumerWidget {
     // Una vez enviado el código 2FA, esta sección cede el paso a la de
     // verificación (TwoFactorSection).
     if (state.requiresTwoFactor) return const SizedBox.shrink();
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton(
-        onPressed: state.isLoading
-            ? null
-            : () => ref.read(loginProvider.notifier).login(
-                  email: emailController.text,
-                  password: passwordController.text,
-                  onSuccess: () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomeScreen()),
-                  ),
+    return GradientButton(
+      onPressed: state.isLoading
+          ? null
+          : () => ref.read(loginProvider.notifier).login(
+                email: emailController.text,
+                password: passwordController.text,
+                onSuccess: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
                 ),
-        child: state.isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Continuar'),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward, size: 18),
-                ],
               ),
-      ),
+      child: state.isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Continuar'),
+                SizedBox(width: 8),
+                Icon(Icons.arrow_forward, size: 18),
+              ],
+            ),
     );
   }
 }

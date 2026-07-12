@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../sync/presentation/screens/processing_screen.dart';
 import '../providers/recording_provider.dart';
 import '../widgets/audio_visualizer.dart';
@@ -22,14 +23,33 @@ class _RecordingView extends ConsumerWidget {
     final state = ref.watch(recordingProvider);
     final notifier = ref.read(recordingProvider.notifier);
 
-    return Scaffold(
-      backgroundColor: context.colors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _RecordingAppBar(),
-            _ProjectSelector(state: state),
-            Expanded(
+    // Look inmersivo: esta pantalla siempre se ve oscura (fondo degradado
+    // navy), independientemente del ThemeMode.system del resto de la app.
+    // El Theme(copyWith(extensions:[AppPalette.dark])) local hace que TODO
+    // el subárbol (incluidos AudioVisualizer, chips, etc.) resuelva
+    // context.colors contra la paleta oscura sin tocar app.dart.
+    return Theme(
+      data: Theme.of(context).copyWith(
+        extensions: [AppPalette.dark],
+        brightness: Brightness.dark,
+      ),
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF0B1220), Color(0xFF12213F), Color(0xFF16294A)],
+            stops: [0.0, 0.55, 1.0],
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Column(
+              children: [
+                _RecordingAppBar(),
+                _ProjectSelector(state: state),
+                Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -79,11 +99,13 @@ class _RecordingView extends ConsumerWidget {
                 ],
               ),
             ),
-            _BottomActions(state: state, notifier: notifier),
-            const SizedBox(height: 16),
-            _ConnectivityChip(state: state, notifier: notifier),
-            const SizedBox(height: 24),
-          ],
+                _BottomActions(state: state, notifier: notifier),
+                const SizedBox(height: 16),
+                _ConnectivityChip(state: state, notifier: notifier),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -107,9 +129,9 @@ class _RecordingAppBar extends StatelessWidget {
             children: [
               Text(
                 'Nueva grabación',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
+                style: AppTextStyles.heading(
+                  size: 17,
+                  weight: FontWeight.w700,
                   color: context.colors.textPrimary,
                 ),
               ),
@@ -128,13 +150,52 @@ class _RecordingAppBar extends StatelessWidget {
   }
 }
 
-class _MicButton extends StatelessWidget {
+class _MicButton extends StatefulWidget {
   final RecordingState state;
   final Recording notifier;
   const _MicButton({required this.state, required this.notifier});
 
   @override
+  State<_MicButton> createState() => _MicButtonState();
+}
+
+class _MicButtonState extends State<_MicButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2200),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.state.isRecording) _pulseController.repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MicButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.state.isRecording && !oldWidget.state.isRecording) {
+      _pulseController.repeat();
+    } else if (!widget.state.isRecording && oldWidget.state.isRecording) {
+      _pulseController
+        ..stop()
+        ..reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final state = widget.state;
+    final notifier = widget.notifier;
+    final color =
+        state.isRecording ? context.colors.recordingRed : context.colors.primary;
     return GestureDetector(
       onTap: state.isUploading
           ? null
@@ -145,28 +206,51 @@ class _MicButton extends StatelessWidget {
                 notifier.startRecording();
               }
             },
-      child: Container(
-        width: 88,
-        height: 88,
-        decoration: BoxDecoration(
-          color:
-              state.isRecording ? context.colors.recordingRed : context.colors.primary,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color:
-                  (state.isRecording ? context.colors.recordingRed : context.colors.primary)
-                      .withValues(alpha: 0.3),
-              blurRadius: 20,
-              spreadRadius: 4,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (state.isRecording)
+            AnimatedBuilder(
+              animation: _pulseController,
+              builder: (context, _) {
+                final t = _pulseController.value;
+                return Container(
+                  width: 88,
+                  height: 88,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withValues(alpha: (1 - t) * 0.45),
+                        blurRadius: 4,
+                        spreadRadius: t * 22,
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          ],
-        ),
-        child: Icon(
-          state.isRecording ? Icons.stop : Icons.mic,
-          color: Colors.white,
-          size: 36,
-        ),
+          Container(
+            width: 88,
+            height: 88,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  spreadRadius: 4,
+                ),
+              ],
+            ),
+            child: Icon(
+              state.isRecording ? Icons.stop : Icons.mic,
+              color: Colors.white,
+              size: 36,
+            ),
+          ),
+        ],
       ),
     );
   }

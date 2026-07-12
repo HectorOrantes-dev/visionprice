@@ -1,5 +1,3 @@
-import 'item_cotizacion.dart';
-
 /// Una línea del resultado de la cotización.
 class LineaCotizacionEntity {
   final int? materialId;

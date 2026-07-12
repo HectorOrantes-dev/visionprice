@@ -15,6 +15,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color primary;
   final Color primaryLight;
   final Color primaryDark;
+  final Color gradientStart;
+  final Color gradientEnd;
   final Color background;
   final Color surface;
   final Color surfaceVariant;
@@ -45,6 +47,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.primary,
     required this.primaryLight,
     required this.primaryDark,
+    required this.gradientStart,
+    required this.gradientEnd,
     required this.background,
     required this.surface,
     required this.surfaceVariant,
@@ -77,6 +81,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     primary: AppColors.primary,
     primaryLight: AppColors.primaryLight,
     primaryDark: AppColors.primaryDark,
+    gradientStart: AppColors.gradientStart,
+    gradientEnd: AppColors.gradientEnd,
     background: AppColors.background,
     surface: AppColors.surface,
     surfaceVariant: AppColors.surfaceVariant,
@@ -109,6 +115,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     primary: Color(0xFF60A5FA), // azul marca, aclarado para contraste en oscuro
     primaryLight: Color(0xFF1E3A5F),
     primaryDark: Color(0xFF93C5FD),
+    gradientStart: AppColors.gradientStart,
+    gradientEnd: AppColors.gradientEnd,
     background: Color(0xFF0B1220),
     surface: Color(0xFF111827),
     surfaceVariant: Color(0xFF1E293B),
@@ -141,6 +149,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? primary,
     Color? primaryLight,
     Color? primaryDark,
+    Color? gradientStart,
+    Color? gradientEnd,
     Color? background,
     Color? surface,
     Color? surfaceVariant,
@@ -171,6 +181,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       primary: primary ?? this.primary,
       primaryLight: primaryLight ?? this.primaryLight,
       primaryDark: primaryDark ?? this.primaryDark,
+      gradientStart: gradientStart ?? this.gradientStart,
+      gradientEnd: gradientEnd ?? this.gradientEnd,
       background: background ?? this.background,
       surface: surface ?? this.surface,
       surfaceVariant: surfaceVariant ?? this.surfaceVariant,
@@ -207,6 +219,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       primary: c(primary, other.primary),
       primaryLight: c(primaryLight, other.primaryLight),
       primaryDark: c(primaryDark, other.primaryDark),
+      gradientStart: c(gradientStart, other.gradientStart),
+      gradientEnd: c(gradientEnd, other.gradientEnd),
       background: c(background, other.background),
       surface: c(surface, other.surface),
       surfaceVariant: c(surfaceVariant, other.surfaceVariant),

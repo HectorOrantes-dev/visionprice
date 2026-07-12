@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/field_label.dart';
+import '../../../../shared/widgets/gradient_button.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../domain/entities/role_entity.dart';
 import '../providers/register_provider.dart';
@@ -20,11 +22,7 @@ class RegisterHeader extends StatelessWidget {
       children: [
         Text(
           'Crear cuenta',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: context.colors.textPrimary,
-          ),
+          style: AppTextStyles.heading(size: 28, color: context.colors.textPrimary),
         ),
         const SizedBox(height: 8),
         Text(
@@ -197,29 +195,25 @@ class RegisterButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(registerProvider);
     if (state.requiresTwoFactor) return const SizedBox.shrink();
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton(
-        onPressed: state.isLoading
-            ? null
-            : () => ref.read(registerProvider.notifier).register(
-                  nombre: nameController.text,
-                  correo: emailController.text,
-                  contrasena: passwordController.text,
-                  telefono: phoneController.text,
-                ),
-        child: state.isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Text('Crear cuenta'),
-      ),
+    return GradientButton(
+      onPressed: state.isLoading
+          ? null
+          : () => ref.read(registerProvider.notifier).register(
+                nombre: nameController.text,
+                correo: emailController.text,
+                contrasena: passwordController.text,
+                telefono: phoneController.text,
+              ),
+      child: state.isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Text('Crear cuenta'),
     );
   }
 }

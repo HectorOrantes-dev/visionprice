@@ -6,9 +6,13 @@ import 'app_palette.dart';
 
 abstract final class AppColors {
   // Brand
-  static const primary = Color(0xFF2563EB);
+  static const primary = Color(0xFF1E3A8A);
   static const primaryLight = Color(0xFFEFF6FF);
-  static const primaryDark = Color(0xFF1D4ED8);
+  static const primaryDark = Color(0xFF16295E);
+
+  // Gradiente de marca (CTAs destacados: botones principales, hero cards)
+  static const gradientStart = Color(0xFF1E3A8A);
+  static const gradientEnd = Color(0xFF2F5BD9);
 
   // Background
   static const background = Color(0xFFF1F5F9);
@@ -115,7 +119,7 @@ class AppTheme {
             foregroundColor: p.textOnPrimary,
             minimumSize: const Size(double.infinity, 52),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
             ),
             elevation: 0,
             textStyle: const TextStyle(
@@ -130,7 +134,7 @@ class AppTheme {
             side: BorderSide(color: p.border),
             minimumSize: const Size(double.infinity, 52),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
             ),
             textStyle: const TextStyle(
               fontSize: 16,
@@ -144,15 +148,15 @@ class AppTheme {
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: p.border),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: p.border),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: p.primary, width: 1.5),
           ),
           hintStyle: TextStyle(
@@ -164,7 +168,7 @@ class AppTheme {
           color: p.surface,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(18),
             side: BorderSide(color: p.border, width: 1),
           ),
           margin: EdgeInsets.zero,
