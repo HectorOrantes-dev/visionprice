@@ -6,7 +6,7 @@ part of 'export_pdf_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$exportPdfHash() => r'923efad2dc5c083ceee45e84baba53139e2554ae';
+String _$exportPdfHash() => r'915ea6fb1788be0bb7b5291ec135c655bc99bba6';
 
 /// Notifier de "Exportar PDF" (Riverpod moderno). Pide el PDF de la cotización;
 /// el back-end responde JSON y se busca defensivamente un enlace de descarga.

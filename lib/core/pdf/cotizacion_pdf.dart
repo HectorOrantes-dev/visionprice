@@ -70,3 +70,57 @@ Future<Uint8List> buildCotizacionPdf(CotizacionEntity cot) {
     return doc.save();
   });
 }
+
+/// Genera un PDF con las líneas de VARIAS cotizaciones juntas (ej. una
+/// simple + una kit del mismo proyecto) y un total general combinado.
+/// Mismo mecanismo en isolate que [buildCotizacionPdf].
+Future<Uint8List> buildResumenCotizacionesPdf(List<CotizacionEntity> cotizaciones) {
+  return runHeavy(() {
+    String money(double v) => '\$${v.toStringAsFixed(2)}';
+    final total = cotizaciones.fold<double>(0, (acc, c) => acc + c.total);
+    final proyectoId = cotizaciones.isNotEmpty ? cotizaciones.first.proyectoId : 0;
+
+    final doc = pw.Document();
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) => [
+          pw.Header(level: 0, text: 'Presupuesto del proyecto'),
+          pw.SizedBox(height: 4),
+          pw.Text('Proyecto: $proyectoId   ·   ${cotizaciones.length} cotización(es)'),
+          pw.SizedBox(height: 16),
+          pw.TableHelper.fromTextArray(
+            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            headers: const ['Material', 'Cant.', 'Unidad', 'P. unit.', 'Subtotal'],
+            cellAlignments: const {
+              1: pw.Alignment.centerRight,
+              3: pw.Alignment.centerRight,
+              4: pw.Alignment.centerRight,
+            },
+            data: [
+              for (final cot in cotizaciones)
+                for (final l in cot.lineas)
+                  [
+                    l.descripcion,
+                    l.cantidad.toStringAsFixed(2),
+                    l.unidad,
+                    money(l.precioUnitario),
+                    money(l.subtotal),
+                  ],
+            ],
+          ),
+          pw.SizedBox(height: 16),
+          pw.Align(
+            alignment: pw.Alignment.centerRight,
+            child: pw.Text(
+              'Total general: ${money(total)}',
+              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+    return doc.save();
+  });
+}

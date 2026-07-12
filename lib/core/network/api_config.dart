@@ -45,6 +45,8 @@ class ApiConfig {
   static const String cotizacionesCalculo = '$apiPrefix/cotizaciones/calculo';
   static const String cotizaciones = '$apiPrefix/cotizaciones';
   static const String cotizacionesProductos = '$apiPrefix/cotizaciones/productos';
+  static const String cotizacionesMateriales = '$apiPrefix/cotizaciones/materiales';
+  static const String cotizacionesKit = '$apiPrefix/cotizaciones/kit';
   static String cotizacionPdf(int id) => '$apiPrefix/cotizaciones/$id/pdf';
 
   // --- Notificaciones ---

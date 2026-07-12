@@ -103,5 +103,45 @@ final obtenerPdfUseCaseProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ObtenerPdfUseCaseRef = AutoDisposeProviderRef<ObtenerPdfUseCase>;
+String _$obtenerMaterialesUseCaseHash() =>
+    r'3d476d0d5a90a004c6939f922076baa17c655005';
+
+/// See also [obtenerMaterialesUseCase].
+@ProviderFor(obtenerMaterialesUseCase)
+final obtenerMaterialesUseCaseProvider =
+    AutoDisposeProvider<ObtenerMaterialesUseCase>.internal(
+  obtenerMaterialesUseCase,
+  name: r'obtenerMaterialesUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$obtenerMaterialesUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ObtenerMaterialesUseCaseRef
+    = AutoDisposeProviderRef<ObtenerMaterialesUseCase>;
+String _$crearCotizacionKitUseCaseHash() =>
+    r'3ac7f5642b5cda28bf711a7ac60be2353ccd0641';
+
+/// See also [crearCotizacionKitUseCase].
+@ProviderFor(crearCotizacionKitUseCase)
+final crearCotizacionKitUseCaseProvider =
+    AutoDisposeProvider<CrearCotizacionKitUseCase>.internal(
+  crearCotizacionKitUseCase,
+  name: r'crearCotizacionKitUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$crearCotizacionKitUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CrearCotizacionKitUseCaseRef
+    = AutoDisposeProviderRef<CrearCotizacionKitUseCase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

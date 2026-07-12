@@ -4,6 +4,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../recording/domain/entities/superficie_entity.dart';
 import '../../../recording/presentation/providers/parameters_provider.dart';
 import 'nearby_stores_screen.dart';
+import 'superficies_detectadas_screen.dart';
 class ParametersReviewScreen extends StatelessWidget {
   final int grabacionId;
   const ParametersReviewScreen({super.key, required this.grabacionId});
@@ -488,15 +489,24 @@ class _ConfirmButton extends ConsumerWidget {
                         .guardarEdicion(id);
                   }
                   if (context.mounted) {
+                    // Con superficies detectadas por el ML: flujo nuevo,
+                    // secuencial por superficie (simple o kit). Sin ellas
+                    // (formato legacy plano piso_m2/paredes_m2): se mantiene
+                    // el flujo anterior de ferreterías cercanas.
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => NearbyStoresScreen(
-                          proyectoId: proyectoId!,
-                          pisoM2: pisoM2,
-                          paredesM2: paredesM2,
-                          superficies: superficies,
-                        ),
+                        builder: (_) => hasNewFormat
+                            ? SuperficiesDetectadasScreen(
+                                proyectoId: proyectoId!,
+                                superficies: superficies!,
+                              )
+                            : NearbyStoresScreen(
+                                proyectoId: proyectoId!,
+                                pisoM2: pisoM2,
+                                paredesM2: paredesM2,
+                                superficies: superficies,
+                              ),
                       ),
                     );
                   }

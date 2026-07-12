@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../domain/entities/cotizacion_entity.dart';
+import '../../domain/entities/material_regla_entity.dart';
 import '../../domain/entities/producto_entity.dart';
 import 'cotizacion_remote_datasource.dart';
 
@@ -44,6 +45,21 @@ class CotizacionRemoteDataSourceImpl implements CotizacionRemoteDataSource {
   Future<CotizacionEntity> crear(Map<String, dynamic> body) async {
     final data = await _client.postJson(ApiConfig.cotizaciones, body, auth: true);
     return CotizacionEntity.fromJson(data);
+  }
+
+  @override
+  Future<CotizacionEntity> crearKit(Map<String, dynamic> body) async {
+    final data = await _client.postJson(ApiConfig.cotizacionesKit, body, auth: true);
+    return CotizacionEntity.fromJson(data);
+  }
+
+  @override
+  Future<List<MaterialReglaEntity>> materiales() async {
+    final data = await _client.getJsonList(ApiConfig.cotizacionesMateriales, auth: true);
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map(MaterialReglaEntity.fromJson)
+        .toList();
   }
 
   @override

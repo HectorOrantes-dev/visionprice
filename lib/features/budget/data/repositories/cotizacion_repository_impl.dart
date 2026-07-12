@@ -1,7 +1,9 @@
 
 import '../../domain/entities/cotizacion_entity.dart';
 import '../../domain/entities/item_cotizacion.dart';
+import '../../domain/entities/material_regla_entity.dart';
 import '../../domain/entities/producto_entity.dart';
+import '../../domain/entities/superficie_kit_item.dart';
 import '../../domain/repositories/cotizacion_repository.dart';
 import '../datasources/cotizacion_remote_datasource.dart';
 
@@ -32,6 +34,20 @@ class CotizacionRepositoryImpl implements CotizacionRepository {
       'items': items.map((e) => e.toJson()).toList(),
     });
   }
+
+  @override
+  Future<CotizacionEntity> crearKit({
+    required int proyectoId,
+    required List<SuperficieKitItem> superficies,
+  }) {
+    return _remote.crearKit({
+      'proyecto_id': proyectoId,
+      'superficies': superficies.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  @override
+  Future<List<MaterialReglaEntity>> materiales() => _remote.materiales();
 
   @override
   Future<Map<String, dynamic>> pdf(int cotizacionId) =>
