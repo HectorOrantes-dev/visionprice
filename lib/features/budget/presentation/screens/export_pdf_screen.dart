@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:printing/printing.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../providers/export_pdf_provider.dart';
@@ -83,6 +84,29 @@ class ExportPdfScreen extends ConsumerWidget {
                             )
                           : const Icon(Icons.download_outlined, size: 18),
                       label: Text(vm.loading ? 'Generando…' : 'Generar PDF'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 52,
+                    child: OutlinedButton.icon(
+                      // Genera el PDF localmente en un isolate (sin backend) y
+                      // abre la vista de impresión/compartir. Ideal para
+                      // cotizaciones largas: no bloquea la UI.
+                      onPressed: vm.loading
+                          ? null
+                          : () async {
+                              final bytes =
+                                  await notifier.generarPdfLocal(cotizacion);
+                              if (bytes != null) {
+                                await Printing.layoutPdf(
+                                  onLayout: (_) async => bytes,
+                                  name: 'cotizacion_${cotizacion.id}.pdf',
+                                );
+                              }
+                            },
+                      icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                      label: const Text('Ver / Compartir PDF (local)'),
                     ),
                   ),
                 ],

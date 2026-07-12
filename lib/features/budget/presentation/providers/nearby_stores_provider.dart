@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/infra_providers.dart';
+import '../../../../core/di/location_service_provider.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../recording/domain/entities/superficie_entity.dart';

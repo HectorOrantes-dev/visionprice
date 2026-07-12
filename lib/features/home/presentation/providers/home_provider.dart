@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/infra_providers.dart';
+import '../../../../core/di/connectivity_service_provider.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';

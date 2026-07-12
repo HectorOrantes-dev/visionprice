@@ -1,6 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/infra_providers.dart';
+import '../../../../core/di/api_client_provider.dart';
+import '../../../../core/di/local_database_provider.dart';
+import '../../../../core/di/token_storage_provider.dart';
 import '../../../sync/data/datasources/sync_local_datasource.dart';
 import '../../../sync/services/sync_service.dart';
 import '../../data/datasources/grabacion_remote_datasource.dart';

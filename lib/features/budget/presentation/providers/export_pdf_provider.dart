@@ -1,6 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/pdf/cotizacion_pdf.dart';
+import '../../domain/entities/cotizacion_entity.dart';
 import 'budget_providers.dart';
 import 'export_pdf_state.dart';
 
@@ -34,6 +38,25 @@ class ExportPdf extends _$ExportPdf {
         errorMessage:
             e is ApiException ? e.message : 'No se pudo generar el PDF.',
       );
+    }
+  }
+
+  /// Genera el PDF de la cotización **localmente**, en un isolate (hilo
+  /// aislado), sin depender del back-end. Ideal para cotizaciones largas: el
+  /// render pesado no bloquea la UI. Devuelve los bytes para compartir/imprimir
+  /// (la capa de UI usa `printing`), o `null` si falló.
+  Future<Uint8List?> generarPdfLocal(CotizacionEntity cot) async {
+    state = state.copyWith(loading: true, errorMessage: null);
+    try {
+      final bytes = await buildCotizacionPdf(cot);
+      state = state.copyWith(loading: false);
+      return bytes;
+    } catch (_) {
+      state = state.copyWith(
+        loading: false,
+        errorMessage: 'No se pudo generar el PDF local.',
+      );
+      return null;
     }
   }
 }

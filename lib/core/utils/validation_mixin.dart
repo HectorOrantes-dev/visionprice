@@ -29,4 +29,10 @@ mixin ValidationMixin {
     if (value.trim().length < 4) return 'Código incompleto';
     return null;
   }
+
+  String? validateProjectName(String value) {
+    if (value.trim().isEmpty) return 'El nombre es obligatorio';
+    if (value.trim().length < 2) return 'Escribe un nombre (mín. 2 caracteres)';
+    return null;
+  }
 }

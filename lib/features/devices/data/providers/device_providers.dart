@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/infra_providers.dart';
+import '../../../../core/di/api_client_provider.dart';
 import '../datasources/dispositivo_remote_datasource.dart';
 import '../datasources/dispositivo_remote_datasource_impl.dart';
 import '../repositories/dispositivo_repository_impl.dart';

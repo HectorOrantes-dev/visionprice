@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../di/infra_providers.dart';
+import '../di/token_storage_provider.dart';
 
 part 'auth_state_provider.g.dart';
 

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../devices/data/providers/device_providers.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/utils/validation_mixin.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
@@ -440,7 +441,8 @@ class _CreateProjectSheet extends StatefulWidget {
   State<_CreateProjectSheet> createState() => _CreateProjectSheetState();
 }
 
-class _CreateProjectSheetState extends State<_CreateProjectSheet> {
+class _CreateProjectSheetState extends State<_CreateProjectSheet>
+    with ValidationMixin {
   final _nombreController = TextEditingController();
   final _direccionController = TextEditingController();
   bool _creating = false;
@@ -455,8 +457,9 @@ class _CreateProjectSheetState extends State<_CreateProjectSheet> {
 
   Future<void> _crear() async {
     final nombre = _nombreController.text.trim();
-    if (nombre.length < 2) {
-      setState(() => _error = 'Escribe un nombre (mín. 2 caracteres)');
+    final nombreError = validateProjectName(nombre);
+    if (nombreError != null) {
+      setState(() => _error = nombreError);
       return;
     }
     setState(() {

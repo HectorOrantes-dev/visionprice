@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:record/record.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/infra_providers.dart';
+import '../../../../core/di/connectivity_service_provider.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
 import '../../../project/presentation/providers/project_providers.dart';

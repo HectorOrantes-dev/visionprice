@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/infra_providers.dart';
+import '../../../../core/di/api_client_provider.dart';
 import '../../data/datasources/cotizacion_remote_datasource.dart';
 import '../../data/datasources/cotizacion_remote_datasource_impl.dart';
 import '../../data/repositories/cotizacion_repository_impl.dart';

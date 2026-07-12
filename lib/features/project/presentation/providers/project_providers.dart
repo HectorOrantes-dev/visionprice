@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/infra_providers.dart';
+import '../../../../core/di/api_client_provider.dart';
+import '../../../../core/di/local_database_provider.dart';
 import '../../data/datasources/proyecto_remote_datasource.dart';
 import '../../data/datasources/proyecto_remote_datasource_impl.dart';
 import '../../data/repositories/proyecto_repository_impl.dart';
