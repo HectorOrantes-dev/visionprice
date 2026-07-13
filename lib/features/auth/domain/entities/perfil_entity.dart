@@ -41,7 +41,7 @@ class PerfilEntity {
       correo: (json['correo'] ?? json['email'] ?? '').toString(),
       telefono: (json['telefono'] ?? '').toString(),
       rol: (json['rol'] ?? json['role'] ?? '').toString(),
-      activo: json['activo'] == true,
+      activo: json['activo'] == true || json['activo'] == 1,
       proveedorAuth: (json['proveedor_auth'] ?? 'local').toString(),
       fechaRegistro: _parseDate(json['fecha_registro']),
       planActivo: (json['plan_activo']?.toString().isNotEmpty ?? false)

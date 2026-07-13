@@ -42,7 +42,9 @@ class NotificationsState {
 class Notifications extends _$Notifications {
   @override
   NotificationsState build() {
-    load();
+    // `load` muta `state` en su primera línea síncrona → se difiere para no
+    // mutar el estado mientras el propio build() se construye.
+    Future.microtask(load);
     return const NotificationsState();
   }
 

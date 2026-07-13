@@ -116,11 +116,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final perfil = await _remote.getPerfil();
       _perfilCache = perfil;
       
-      // Guardar en la base de datos local para modo offline
+      // Guardar en la base de datos local para modo offline.
+      // SQLite solo acepta num/String/blob → el bool `activo` va como 1/0.
       final db = await _localDatabase.database;
-      // Requerimos importar sqflite pero como local_database ya lo encapsula...
-      // vamos a usar sqflite aquí. Ojo: Necesito importar sqflite arriba.
-      await db.insert('perfil', perfil.toJson(), conflictAlgorithm: ConflictAlgorithm.replace);
+      final row = perfil.toJson()..['activo'] = perfil.activo ? 1 : 0;
+      await db.insert('perfil', row, conflictAlgorithm: ConflictAlgorithm.replace);
       
       return perfil;
     } catch (e) {

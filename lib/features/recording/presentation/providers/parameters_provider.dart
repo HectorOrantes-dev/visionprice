@@ -17,7 +17,11 @@ part 'parameters_provider.g.dart';
 class Parameters extends _$Parameters {
   @override
   ParametersState build(int grabacionId) {
-    load(grabacionId);
+    // `load` muta `state` en su primera línea (síncrona) — Riverpod no permite
+    // leer/mutar el estado mientras el propio build() aún se construye (lanza
+    // "Tried to read the state of an uninitialized provider"). Se difiere con
+    // microtask para que corra justo después, como en Home/Recording.
+    Future.microtask(() => load(grabacionId));
     return const ParametersState(loading: true);
   }
 
