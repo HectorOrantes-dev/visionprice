@@ -6,6 +6,7 @@ import '../../../../core/di/location_service_provider.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../recording/domain/entities/superficie_entity.dart';
+import '../../domain/categoria_material.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../../domain/entities/item_cotizacion.dart';
 import 'budget_providers.dart';
@@ -57,8 +58,14 @@ class NearbyStores extends _$NearbyStores {
       final ubic = await location.current();
       _lastFetchPosition = ubic;
       final pos = ubic ?? LocationService.fallback;
+      // Solo pedimos proveedores del material del item: derivamos las categorías
+      // de las superficies (ej. "cambio de pintura" → "pintura") y las mandamos
+      // al backend. Si no se identifica ninguna, `categoria` va null (sin filtro).
+      final categorias = CategoriaMaterial.deSuperficies(state.superficies);
       final productos = await ref.read(obtenerProductosUseCaseProvider)(
-          lat: pos.lat, lng: pos.lng);
+          lat: pos.lat,
+          lng: pos.lng,
+          categoria: categorias.isEmpty ? null : categorias.join(','));
       state = state.copyWith(
         usandoUbicacionAprox: ubic == null,
         productos: productos,

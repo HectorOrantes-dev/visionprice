@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../recording/domain/entities/superficie_entity.dart';
+import '../../domain/categoria_material.dart';
 import '../../domain/entities/producto_entity.dart';
 import '../providers/nearby_stores_provider.dart';
 import 'budget_result_screen.dart';
@@ -280,7 +281,13 @@ class _ProductCard extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: usaNuevo
-                ? state.superficies!.map((sup) {
+                ? state.superficies!
+                    // Solo ofrecemos las superficies cuyo material coincide con
+                    // la categoría del producto (ej. una pintura solo se puede
+                    // asignar a la superficie de "cambio de pintura").
+                    .where((sup) =>
+                        CategoriaMaterial.productoAplicaA(producto, sup))
+                    .map((sup) {
                     final isSel =
                         state.isNuevaSelected(producto.productoId, sup);
                     final label = sup.descripcion.isNotEmpty
