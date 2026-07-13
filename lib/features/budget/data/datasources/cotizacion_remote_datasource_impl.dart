@@ -14,6 +14,10 @@ class CotizacionRemoteDataSourceImpl implements CotizacionRemoteDataSource {
   @override
   Future<List<ProductoEntity>> productos(
       double lat, double lng, double? radioKm, String? categoria) async {
+    if (kDebugMode) {
+      debugPrint('🛰️ REQ /cotizaciones/productos lat=$lat lng=$lng '
+          'radio_km=${radioKm ?? '(default)'} categoria=${categoria ?? '(ninguna)'}');
+    }
     final data = await _client.getJsonList(
       ApiConfig.cotizacionesProductos,
       auth: true,
