@@ -139,7 +139,7 @@ class _SuperficieCard extends StatelessWidget {
   });
 
   IconData get _icon {
-    switch (state.superficies[index].tipo.toLowerCase().trim()) {
+    switch (state.superficies[index].categoria.toLowerCase().trim()) {
       case 'piso':
         return Icons.grid_view_rounded;
       case 'azulejo':
@@ -147,7 +147,7 @@ class _SuperficieCard extends StatelessWidget {
       case 'zoclo':
         return Icons.straighten;
       case 'pintura':
-      case 'pared':
+      case 'impermeabilizante':
         return Icons.format_paint_outlined;
       default:
         return Icons.construction_outlined;

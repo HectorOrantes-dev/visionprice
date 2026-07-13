@@ -26,7 +26,7 @@ class ElegirMaterialScreen extends ConsumerWidget {
     final notifier = ref.read(cotizacionWizardProvider(proyectoId).notifier);
     final sup = wizard.superficies[index];
     final regla = wizard.reglaDe(index);
-    final titulo = 'Elegir ${sup.tipo}';
+    final titulo = 'Elegir ${sup.categoria}';
     final subtitulo = '${sup.descripcion} · ${_fmtArea(sup.areaM2)} m²';
 
     return Scaffold(
@@ -39,7 +39,7 @@ class ElegirMaterialScreen extends ConsumerWidget {
               child: regla.requiereKit
                   ? _KitBody(proyectoId: proyectoId, index: index)
                   : _ProductoPicker(
-                      categoria: sup.tipo,
+                      categoria: sup.categoria,
                       seleccionado: wizard.seleccionSimple[index],
                       onConfirm: (p) {
                         notifier.seleccionarSimple(index, p);
@@ -301,7 +301,7 @@ class _KitBody extends ConsumerWidget {
                 producto: kit?.principal,
                 onTap: () => _elegirComplemento(
                   context,
-                  categoria: sup.tipo,
+                  categoria: sup.categoria,
                   seleccionado: kit?.principal,
                   onConfirm: (p) => notifier.seleccionarKitPrincipal(index, p),
                 ),

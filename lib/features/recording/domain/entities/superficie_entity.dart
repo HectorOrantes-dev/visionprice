@@ -1,12 +1,19 @@
 class SuperficieEntity {
-  final String tipo; // ej. 'piso', 'pared'
+  final String tipo; // SUPERFICIE que se interviene, ej. 'pared', 'piso'
   final String descripcion; // ej. 'piso sala'
   final double areaM2;
+
+  /// MATERIAL a cotizar, ej. 'pintura', 'piso', 'azulejo'. Es lo que se usa
+  /// para consultar el catálogo (`categoria=`) y para saber si es simple o kit
+  /// (`GET /cotizaciones/materiales`). Distinto de [tipo]: una 'pared' se pinta
+  /// con 'pintura'. El ML lo manda en `categoria` (o `materiales[0]`).
+  final String categoria;
 
   const SuperficieEntity({
     required this.tipo,
     required this.descripcion,
     required this.areaM2,
+    required this.categoria,
   });
 
   factory SuperficieEntity.fromJson(Map<String, dynamic> json) {
@@ -35,10 +42,21 @@ class SuperficieEntity {
         ? areaRaw.toDouble()
         : double.tryParse(areaRaw?.toString() ?? '') ?? 0.0;
 
+    // El material a cotizar: el ML lo manda en "categoria" (o en "materiales").
+    // Si no viene, se cae a "tipo" (compatibilidad con extracciones viejas).
+    final materiales = json['materiales'];
+    final categoriaRaw = json['categoria']?.toString();
+    final categoria = (categoriaRaw != null && categoriaRaw.isNotEmpty)
+        ? categoriaRaw
+        : (materiales is List && materiales.isNotEmpty)
+            ? materiales.first.toString()
+            : tipo;
+
     return SuperficieEntity(
       tipo: tipo,
       descripcion: descripcion,
       areaM2: areaM2,
+      categoria: categoria,
     );
   }
 }

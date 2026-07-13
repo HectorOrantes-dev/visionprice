@@ -59,9 +59,9 @@ class CotizacionWizardState {
   /// Regla de la superficie en el índice [i] (asume "simple" si no se
   /// encontró la categoría en `GET /cotizaciones/materiales`).
   MaterialReglaEntity reglaDe(int i) {
-    final tipo = superficies[i].tipo.toLowerCase().trim();
-    return reglas[tipo] ??
-        MaterialReglaEntity(categoria: tipo, metodoCalculo: 'rendimiento', requiereKit: false);
+    final cat = superficies[i].categoria.toLowerCase().trim();
+    return reglas[cat] ??
+        MaterialReglaEntity(categoria: cat, metodoCalculo: 'rendimiento', requiereKit: false);
   }
 
   bool superficieCompleta(int i) {
