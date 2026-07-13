@@ -6,177 +6,408 @@ part of 'recording_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$grabacionRemoteDataSourceHash() =>
-    r'c68302e3fa47a88a30f660af84a4a86607769d1a';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Cadena de dependencias de grabaciones como providers de Riverpod
+/// (composición declarativa). Reemplaza el registro get_it de esta feature.
+
+@ProviderFor(grabacionRemoteDataSource)
+final grabacionRemoteDataSourceProvider = GrabacionRemoteDataSourceProvider._();
 
 /// Cadena de dependencias de grabaciones como providers de Riverpod
 /// (composición declarativa). Reemplaza el registro get_it de esta feature.
-///
-/// Copied from [grabacionRemoteDataSource].
-@ProviderFor(grabacionRemoteDataSource)
-final grabacionRemoteDataSourceProvider =
-    Provider<GrabacionRemoteDataSource>.internal(
-  grabacionRemoteDataSource,
-  name: r'grabacionRemoteDataSourceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$grabacionRemoteDataSourceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GrabacionRemoteDataSourceRef = ProviderRef<GrabacionRemoteDataSource>;
-String _$grabacionRepositoryHash() =>
-    r'ea2ab23fd21a1a5c128faa3e6b74f181d6a7189c';
+final class GrabacionRemoteDataSourceProvider extends $FunctionalProvider<
+    GrabacionRemoteDataSource,
+    GrabacionRemoteDataSource,
+    GrabacionRemoteDataSource> with $Provider<GrabacionRemoteDataSource> {
+  /// Cadena de dependencias de grabaciones como providers de Riverpod
+  /// (composición declarativa). Reemplaza el registro get_it de esta feature.
+  GrabacionRemoteDataSourceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'grabacionRemoteDataSourceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [grabacionRepository].
+  @override
+  String debugGetCreateSourceHash() => _$grabacionRemoteDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<GrabacionRemoteDataSource> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GrabacionRemoteDataSource create(Ref ref) {
+    return grabacionRemoteDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GrabacionRemoteDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GrabacionRemoteDataSource>(value),
+    );
+  }
+}
+
+String _$grabacionRemoteDataSourceHash() =>
+    r'85a21b58120b574df5ad12489cb18b627419b438';
+
 @ProviderFor(grabacionRepository)
-final grabacionRepositoryProvider = Provider<GrabacionRepository>.internal(
-  grabacionRepository,
-  name: r'grabacionRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$grabacionRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final grabacionRepositoryProvider = GrabacionRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GrabacionRepositoryRef = ProviderRef<GrabacionRepository>;
-String _$obtenerGrabacionUseCaseHash() =>
-    r'c7d17e85dc4a24e76021024d398a9526fe89f16d';
+final class GrabacionRepositoryProvider extends $FunctionalProvider<
+    GrabacionRepository,
+    GrabacionRepository,
+    GrabacionRepository> with $Provider<GrabacionRepository> {
+  GrabacionRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'grabacionRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [obtenerGrabacionUseCase].
+  @override
+  String debugGetCreateSourceHash() => _$grabacionRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<GrabacionRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GrabacionRepository create(Ref ref) {
+    return grabacionRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GrabacionRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GrabacionRepository>(value),
+    );
+  }
+}
+
+String _$grabacionRepositoryHash() =>
+    r'4c8850c4b1cccf9ae0f2d37307492e539eb0d0bc';
+
 @ProviderFor(obtenerGrabacionUseCase)
-final obtenerGrabacionUseCaseProvider =
-    AutoDisposeProvider<ObtenerGrabacionUseCase>.internal(
-  obtenerGrabacionUseCase,
-  name: r'obtenerGrabacionUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$obtenerGrabacionUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final obtenerGrabacionUseCaseProvider = ObtenerGrabacionUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ObtenerGrabacionUseCaseRef
-    = AutoDisposeProviderRef<ObtenerGrabacionUseCase>;
-String _$calcularMetrosUseCaseHash() =>
-    r'9a97fec34a16896dab3fad01c38d2fe6bc4ffef2';
+final class ObtenerGrabacionUseCaseProvider extends $FunctionalProvider<
+    ObtenerGrabacionUseCase,
+    ObtenerGrabacionUseCase,
+    ObtenerGrabacionUseCase> with $Provider<ObtenerGrabacionUseCase> {
+  ObtenerGrabacionUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'obtenerGrabacionUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [calcularMetrosUseCase].
+  @override
+  String debugGetCreateSourceHash() => _$obtenerGrabacionUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ObtenerGrabacionUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ObtenerGrabacionUseCase create(Ref ref) {
+    return obtenerGrabacionUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ObtenerGrabacionUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ObtenerGrabacionUseCase>(value),
+    );
+  }
+}
+
+String _$obtenerGrabacionUseCaseHash() =>
+    r'01fb2309e3caa70e208504d539504e8723d3adf1';
+
 @ProviderFor(calcularMetrosUseCase)
-final calcularMetrosUseCaseProvider =
-    AutoDisposeProvider<CalcularMetrosUseCase>.internal(
-  calcularMetrosUseCase,
-  name: r'calcularMetrosUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$calcularMetrosUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final calcularMetrosUseCaseProvider = CalcularMetrosUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CalcularMetrosUseCaseRef
-    = AutoDisposeProviderRef<CalcularMetrosUseCase>;
-String _$actualizarTranscripcionUseCaseHash() =>
-    r'470d8a6a8bb26d9282977399514ef82cfdc3ac40';
+final class CalcularMetrosUseCaseProvider extends $FunctionalProvider<
+    CalcularMetrosUseCase,
+    CalcularMetrosUseCase,
+    CalcularMetrosUseCase> with $Provider<CalcularMetrosUseCase> {
+  CalcularMetrosUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'calcularMetrosUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [actualizarTranscripcionUseCase].
+  @override
+  String debugGetCreateSourceHash() => _$calcularMetrosUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<CalcularMetrosUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CalcularMetrosUseCase create(Ref ref) {
+    return calcularMetrosUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CalcularMetrosUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CalcularMetrosUseCase>(value),
+    );
+  }
+}
+
+String _$calcularMetrosUseCaseHash() =>
+    r'54c8c21f7c2c91a8f31c8b3e90b43f1f0a4ed2a8';
+
 @ProviderFor(actualizarTranscripcionUseCase)
 final actualizarTranscripcionUseCaseProvider =
-    AutoDisposeProvider<ActualizarTranscripcionUseCase>.internal(
-  actualizarTranscripcionUseCase,
-  name: r'actualizarTranscripcionUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$actualizarTranscripcionUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+    ActualizarTranscripcionUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ActualizarTranscripcionUseCaseRef
-    = AutoDisposeProviderRef<ActualizarTranscripcionUseCase>;
-String _$subirGrabacionUseCaseHash() =>
-    r'106c8cefa541002aa080653004eeeab7bce03fbd';
+final class ActualizarTranscripcionUseCaseProvider extends $FunctionalProvider<
+        ActualizarTranscripcionUseCase,
+        ActualizarTranscripcionUseCase,
+        ActualizarTranscripcionUseCase>
+    with $Provider<ActualizarTranscripcionUseCase> {
+  ActualizarTranscripcionUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'actualizarTranscripcionUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [subirGrabacionUseCase].
+  @override
+  String debugGetCreateSourceHash() => _$actualizarTranscripcionUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ActualizarTranscripcionUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ActualizarTranscripcionUseCase create(Ref ref) {
+    return actualizarTranscripcionUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ActualizarTranscripcionUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<ActualizarTranscripcionUseCase>(value),
+    );
+  }
+}
+
+String _$actualizarTranscripcionUseCaseHash() =>
+    r'bb899d88eccd0ecbf34e86e75a6c56ba586209f6';
+
 @ProviderFor(subirGrabacionUseCase)
-final subirGrabacionUseCaseProvider =
-    AutoDisposeProvider<SubirGrabacionUseCase>.internal(
-  subirGrabacionUseCase,
-  name: r'subirGrabacionUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$subirGrabacionUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final subirGrabacionUseCaseProvider = SubirGrabacionUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SubirGrabacionUseCaseRef
-    = AutoDisposeProviderRef<SubirGrabacionUseCase>;
-String _$audioRecorderServiceHash() =>
-    r'7215c671355ebec421740a72783929ac6d3266f1';
+final class SubirGrabacionUseCaseProvider extends $FunctionalProvider<
+    SubirGrabacionUseCase,
+    SubirGrabacionUseCase,
+    SubirGrabacionUseCase> with $Provider<SubirGrabacionUseCase> {
+  SubirGrabacionUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'subirGrabacionUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [audioRecorderService].
+  @override
+  String debugGetCreateSourceHash() => _$subirGrabacionUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<SubirGrabacionUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SubirGrabacionUseCase create(Ref ref) {
+    return subirGrabacionUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SubirGrabacionUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SubirGrabacionUseCase>(value),
+    );
+  }
+}
+
+String _$subirGrabacionUseCaseHash() =>
+    r'6a0aac53a3f77273e078803753b18b42f44e9dbb';
+
 @ProviderFor(audioRecorderService)
-final audioRecorderServiceProvider = Provider<AudioRecorderService>.internal(
-  audioRecorderService,
-  name: r'audioRecorderServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$audioRecorderServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final audioRecorderServiceProvider = AudioRecorderServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AudioRecorderServiceRef = ProviderRef<AudioRecorderService>;
-String _$syncLocalDataSourceHash() =>
-    r'460bf46b5e871310a30033900cb9e944b58b3201';
+final class AudioRecorderServiceProvider extends $FunctionalProvider<
+    AudioRecorderService,
+    AudioRecorderService,
+    AudioRecorderService> with $Provider<AudioRecorderService> {
+  AudioRecorderServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'audioRecorderServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [syncLocalDataSource].
+  @override
+  String debugGetCreateSourceHash() => _$audioRecorderServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<AudioRecorderService> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AudioRecorderService create(Ref ref) {
+    return audioRecorderService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AudioRecorderService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AudioRecorderService>(value),
+    );
+  }
+}
+
+String _$audioRecorderServiceHash() =>
+    r'08e7b66d8f78c8040e58b3f57f491e96b86f0bbe';
+
 @ProviderFor(syncLocalDataSource)
-final syncLocalDataSourceProvider = Provider<SyncLocalDataSource>.internal(
-  syncLocalDataSource,
-  name: r'syncLocalDataSourceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$syncLocalDataSourceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final syncLocalDataSourceProvider = SyncLocalDataSourceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SyncLocalDataSourceRef = ProviderRef<SyncLocalDataSource>;
-String _$syncServiceHash() => r'd2b8d3b87de66f8a7b4e0199496c020ae7ae1a98';
+final class SyncLocalDataSourceProvider extends $FunctionalProvider<
+    SyncLocalDataSource,
+    SyncLocalDataSource,
+    SyncLocalDataSource> with $Provider<SyncLocalDataSource> {
+  SyncLocalDataSourceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'syncLocalDataSourceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [syncService].
+  @override
+  String debugGetCreateSourceHash() => _$syncLocalDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SyncLocalDataSource> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SyncLocalDataSource create(Ref ref) {
+    return syncLocalDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SyncLocalDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SyncLocalDataSource>(value),
+    );
+  }
+}
+
+String _$syncLocalDataSourceHash() =>
+    r'35e3b50352ca791056a6f39d853922c6a26e2387';
+
 @ProviderFor(syncService)
-final syncServiceProvider = Provider<SyncService>.internal(
-  syncService,
-  name: r'syncServiceProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$syncServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final syncServiceProvider = SyncServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SyncServiceRef = ProviderRef<SyncService>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class SyncServiceProvider
+    extends $FunctionalProvider<SyncService, SyncService, SyncService>
+    with $Provider<SyncService> {
+  SyncServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'syncServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SyncService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SyncService create(Ref ref) {
+    return syncService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SyncService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SyncService>(value),
+    );
+  }
+}
+
+String _$syncServiceHash() => r'43fde735a87eee44abcbab47451eeb834409c602';

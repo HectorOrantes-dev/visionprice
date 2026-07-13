@@ -6,25 +6,53 @@ part of 'connectivity_service_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$connectivityServiceHash() =>
-    r'939aa5215b211c9ea5ada6c172fd0b200797a1c7';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Servicio de conectividad real (ping al back-end). `keepAlive`: singleton.
+
+@ProviderFor(connectivityService)
+final connectivityServiceProvider = ConnectivityServiceProvider._();
 
 /// Servicio de conectividad real (ping al back-end). `keepAlive`: singleton.
-///
-/// Copied from [connectivityService].
-@ProviderFor(connectivityService)
-final connectivityServiceProvider = Provider<ConnectivityService>.internal(
-  connectivityService,
-  name: r'connectivityServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$connectivityServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ConnectivityServiceRef = ProviderRef<ConnectivityService>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class ConnectivityServiceProvider extends $FunctionalProvider<
+    ConnectivityService,
+    ConnectivityService,
+    ConnectivityService> with $Provider<ConnectivityService> {
+  /// Servicio de conectividad real (ping al back-end). `keepAlive`: singleton.
+  ConnectivityServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'connectivityServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$connectivityServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<ConnectivityService> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ConnectivityService create(Ref ref) {
+    return connectivityService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ConnectivityService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ConnectivityService>(value),
+    );
+  }
+}
+
+String _$connectivityServiceHash() =>
+    r'b7991ee0e29c31047b81c2ed5cbbed7165a37da6';

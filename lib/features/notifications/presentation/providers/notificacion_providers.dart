@@ -13,20 +13,20 @@ part 'notificacion_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 NotificacionRemoteDataSource notificacionRemoteDataSource(
-        NotificacionRemoteDataSourceRef ref) =>
+        Ref ref) =>
     NotificacionRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)
 NotificacionRepository notificacionRepository(
-        NotificacionRepositoryRef ref) =>
+        Ref ref) =>
     NotificacionRepositoryImpl(ref.watch(notificacionRemoteDataSourceProvider));
 
 @riverpod
 ObtenerNotificacionesUseCase obtenerNotificacionesUseCase(
-        ObtenerNotificacionesUseCaseRef ref) =>
+        Ref ref) =>
     ObtenerNotificacionesUseCase(ref.watch(notificacionRepositoryProvider));
 
 @riverpod
 MarcarNotificacionLeidaUseCase marcarNotificacionLeidaUseCase(
-        MarcarNotificacionLeidaUseCaseRef ref) =>
+        Ref ref) =>
     MarcarNotificacionLeidaUseCase(ref.watch(notificacionRepositoryProvider));

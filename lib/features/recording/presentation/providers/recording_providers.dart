@@ -19,46 +19,46 @@ part 'recording_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 GrabacionRemoteDataSource grabacionRemoteDataSource(
-        GrabacionRemoteDataSourceRef ref) =>
+        Ref ref) =>
     GrabacionRemoteDataSourceImpl(
       ref.watch(apiClientProvider),
       ref.watch(tokenStorageProvider),
     );
 
 @Riverpod(keepAlive: true)
-GrabacionRepository grabacionRepository(GrabacionRepositoryRef ref) =>
+GrabacionRepository grabacionRepository(Ref ref) =>
     GrabacionRepositoryImpl(ref.watch(grabacionRemoteDataSourceProvider));
 
 @riverpod
 ObtenerGrabacionUseCase obtenerGrabacionUseCase(
-        ObtenerGrabacionUseCaseRef ref) =>
+        Ref ref) =>
     ObtenerGrabacionUseCase(ref.watch(grabacionRepositoryProvider));
 
 @riverpod
-CalcularMetrosUseCase calcularMetrosUseCase(CalcularMetrosUseCaseRef ref) =>
+CalcularMetrosUseCase calcularMetrosUseCase(Ref ref) =>
     CalcularMetrosUseCase(ref.watch(grabacionRepositoryProvider));
 
 @riverpod
 ActualizarTranscripcionUseCase actualizarTranscripcionUseCase(
-        ActualizarTranscripcionUseCaseRef ref) =>
+        Ref ref) =>
     ActualizarTranscripcionUseCase(ref.watch(grabacionRepositoryProvider));
 
 @riverpod
-SubirGrabacionUseCase subirGrabacionUseCase(SubirGrabacionUseCaseRef ref) =>
+SubirGrabacionUseCase subirGrabacionUseCase(Ref ref) =>
     SubirGrabacionUseCase(ref.watch(grabacionRepositoryProvider));
 
 // --- Servicios de grabación / sincronización (construidos nativamente) ---
 
 @Riverpod(keepAlive: true)
-AudioRecorderService audioRecorderService(AudioRecorderServiceRef ref) =>
+AudioRecorderService audioRecorderService(Ref ref) =>
     AudioRecorderService();
 
 @Riverpod(keepAlive: true)
-SyncLocalDataSource syncLocalDataSource(SyncLocalDataSourceRef ref) =>
+SyncLocalDataSource syncLocalDataSource(Ref ref) =>
     SyncLocalDataSource(ref.watch(localDatabaseProvider));
 
 @Riverpod(keepAlive: true)
-SyncService syncService(SyncServiceRef ref) => SyncService(
+SyncService syncService(Ref ref) => SyncService(
       ref.watch(syncLocalDataSourceProvider),
       ref.watch(apiClientProvider),
       ref.watch(tokenStorageProvider),

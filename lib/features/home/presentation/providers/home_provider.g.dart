@@ -6,23 +6,63 @@ part of 'home_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$homeHash() => r'0e4da95134f652c62daa571b76aba1be69f0f208';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Notifier de la pantalla de inicio (Riverpod moderno). Reúne proyectos,
+/// conectividad real (ping) y creación de proyectos. Reemplaza al
+/// `HomeViewModel` (ChangeNotifier).
+
+@ProviderFor(Home)
+final homeProvider = HomeProvider._();
 
 /// Notifier de la pantalla de inicio (Riverpod moderno). Reúne proyectos,
 /// conectividad real (ping) y creación de proyectos. Reemplaza al
 /// `HomeViewModel` (ChangeNotifier).
-///
-/// Copied from [Home].
-@ProviderFor(Home)
-final homeProvider = AutoDisposeNotifierProvider<Home, HomeState>.internal(
-  Home.new,
-  name: r'homeProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$homeHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final class HomeProvider extends $NotifierProvider<Home, HomeState> {
+  /// Notifier de la pantalla de inicio (Riverpod moderno). Reúne proyectos,
+  /// conectividad real (ping) y creación de proyectos. Reemplaza al
+  /// `HomeViewModel` (ChangeNotifier).
+  HomeProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'homeProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-typedef _$Home = AutoDisposeNotifier<HomeState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+  @override
+  String debugGetCreateSourceHash() => _$homeHash();
+
+  @$internal
+  @override
+  Home create() => Home();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HomeState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<HomeState>(value),
+    );
+  }
+}
+
+String _$homeHash() => r'c70ac32ff5ec4540502590e5476b8bb7c1e07ee9';
+
+/// Notifier de la pantalla de inicio (Riverpod moderno). Reúne proyectos,
+/// conectividad real (ping) y creación de proyectos. Reemplaza al
+/// `HomeViewModel` (ChangeNotifier).
+
+abstract class _$Home extends $Notifier<HomeState> {
+  HomeState build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<HomeState, HomeState>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<HomeState, HomeState>, HomeState, Object?, Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

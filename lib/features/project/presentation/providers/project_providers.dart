@@ -14,11 +14,11 @@ part 'project_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 ProyectoRemoteDataSource proyectoRemoteDataSource(
-        ProyectoRemoteDataSourceRef ref) =>
+        Ref ref) =>
     ProyectoRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)
-ProyectoRepository proyectoRepository(ProyectoRepositoryRef ref) =>
+ProyectoRepository proyectoRepository(Ref ref) =>
     ProyectoRepositoryImpl(
       ref.watch(proyectoRemoteDataSourceProvider),
       ref.watch(localDatabaseProvider),
@@ -26,9 +26,9 @@ ProyectoRepository proyectoRepository(ProyectoRepositoryRef ref) =>
 
 @riverpod
 ObtenerProyectosUseCase obtenerProyectosUseCase(
-        ObtenerProyectosUseCaseRef ref) =>
+        Ref ref) =>
     ObtenerProyectosUseCase(ref.watch(proyectoRepositoryProvider));
 
 @riverpod
-CrearProyectoUseCase crearProyectoUseCase(CrearProyectoUseCaseRef ref) =>
+CrearProyectoUseCase crearProyectoUseCase(Ref ref) =>
     CrearProyectoUseCase(ref.watch(proyectoRepositoryProvider));

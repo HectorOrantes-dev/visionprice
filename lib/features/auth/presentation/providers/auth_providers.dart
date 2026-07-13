@@ -16,11 +16,11 @@ part 'auth_providers.g.dart';
 /// keepAlive: el repositorio cachea el perfil en memoria durante la sesión.
 
 @Riverpod(keepAlive: true)
-AuthRemoteDataSource authRemoteDataSource(AuthRemoteDataSourceRef ref) =>
+AuthRemoteDataSource authRemoteDataSource(Ref ref) =>
     AuthRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)
-AuthRepository authRepository(AuthRepositoryRef ref) => AuthRepositoryImpl(
+AuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
       ref.watch(authRemoteDataSourceProvider),
       ref.watch(tokenStorageProvider),
       ref.watch(localDatabaseProvider),
@@ -29,45 +29,45 @@ AuthRepository authRepository(AuthRepositoryRef ref) => AuthRepositoryImpl(
 // --- Use cases (uno por acción de negocio) ---
 
 @riverpod
-LoginUseCase loginUseCase(LoginUseCaseRef ref) =>
+LoginUseCase loginUseCase(Ref ref) =>
     LoginUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-VerifyTwoFactorUseCase verifyTwoFactorUseCase(VerifyTwoFactorUseCaseRef ref) =>
+VerifyTwoFactorUseCase verifyTwoFactorUseCase(Ref ref) =>
     VerifyTwoFactorUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-GoogleLoginUseCase googleLoginUseCase(GoogleLoginUseCaseRef ref) =>
+GoogleLoginUseCase googleLoginUseCase(Ref ref) =>
     GoogleLoginUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-GoogleRegisterUseCase googleRegisterUseCase(GoogleRegisterUseCaseRef ref) =>
+GoogleRegisterUseCase googleRegisterUseCase(Ref ref) =>
     GoogleRegisterUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-GetRolesUseCase getRolesUseCase(GetRolesUseCaseRef ref) =>
+GetRolesUseCase getRolesUseCase(Ref ref) =>
     GetRolesUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-RegisterUseCase registerUseCase(RegisterUseCaseRef ref) =>
+RegisterUseCase registerUseCase(Ref ref) =>
     RegisterUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-ForgotPasswordUseCase forgotPasswordUseCase(ForgotPasswordUseCaseRef ref) =>
+ForgotPasswordUseCase forgotPasswordUseCase(Ref ref) =>
     ForgotPasswordUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-VerifyResetCodeUseCase verifyResetCodeUseCase(VerifyResetCodeUseCaseRef ref) =>
+VerifyResetCodeUseCase verifyResetCodeUseCase(Ref ref) =>
     VerifyResetCodeUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-ResetPasswordUseCase resetPasswordUseCase(ResetPasswordUseCaseRef ref) =>
+ResetPasswordUseCase resetPasswordUseCase(Ref ref) =>
     ResetPasswordUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-GetPerfilUseCase getPerfilUseCase(GetPerfilUseCaseRef ref) =>
+GetPerfilUseCase getPerfilUseCase(Ref ref) =>
     GetPerfilUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
-LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) =>
+LogoutUseCase logoutUseCase(Ref ref) =>
     LogoutUseCase(ref.watch(authRepositoryProvider));

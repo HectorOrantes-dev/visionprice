@@ -6,38 +6,8 @@ part of 'processing_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$processingHash() => r'0c3d64d82a4de0ed83fed10558ffdcce5a4e7144';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$Processing
-    extends BuildlessAutoDisposeNotifier<ProcessingState> {
-  late final int grabacionId;
-
-  ProcessingState build(
-    int grabacionId,
-  );
-}
-
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 /// Notifier `.family` (parametrizado por `grabacionId`) que sondea
 /// `GET /grabaciones/{id}` de forma SERIALIZADA cada ~4 s mientras el estado
 /// sea "procesando", hasta "sincronizado"/"error", con tope de intentos y
@@ -45,10 +15,9 @@ abstract class _$Processing
 ///
 /// El sondeo arranca solo en `build()` (una vez) y se corta cuando el provider
 /// se elimina (autoDispose al salir de la pantalla) vía `ref.onDispose`.
-///
-/// Copied from [Processing].
+
 @ProviderFor(Processing)
-const processingProvider = ProcessingFamily();
+final processingProvider = ProcessingFamily._();
 
 /// Notifier `.family` (parametrizado por `grabacionId`) que sondea
 /// `GET /grabaciones/{id}` de forma SERIALIZADA cada ~4 s mientras el estado
@@ -57,9 +26,8 @@ const processingProvider = ProcessingFamily();
 ///
 /// El sondeo arranca solo en `build()` (una vez) y se corta cuando el provider
 /// se elimina (autoDispose al salir de la pantalla) vía `ref.onDispose`.
-///
-/// Copied from [Processing].
-class ProcessingFamily extends Family<ProcessingState> {
+final class ProcessingProvider
+    extends $NotifierProvider<Processing, ProcessingState> {
   /// Notifier `.family` (parametrizado por `grabacionId`) que sondea
   /// `GET /grabaciones/{id}` de forma SERIALIZADA cada ~4 s mientras el estado
   /// sea "procesando", hasta "sincronizado"/"error", con tope de intentos y
@@ -67,158 +35,117 @@ class ProcessingFamily extends Family<ProcessingState> {
   ///
   /// El sondeo arranca solo en `build()` (una vez) y se corta cuando el provider
   /// se elimina (autoDispose al salir de la pantalla) vía `ref.onDispose`.
-  ///
-  /// Copied from [Processing].
-  const ProcessingFamily();
-
-  /// Notifier `.family` (parametrizado por `grabacionId`) que sondea
-  /// `GET /grabaciones/{id}` de forma SERIALIZADA cada ~4 s mientras el estado
-  /// sea "procesando", hasta "sincronizado"/"error", con tope de intentos y
-  /// backoff ante 429. Reemplaza al antiguo `ProcessingViewModel` (ChangeNotifier).
-  ///
-  /// El sondeo arranca solo en `build()` (una vez) y se corta cuando el provider
-  /// se elimina (autoDispose al salir de la pantalla) vía `ref.onDispose`.
-  ///
-  /// Copied from [Processing].
-  ProcessingProvider call(
-    int grabacionId,
-  ) {
-    return ProcessingProvider(
-      grabacionId,
-    );
-  }
-
-  @override
-  ProcessingProvider getProviderOverride(
-    covariant ProcessingProvider provider,
-  ) {
-    return call(
-      provider.grabacionId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'processingProvider';
-}
-
-/// Notifier `.family` (parametrizado por `grabacionId`) que sondea
-/// `GET /grabaciones/{id}` de forma SERIALIZADA cada ~4 s mientras el estado
-/// sea "procesando", hasta "sincronizado"/"error", con tope de intentos y
-/// backoff ante 429. Reemplaza al antiguo `ProcessingViewModel` (ChangeNotifier).
-///
-/// El sondeo arranca solo en `build()` (una vez) y se corta cuando el provider
-/// se elimina (autoDispose al salir de la pantalla) vía `ref.onDispose`.
-///
-/// Copied from [Processing].
-class ProcessingProvider
-    extends AutoDisposeNotifierProviderImpl<Processing, ProcessingState> {
-  /// Notifier `.family` (parametrizado por `grabacionId`) que sondea
-  /// `GET /grabaciones/{id}` de forma SERIALIZADA cada ~4 s mientras el estado
-  /// sea "procesando", hasta "sincronizado"/"error", con tope de intentos y
-  /// backoff ante 429. Reemplaza al antiguo `ProcessingViewModel` (ChangeNotifier).
-  ///
-  /// El sondeo arranca solo en `build()` (una vez) y se corta cuando el provider
-  /// se elimina (autoDispose al salir de la pantalla) vía `ref.onDispose`.
-  ///
-  /// Copied from [Processing].
-  ProcessingProvider(
-    int grabacionId,
-  ) : this._internal(
-          () => Processing()..grabacionId = grabacionId,
-          from: processingProvider,
+  ProcessingProvider._(
+      {required ProcessingFamily super.from, required int super.argument})
+      : super(
+          retry: null,
           name: r'processingProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$processingHash,
-          dependencies: ProcessingFamily._dependencies,
-          allTransitiveDependencies:
-              ProcessingFamily._allTransitiveDependencies,
-          grabacionId: grabacionId,
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
         );
 
-  ProcessingProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.grabacionId,
-  }) : super.internal();
-
-  final int grabacionId;
+  @override
+  String debugGetCreateSourceHash() => _$processingHash();
 
   @override
-  ProcessingState runNotifierBuild(
-    covariant Processing notifier,
-  ) {
-    return notifier.build(
-      grabacionId,
-    );
+  String toString() {
+    return r'processingProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  Override overrideWith(Processing Function() create) {
-    return ProviderOverride(
+  Processing create() => Processing();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProcessingState value) {
+    return $ProviderOverride(
       origin: this,
-      override: ProcessingProvider._internal(
-        () => create()..grabacionId = grabacionId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        grabacionId: grabacionId,
-      ),
+      providerOverride: $SyncValueProvider<ProcessingState>(value),
     );
-  }
-
-  @override
-  AutoDisposeNotifierProviderElement<Processing, ProcessingState>
-      createElement() {
-    return _ProcessingProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is ProcessingProvider && other.grabacionId == grabacionId;
+    return other is ProcessingProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, grabacionId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin ProcessingRef on AutoDisposeNotifierProviderRef<ProcessingState> {
-  /// The parameter `grabacionId` of this provider.
-  int get grabacionId;
-}
+String _$processingHash() => r'16802d658bee08691b2968a49c733206a684feb2';
 
-class _ProcessingProviderElement
-    extends AutoDisposeNotifierProviderElement<Processing, ProcessingState>
-    with ProcessingRef {
-  _ProcessingProviderElement(super.provider);
+/// Notifier `.family` (parametrizado por `grabacionId`) que sondea
+/// `GET /grabaciones/{id}` de forma SERIALIZADA cada ~4 s mientras el estado
+/// sea "procesando", hasta "sincronizado"/"error", con tope de intentos y
+/// backoff ante 429. Reemplaza al antiguo `ProcessingViewModel` (ChangeNotifier).
+///
+/// El sondeo arranca solo en `build()` (una vez) y se corta cuando el provider
+/// se elimina (autoDispose al salir de la pantalla) vía `ref.onDispose`.
+
+final class ProcessingFamily extends $Family
+    with
+        $ClassFamilyOverride<Processing, ProcessingState, ProcessingState,
+            ProcessingState, int> {
+  ProcessingFamily._()
+      : super(
+          retry: null,
+          name: r'processingProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Notifier `.family` (parametrizado por `grabacionId`) que sondea
+  /// `GET /grabaciones/{id}` de forma SERIALIZADA cada ~4 s mientras el estado
+  /// sea "procesando", hasta "sincronizado"/"error", con tope de intentos y
+  /// backoff ante 429. Reemplaza al antiguo `ProcessingViewModel` (ChangeNotifier).
+  ///
+  /// El sondeo arranca solo en `build()` (una vez) y se corta cuando el provider
+  /// se elimina (autoDispose al salir de la pantalla) vía `ref.onDispose`.
+
+  ProcessingProvider call(
+    int grabacionId,
+  ) =>
+      ProcessingProvider._(argument: grabacionId, from: this);
 
   @override
-  int get grabacionId => (origin as ProcessingProvider).grabacionId;
+  String toString() => r'processingProvider';
 }
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+
+/// Notifier `.family` (parametrizado por `grabacionId`) que sondea
+/// `GET /grabaciones/{id}` de forma SERIALIZADA cada ~4 s mientras el estado
+/// sea "procesando", hasta "sincronizado"/"error", con tope de intentos y
+/// backoff ante 429. Reemplaza al antiguo `ProcessingViewModel` (ChangeNotifier).
+///
+/// El sondeo arranca solo en `build()` (una vez) y se corta cuando el provider
+/// se elimina (autoDispose al salir de la pantalla) vía `ref.onDispose`.
+
+abstract class _$Processing extends $Notifier<ProcessingState> {
+  late final _$args = ref.$arg as int;
+  int get grabacionId => _$args;
+
+  ProcessingState build(
+    int grabacionId,
+  );
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<ProcessingState, ProcessingState>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<ProcessingState, ProcessingState>,
+        ProcessingState,
+        Object?,
+        Object?>;
+    return element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
+  }
+}

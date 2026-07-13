@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../providers/subscriptions_provider.dart';
 import '../widgets/account_message.dart';
@@ -11,8 +12,7 @@ class SubscriptionsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vm = ref.watch(subscriptionsProvider);
-    final notifier = ref.read(subscriptionsProvider.notifier);
+    final subsAsync = ref.watch(subscriptionsProvider);
     return Scaffold(
         backgroundColor: context.colors.background,
         appBar: AppBar(
@@ -38,25 +38,24 @@ class SubscriptionsScreen extends ConsumerWidget {
           ],
         ),
         body: SafeArea(
-          child: Builder(
-            builder: (context) {
-              if (vm.loading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (vm.errorMessage != null) {
-                return AccountMessage(text: vm.errorMessage!);
-              }
-              if (vm.items.isEmpty) {
+          child: subsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => AccountMessage(
+                text: e is ApiException
+                    ? e.message
+                    : 'No se pudieron cargar las suscripciones.'),
+            data: (items) {
+              if (items.isEmpty) {
                 return const AccountMessage(
                     text: 'No tienes suscripciones activas.');
               }
               return RefreshIndicator(
-                onRefresh: notifier.load,
+                onRefresh: () => ref.refresh(subscriptionsProvider.future),
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
-                  itemCount: vm.items.length,
+                  itemCount: items.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) => SubscriptionCard(sub: vm.items[i]),
+                  itemBuilder: (_, i) => SubscriptionCard(sub: items[i]),
                 ),
               );
             },

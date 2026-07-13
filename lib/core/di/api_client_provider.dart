@@ -8,7 +8,7 @@ part 'api_client_provider.g.dart';
 
 /// Cliente de la API (core), con Bearer token. `keepAlive`: singleton.
 @Riverpod(keepAlive: true)
-ApiClient apiClient(ApiClientRef ref) => ApiClient(
+ApiClient apiClient(Ref ref) => ApiClient(
       ref.watch(httpClientProvider),
       ref.watch(tokenStorageProvider),
     );

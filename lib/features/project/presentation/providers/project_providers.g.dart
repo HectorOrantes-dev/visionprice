@@ -6,83 +6,185 @@ part of 'project_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$proyectoRemoteDataSourceHash() =>
-    r'b6e163ae61d067e4ad9e7d5b8d89eb5d8635c15b';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Cadena de dependencias de proyectos como providers de Riverpod.
+
+@ProviderFor(proyectoRemoteDataSource)
+final proyectoRemoteDataSourceProvider = ProyectoRemoteDataSourceProvider._();
 
 /// Cadena de dependencias de proyectos como providers de Riverpod.
-///
-/// Copied from [proyectoRemoteDataSource].
-@ProviderFor(proyectoRemoteDataSource)
-final proyectoRemoteDataSourceProvider =
-    Provider<ProyectoRemoteDataSource>.internal(
-  proyectoRemoteDataSource,
-  name: r'proyectoRemoteDataSourceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$proyectoRemoteDataSourceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ProyectoRemoteDataSourceRef = ProviderRef<ProyectoRemoteDataSource>;
-String _$proyectoRepositoryHash() =>
-    r'304722e8c241d3d0cd203acaa6e65268ce1d0d89';
+final class ProyectoRemoteDataSourceProvider extends $FunctionalProvider<
+    ProyectoRemoteDataSource,
+    ProyectoRemoteDataSource,
+    ProyectoRemoteDataSource> with $Provider<ProyectoRemoteDataSource> {
+  /// Cadena de dependencias de proyectos como providers de Riverpod.
+  ProyectoRemoteDataSourceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'proyectoRemoteDataSourceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [proyectoRepository].
+  @override
+  String debugGetCreateSourceHash() => _$proyectoRemoteDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProyectoRemoteDataSource> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProyectoRemoteDataSource create(Ref ref) {
+    return proyectoRemoteDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProyectoRemoteDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProyectoRemoteDataSource>(value),
+    );
+  }
+}
+
+String _$proyectoRemoteDataSourceHash() =>
+    r'47a41ccef087806df1cf44bdf0f6a005ebd97eeb';
+
 @ProviderFor(proyectoRepository)
-final proyectoRepositoryProvider = Provider<ProyectoRepository>.internal(
-  proyectoRepository,
-  name: r'proyectoRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$proyectoRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final proyectoRepositoryProvider = ProyectoRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ProyectoRepositoryRef = ProviderRef<ProyectoRepository>;
-String _$obtenerProyectosUseCaseHash() =>
-    r'389d54c1fa87f03e8f5f4fc4db062462004b7316';
+final class ProyectoRepositoryProvider extends $FunctionalProvider<
+    ProyectoRepository,
+    ProyectoRepository,
+    ProyectoRepository> with $Provider<ProyectoRepository> {
+  ProyectoRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'proyectoRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [obtenerProyectosUseCase].
+  @override
+  String debugGetCreateSourceHash() => _$proyectoRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProyectoRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProyectoRepository create(Ref ref) {
+    return proyectoRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProyectoRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProyectoRepository>(value),
+    );
+  }
+}
+
+String _$proyectoRepositoryHash() =>
+    r'56b26793577d7e2c5e0a6acdebe2123e65ad4426';
+
 @ProviderFor(obtenerProyectosUseCase)
-final obtenerProyectosUseCaseProvider =
-    AutoDisposeProvider<ObtenerProyectosUseCase>.internal(
-  obtenerProyectosUseCase,
-  name: r'obtenerProyectosUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$obtenerProyectosUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final obtenerProyectosUseCaseProvider = ObtenerProyectosUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ObtenerProyectosUseCaseRef
-    = AutoDisposeProviderRef<ObtenerProyectosUseCase>;
-String _$crearProyectoUseCaseHash() =>
-    r'c4c43237281afebd9bf6594deade76a27153a6a8';
+final class ObtenerProyectosUseCaseProvider extends $FunctionalProvider<
+    ObtenerProyectosUseCase,
+    ObtenerProyectosUseCase,
+    ObtenerProyectosUseCase> with $Provider<ObtenerProyectosUseCase> {
+  ObtenerProyectosUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'obtenerProyectosUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [crearProyectoUseCase].
+  @override
+  String debugGetCreateSourceHash() => _$obtenerProyectosUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ObtenerProyectosUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ObtenerProyectosUseCase create(Ref ref) {
+    return obtenerProyectosUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ObtenerProyectosUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ObtenerProyectosUseCase>(value),
+    );
+  }
+}
+
+String _$obtenerProyectosUseCaseHash() =>
+    r'3cdc7614f26009a445ad17247bfa5840415bb1a5';
+
 @ProviderFor(crearProyectoUseCase)
-final crearProyectoUseCaseProvider =
-    AutoDisposeProvider<CrearProyectoUseCase>.internal(
-  crearProyectoUseCase,
-  name: r'crearProyectoUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$crearProyectoUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final crearProyectoUseCaseProvider = CrearProyectoUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CrearProyectoUseCaseRef = AutoDisposeProviderRef<CrearProyectoUseCase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class CrearProyectoUseCaseProvider extends $FunctionalProvider<
+    CrearProyectoUseCase,
+    CrearProyectoUseCase,
+    CrearProyectoUseCase> with $Provider<CrearProyectoUseCase> {
+  CrearProyectoUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'crearProyectoUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$crearProyectoUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<CrearProyectoUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CrearProyectoUseCase create(Ref ref) {
+    return crearProyectoUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CrearProyectoUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CrearProyectoUseCase>(value),
+    );
+  }
+}
+
+String _$crearProyectoUseCaseHash() =>
+    r'e972fe80a9c332f06cc5d083f60c77b997aed94a';

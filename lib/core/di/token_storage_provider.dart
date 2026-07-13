@@ -6,4 +6,4 @@ part 'token_storage_provider.g.dart';
 
 /// Almacenamiento del token de sesión (core). `keepAlive`: singleton.
 @Riverpod(keepAlive: true)
-TokenStorage tokenStorage(TokenStorageRef ref) => TokenStorage();
+TokenStorage tokenStorage(Ref ref) => TokenStorage();

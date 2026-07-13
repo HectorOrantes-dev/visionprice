@@ -15,15 +15,15 @@ part 'device_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 DispositivoRemoteDataSource dispositivoRemoteDataSource(
-        DispositivoRemoteDataSourceRef ref) =>
+        Ref ref) =>
     DispositivoRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)
-DispositivoRepository dispositivoRepository(DispositivoRepositoryRef ref) =>
+DispositivoRepository dispositivoRepository(Ref ref) =>
     DispositivoRepositoryImpl(ref.watch(dispositivoRemoteDataSourceProvider));
 
 @Riverpod(keepAlive: true)
-DeviceRegistrar deviceRegistrar(DeviceRegistrarRef ref) => DeviceRegistrar(
+DeviceRegistrar deviceRegistrar(Ref ref) => DeviceRegistrar(
       RegistrarDispositivoUseCase(ref.watch(dispositivoRepositoryProvider)),
       BorrarDispositivoUseCase(ref.watch(dispositivoRepositoryProvider)),
     );

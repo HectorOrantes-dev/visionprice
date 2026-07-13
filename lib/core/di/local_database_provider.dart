@@ -6,4 +6,4 @@ part 'local_database_provider.g.dart';
 
 /// Base de datos local (sqflite). `keepAlive`: singleton de sesión.
 @Riverpod(keepAlive: true)
-LocalDatabase localDatabase(LocalDatabaseRef ref) => LocalDatabase();
+LocalDatabase localDatabase(Ref ref) => LocalDatabase();

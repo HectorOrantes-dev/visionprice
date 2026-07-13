@@ -6,24 +6,67 @@ part of 'recording_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$recordingHash() => r'b9553a4a0dc3ed8a5cf71439b40a88e5bfc8ef25';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Notifier de la grabación (Riverpod moderno). Reemplaza al `RecordingViewModel`
+/// (ChangeNotifier): captura audio real y lo sube como multipart, o lo encola
+/// offline vía [syncServiceProvider].
+
+@ProviderFor(Recording)
+final recordingProvider = RecordingProvider._();
 
 /// Notifier de la grabación (Riverpod moderno). Reemplaza al `RecordingViewModel`
 /// (ChangeNotifier): captura audio real y lo sube como multipart, o lo encola
 /// offline vía [syncServiceProvider].
-///
-/// Copied from [Recording].
-@ProviderFor(Recording)
-final recordingProvider =
-    AutoDisposeNotifierProvider<Recording, RecordingState>.internal(
-  Recording.new,
-  name: r'recordingProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$recordingHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final class RecordingProvider
+    extends $NotifierProvider<Recording, RecordingState> {
+  /// Notifier de la grabación (Riverpod moderno). Reemplaza al `RecordingViewModel`
+  /// (ChangeNotifier): captura audio real y lo sube como multipart, o lo encola
+  /// offline vía [syncServiceProvider].
+  RecordingProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'recordingProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-typedef _$Recording = AutoDisposeNotifier<RecordingState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+  @override
+  String debugGetCreateSourceHash() => _$recordingHash();
+
+  @$internal
+  @override
+  Recording create() => Recording();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RecordingState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RecordingState>(value),
+    );
+  }
+}
+
+String _$recordingHash() => r'e230ecf22e137d1394b8b0a56e37a8177afddd1c';
+
+/// Notifier de la grabación (Riverpod moderno). Reemplaza al `RecordingViewModel`
+/// (ChangeNotifier): captura audio real y lo sube como multipart, o lo encola
+/// offline vía [syncServiceProvider].
+
+abstract class _$Recording extends $Notifier<RecordingState> {
+  RecordingState build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<RecordingState, RecordingState>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<RecordingState, RecordingState>,
+        RecordingState,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../devices/data/providers/device_providers.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/utils/validation_mixin.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -702,10 +703,9 @@ class _PerfilTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // El perfil se carga desde `GET /api/v1/me/perfil` a través de perfilProvider.
-    final vm = ref.watch(perfilProvider);
-    final notifier = ref.read(perfilProvider.notifier);
-    final perfil = vm.perfil;
+    // El perfil llega como AsyncValue<PerfilEntity> desde perfilProvider.
+    final perfilAsync = ref.watch(perfilProvider);
+    final perfil = perfilAsync.asData?.value;
     return SafeArea(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -724,7 +724,7 @@ class _PerfilTab extends ConsumerWidget {
                   child: Text(
                     perfil?.nombre.isNotEmpty == true
                         ? perfil!.nombre
-                        : (vm.isLoading ? 'Cargando…' : 'Mi perfil'),
+                        : (perfilAsync.isLoading ? 'Cargando…' : 'Mi perfil'),
                     style: AppTextStyles.heading(
                       size: 18,
                       weight: FontWeight.w700,
@@ -741,18 +741,19 @@ class _PerfilTab extends ConsumerWidget {
                     ),
                   ),
                 const SizedBox(height: 28),
-                if (vm.isLoading)
-                  const Padding(
+                perfilAsync.when(
+                  loading: () => const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
                     child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (vm.status == PerfilStatus.error)
-                  _PerfilError(
-                    message: vm.errorMessage ?? 'No se pudo cargar el perfil',
-                    onRetry: notifier.load,
-                  )
-                else if (perfil != null)
-                  _PerfilInfoCard(perfil: perfil),
+                  ),
+                  error: (e, _) => _PerfilError(
+                    message: e is ApiException
+                        ? e.message
+                        : 'No se pudo cargar el perfil',
+                    onRetry: () => ref.invalidate(perfilProvider),
+                  ),
+                  data: (p) => _PerfilInfoCard(perfil: p),
+                ),
                 const SizedBox(height: 20),
                 _ProfileItem(
                   icon: Icons.workspace_premium_outlined,

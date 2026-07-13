@@ -6,23 +6,63 @@ part of 'export_pdf_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Notifier de "Exportar PDF" (Riverpod moderno). Pide el PDF de la cotización;
+/// el back-end responde JSON y se busca defensivamente un enlace de descarga.
+
+@ProviderFor(ExportPdf)
+final exportPdfProvider = ExportPdfProvider._();
+
+/// Notifier de "Exportar PDF" (Riverpod moderno). Pide el PDF de la cotización;
+/// el back-end responde JSON y se busca defensivamente un enlace de descarga.
+final class ExportPdfProvider
+    extends $NotifierProvider<ExportPdf, ExportPdfState> {
+  /// Notifier de "Exportar PDF" (Riverpod moderno). Pide el PDF de la cotización;
+  /// el back-end responde JSON y se busca defensivamente un enlace de descarga.
+  ExportPdfProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'exportPdfProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$exportPdfHash();
+
+  @$internal
+  @override
+  ExportPdf create() => ExportPdf();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ExportPdfState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ExportPdfState>(value),
+    );
+  }
+}
+
 String _$exportPdfHash() => r'915ea6fb1788be0bb7b5291ec135c655bc99bba6';
 
 /// Notifier de "Exportar PDF" (Riverpod moderno). Pide el PDF de la cotización;
 /// el back-end responde JSON y se busca defensivamente un enlace de descarga.
-///
-/// Copied from [ExportPdf].
-@ProviderFor(ExportPdf)
-final exportPdfProvider =
-    AutoDisposeNotifierProvider<ExportPdf, ExportPdfState>.internal(
-  ExportPdf.new,
-  name: r'exportPdfProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$exportPdfHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-typedef _$ExportPdf = AutoDisposeNotifier<ExportPdfState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$ExportPdf extends $Notifier<ExportPdfState> {
+  ExportPdfState build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<ExportPdfState, ExportPdfState>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<ExportPdfState, ExportPdfState>,
+        ExportPdfState,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

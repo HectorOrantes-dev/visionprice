@@ -13,14 +13,14 @@ part 'account_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 AccountRemoteDataSource accountRemoteDataSource(
-        AccountRemoteDataSourceRef ref) =>
+        Ref ref) =>
     AccountRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)
-AccountRepository accountRepository(AccountRepositoryRef ref) =>
+AccountRepository accountRepository(Ref ref) =>
     AccountRepositoryImpl(ref.watch(accountRemoteDataSourceProvider));
 
 @riverpod
 ObtenerSuscripcionesUseCase obtenerSuscripcionesUseCase(
-        ObtenerSuscripcionesUseCaseRef ref) =>
+        Ref ref) =>
     ObtenerSuscripcionesUseCase(ref.watch(accountRepositoryProvider));

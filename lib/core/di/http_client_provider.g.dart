@@ -6,23 +6,50 @@ part of 'http_client_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$httpClientHash() => r'ed4c948b2fa39b9289a939034474b5f5551ff3b4';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Cliente HTTP compartido (core). `keepAlive`: singleton de sesión.
+
+@ProviderFor(httpClient)
+final httpClientProvider = HttpClientProvider._();
 
 /// Cliente HTTP compartido (core). `keepAlive`: singleton de sesión.
-///
-/// Copied from [httpClient].
-@ProviderFor(httpClient)
-final httpClientProvider = Provider<http.Client>.internal(
-  httpClient,
-  name: r'httpClientProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$httpClientHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef HttpClientRef = ProviderRef<http.Client>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class HttpClientProvider
+    extends $FunctionalProvider<http.Client, http.Client, http.Client>
+    with $Provider<http.Client> {
+  /// Cliente HTTP compartido (core). `keepAlive`: singleton de sesión.
+  HttpClientProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'httpClientProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$httpClientHash();
+
+  @$internal
+  @override
+  $ProviderElement<http.Client> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  http.Client create(Ref ref) {
+    return httpClient(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(http.Client value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<http.Client>(value),
+    );
+  }
+}
+
+String _$httpClientHash() => r'7ec49beae0f15115de79f9aa98dbd250130e26d8';

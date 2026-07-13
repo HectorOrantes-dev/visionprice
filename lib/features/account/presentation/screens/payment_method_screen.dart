@@ -14,8 +14,8 @@ class PaymentMethodScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vm = ref.watch(paymentMethodNotifierProvider);
-    final notifier = ref.read(paymentMethodNotifierProvider.notifier);
+    final vm = ref.watch(paymentMethodProvider);
+    final notifier = ref.read(paymentMethodProvider.notifier);
     return Scaffold(
         backgroundColor: context.colors.background,
         appBar: AppBar(
@@ -50,13 +50,15 @@ class PaymentMethodScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (vm.loading)
-                      const Padding(
+                    vm.subscription.when(
+                      loading: () => const Padding(
                         padding: EdgeInsets.symmetric(vertical: 24),
                         child: Center(child: CircularProgressIndicator()),
-                      )
-                    else
-                      SubscriptionSummaryCard(sub: vm.subscription),
+                      ),
+                      error: (_, __) =>
+                          const SubscriptionSummaryCard(sub: null),
+                      data: (sub) => SubscriptionSummaryCard(sub: sub),
+                    ),
                     const SizedBox(height: 24),
                     Text(
                       'Selecciona tu método de pago',
@@ -88,7 +90,8 @@ class PaymentMethodScreen extends ConsumerWidget {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: vm.loading ? null : notifier.confirmar,
+                        onPressed:
+                            vm.subscription.isLoading ? null : notifier.confirmar,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.primary,
                           shape: RoundedRectangleBorder(

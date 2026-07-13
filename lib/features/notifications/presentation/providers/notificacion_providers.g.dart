@@ -6,86 +6,190 @@ part of 'notificacion_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$notificacionRemoteDataSourceHash() =>
-    r'fc84036d2949b09954bf8fc021bc04099adaef9d';
-
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 /// Cadena de dependencias de notificaciones como providers de Riverpod.
-///
-/// Copied from [notificacionRemoteDataSource].
+
 @ProviderFor(notificacionRemoteDataSource)
 final notificacionRemoteDataSourceProvider =
-    Provider<NotificacionRemoteDataSource>.internal(
-  notificacionRemoteDataSource,
-  name: r'notificacionRemoteDataSourceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$notificacionRemoteDataSourceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+    NotificacionRemoteDataSourceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef NotificacionRemoteDataSourceRef
-    = ProviderRef<NotificacionRemoteDataSource>;
-String _$notificacionRepositoryHash() =>
-    r'15dd4593f4893c79d969d2883377ee9896892f04';
+/// Cadena de dependencias de notificaciones como providers de Riverpod.
 
-/// See also [notificacionRepository].
+final class NotificacionRemoteDataSourceProvider extends $FunctionalProvider<
+    NotificacionRemoteDataSource,
+    NotificacionRemoteDataSource,
+    NotificacionRemoteDataSource> with $Provider<NotificacionRemoteDataSource> {
+  /// Cadena de dependencias de notificaciones como providers de Riverpod.
+  NotificacionRemoteDataSourceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'notificacionRemoteDataSourceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$notificacionRemoteDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<NotificacionRemoteDataSource> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  NotificacionRemoteDataSource create(Ref ref) {
+    return notificacionRemoteDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(NotificacionRemoteDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<NotificacionRemoteDataSource>(value),
+    );
+  }
+}
+
+String _$notificacionRemoteDataSourceHash() =>
+    r'79233dd75c9e2feaca76e6553bb668cba8c6a001';
+
 @ProviderFor(notificacionRepository)
-final notificacionRepositoryProvider =
-    Provider<NotificacionRepository>.internal(
-  notificacionRepository,
-  name: r'notificacionRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$notificacionRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final notificacionRepositoryProvider = NotificacionRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef NotificacionRepositoryRef = ProviderRef<NotificacionRepository>;
-String _$obtenerNotificacionesUseCaseHash() =>
-    r'32a9d306a8aace392bfbf64240137989877e0d69';
+final class NotificacionRepositoryProvider extends $FunctionalProvider<
+    NotificacionRepository,
+    NotificacionRepository,
+    NotificacionRepository> with $Provider<NotificacionRepository> {
+  NotificacionRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'notificacionRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [obtenerNotificacionesUseCase].
+  @override
+  String debugGetCreateSourceHash() => _$notificacionRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<NotificacionRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  NotificacionRepository create(Ref ref) {
+    return notificacionRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(NotificacionRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<NotificacionRepository>(value),
+    );
+  }
+}
+
+String _$notificacionRepositoryHash() =>
+    r'980e025992e8e921deb1af86e66ddcf75eb6dd17';
+
 @ProviderFor(obtenerNotificacionesUseCase)
 final obtenerNotificacionesUseCaseProvider =
-    AutoDisposeProvider<ObtenerNotificacionesUseCase>.internal(
-  obtenerNotificacionesUseCase,
-  name: r'obtenerNotificacionesUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$obtenerNotificacionesUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+    ObtenerNotificacionesUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ObtenerNotificacionesUseCaseRef
-    = AutoDisposeProviderRef<ObtenerNotificacionesUseCase>;
-String _$marcarNotificacionLeidaUseCaseHash() =>
-    r'0d1023d620c2b311920e5f8999d83d46ce6d3c5a';
+final class ObtenerNotificacionesUseCaseProvider extends $FunctionalProvider<
+    ObtenerNotificacionesUseCase,
+    ObtenerNotificacionesUseCase,
+    ObtenerNotificacionesUseCase> with $Provider<ObtenerNotificacionesUseCase> {
+  ObtenerNotificacionesUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'obtenerNotificacionesUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [marcarNotificacionLeidaUseCase].
+  @override
+  String debugGetCreateSourceHash() => _$obtenerNotificacionesUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ObtenerNotificacionesUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ObtenerNotificacionesUseCase create(Ref ref) {
+    return obtenerNotificacionesUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ObtenerNotificacionesUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ObtenerNotificacionesUseCase>(value),
+    );
+  }
+}
+
+String _$obtenerNotificacionesUseCaseHash() =>
+    r'874e3b3562380cfbbe8b0ea2e31c6aaed69d19c4';
+
 @ProviderFor(marcarNotificacionLeidaUseCase)
 final marcarNotificacionLeidaUseCaseProvider =
-    AutoDisposeProvider<MarcarNotificacionLeidaUseCase>.internal(
-  marcarNotificacionLeidaUseCase,
-  name: r'marcarNotificacionLeidaUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$marcarNotificacionLeidaUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+    MarcarNotificacionLeidaUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef MarcarNotificacionLeidaUseCaseRef
-    = AutoDisposeProviderRef<MarcarNotificacionLeidaUseCase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class MarcarNotificacionLeidaUseCaseProvider extends $FunctionalProvider<
+        MarcarNotificacionLeidaUseCase,
+        MarcarNotificacionLeidaUseCase,
+        MarcarNotificacionLeidaUseCase>
+    with $Provider<MarcarNotificacionLeidaUseCase> {
+  MarcarNotificacionLeidaUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'marcarNotificacionLeidaUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$marcarNotificacionLeidaUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<MarcarNotificacionLeidaUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  MarcarNotificacionLeidaUseCase create(Ref ref) {
+    return marcarNotificacionLeidaUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MarcarNotificacionLeidaUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<MarcarNotificacionLeidaUseCase>(value),
+    );
+  }
+}
+
+String _$marcarNotificacionLeidaUseCaseHash() =>
+    r'820bc6a22ab2403bb11d502de5912462a1bf5136';

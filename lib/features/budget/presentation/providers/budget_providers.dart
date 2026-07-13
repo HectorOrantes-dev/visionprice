@@ -15,32 +15,32 @@ part 'budget_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 CotizacionRemoteDataSource cotizacionRemoteDataSource(
-        CotizacionRemoteDataSourceRef ref) =>
+        Ref ref) =>
     CotizacionRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)
-CotizacionRepository cotizacionRepository(CotizacionRepositoryRef ref) =>
+CotizacionRepository cotizacionRepository(Ref ref) =>
     CotizacionRepositoryImpl(ref.watch(cotizacionRemoteDataSourceProvider));
 
 @riverpod
 ObtenerProductosUseCase obtenerProductosUseCase(
-        ObtenerProductosUseCaseRef ref) =>
+        Ref ref) =>
     ObtenerProductosUseCase(ref.watch(cotizacionRepositoryProvider));
 
 @riverpod
-CrearCotizacionUseCase crearCotizacionUseCase(CrearCotizacionUseCaseRef ref) =>
+CrearCotizacionUseCase crearCotizacionUseCase(Ref ref) =>
     CrearCotizacionUseCase(ref.watch(cotizacionRepositoryProvider));
 
 @riverpod
-ObtenerPdfUseCase obtenerPdfUseCase(ObtenerPdfUseCaseRef ref) =>
+ObtenerPdfUseCase obtenerPdfUseCase(Ref ref) =>
     ObtenerPdfUseCase(ref.watch(cotizacionRepositoryProvider));
 
 @riverpod
 ObtenerMaterialesUseCase obtenerMaterialesUseCase(
-        ObtenerMaterialesUseCaseRef ref) =>
+        Ref ref) =>
     ObtenerMaterialesUseCase(ref.watch(cotizacionRepositoryProvider));
 
 @riverpod
 CrearCotizacionKitUseCase crearCotizacionKitUseCase(
-        CrearCotizacionKitUseCaseRef ref) =>
+        Ref ref) =>
     CrearCotizacionKitUseCase(ref.watch(cotizacionRepositoryProvider));

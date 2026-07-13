@@ -6,63 +6,141 @@ part of 'account_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$accountRemoteDataSourceHash() =>
-    r'1732ec1ee63c28154cdfb3cfdc12f731736dacba';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Cadena de dependencias de cuenta/suscripciones como providers de Riverpod.
+
+@ProviderFor(accountRemoteDataSource)
+final accountRemoteDataSourceProvider = AccountRemoteDataSourceProvider._();
 
 /// Cadena de dependencias de cuenta/suscripciones como providers de Riverpod.
-///
-/// Copied from [accountRemoteDataSource].
-@ProviderFor(accountRemoteDataSource)
-final accountRemoteDataSourceProvider =
-    Provider<AccountRemoteDataSource>.internal(
-  accountRemoteDataSource,
-  name: r'accountRemoteDataSourceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$accountRemoteDataSourceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AccountRemoteDataSourceRef = ProviderRef<AccountRemoteDataSource>;
-String _$accountRepositoryHash() => r'45c961235d113f02caa907a35711a18435663858';
+final class AccountRemoteDataSourceProvider extends $FunctionalProvider<
+    AccountRemoteDataSource,
+    AccountRemoteDataSource,
+    AccountRemoteDataSource> with $Provider<AccountRemoteDataSource> {
+  /// Cadena de dependencias de cuenta/suscripciones como providers de Riverpod.
+  AccountRemoteDataSourceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'accountRemoteDataSourceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [accountRepository].
+  @override
+  String debugGetCreateSourceHash() => _$accountRemoteDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<AccountRemoteDataSource> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AccountRemoteDataSource create(Ref ref) {
+    return accountRemoteDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AccountRemoteDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AccountRemoteDataSource>(value),
+    );
+  }
+}
+
+String _$accountRemoteDataSourceHash() =>
+    r'34affd42eec37ceee988afc066c71aee5b037338';
+
 @ProviderFor(accountRepository)
-final accountRepositoryProvider = Provider<AccountRepository>.internal(
-  accountRepository,
-  name: r'accountRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$accountRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final accountRepositoryProvider = AccountRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AccountRepositoryRef = ProviderRef<AccountRepository>;
-String _$obtenerSuscripcionesUseCaseHash() =>
-    r'3a8f30260e97fa1c1626bb6b7f916b031ea24aee';
+final class AccountRepositoryProvider extends $FunctionalProvider<
+    AccountRepository,
+    AccountRepository,
+    AccountRepository> with $Provider<AccountRepository> {
+  AccountRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'accountRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [obtenerSuscripcionesUseCase].
+  @override
+  String debugGetCreateSourceHash() => _$accountRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<AccountRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AccountRepository create(Ref ref) {
+    return accountRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AccountRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AccountRepository>(value),
+    );
+  }
+}
+
+String _$accountRepositoryHash() => r'8d84815f49173b78281da2be3b5e50c5899d1eff';
+
 @ProviderFor(obtenerSuscripcionesUseCase)
 final obtenerSuscripcionesUseCaseProvider =
-    AutoDisposeProvider<ObtenerSuscripcionesUseCase>.internal(
-  obtenerSuscripcionesUseCase,
-  name: r'obtenerSuscripcionesUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$obtenerSuscripcionesUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+    ObtenerSuscripcionesUseCaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ObtenerSuscripcionesUseCaseRef
-    = AutoDisposeProviderRef<ObtenerSuscripcionesUseCase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class ObtenerSuscripcionesUseCaseProvider extends $FunctionalProvider<
+    ObtenerSuscripcionesUseCase,
+    ObtenerSuscripcionesUseCase,
+    ObtenerSuscripcionesUseCase> with $Provider<ObtenerSuscripcionesUseCase> {
+  ObtenerSuscripcionesUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'obtenerSuscripcionesUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$obtenerSuscripcionesUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ObtenerSuscripcionesUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ObtenerSuscripcionesUseCase create(Ref ref) {
+    return obtenerSuscripcionesUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ObtenerSuscripcionesUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ObtenerSuscripcionesUseCase>(value),
+    );
+  }
+}
+
+String _$obtenerSuscripcionesUseCaseHash() =>
+    r'ef2b47b92d29420fdd1f92a95ed55a2f66584a0b';

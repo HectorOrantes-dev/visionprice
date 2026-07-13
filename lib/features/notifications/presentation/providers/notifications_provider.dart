@@ -1,82 +1,40 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/notificacion_entity.dart';
 import 'notificacion_providers.dart';
 
 part 'notifications_provider.g.dart';
 
-/// Estado inmutable de la lista de notificaciones.
-class NotificationsState {
-  final bool loading;
-  final String? errorMessage;
-  final List<NotificacionEntity> items;
-
-  const NotificationsState({
-    this.loading = true,
-    this.errorMessage,
-    this.items = const [],
-  });
-
-  int get noLeidas => items.where((n) => !n.leida).length;
-
-  static const _keep = Object();
-
-  NotificationsState copyWith({
-    bool? loading,
-    Object? errorMessage = _keep,
-    List<NotificacionEntity>? items,
-  }) {
-    return NotificationsState(
-      loading: loading ?? this.loading,
-      errorMessage:
-          errorMessage == _keep ? this.errorMessage : errorMessage as String?,
-      items: items ?? this.items,
-    );
-  }
-}
-
-/// Notifier de notificaciones (Riverpod moderno). Reemplaza al
-/// `NotificationsViewModel` (ChangeNotifier).
+/// AsyncNotifier de la lista de notificaciones. `build()` carga la lista y
+/// Riverpod la expone como `AsyncValue<List<NotificacionEntity>>`. La UI la
+/// consume con `.when()`.
 @riverpod
 class Notifications extends _$Notifications {
   @override
-  NotificationsState build() {
-    // `load` muta `state` en su primera línea síncrona → se difiere para no
-    // mutar el estado mientras el propio build() se construye.
-    Future.microtask(load);
-    return const NotificationsState();
-  }
+  Future<List<NotificacionEntity>> build() =>
+      ref.read(obtenerNotificacionesUseCaseProvider)();
 
-  Future<void> load() async {
-    state = state.copyWith(loading: true, errorMessage: null);
-    try {
-      final items = await ref.read(obtenerNotificacionesUseCaseProvider)();
-      state = state.copyWith(items: items, loading: false);
-    } catch (e) {
-      state = state.copyWith(
-        loading: false,
-        errorMessage: e is ApiException
-            ? e.message
-            : 'No se pudieron cargar las notificaciones.',
-      );
-    }
-  }
-
-  /// Marca como leída (optimista: actualiza la UI y llama al back-end).
+  /// Marca como leída de forma optimista: actualiza la UI al instante y
+  /// revierte si el back-end falla. Opera sobre el valor actual del AsyncData.
   Future<void> marcarLeida(int id) async {
-    final i = state.items.indexWhere((n) => n.id == id);
-    if (i == -1 || state.items[i].leida) return;
-    final original = state.items[i];
-    final optimista = List<NotificacionEntity>.from(state.items)
+    final actuales = state.asData?.value;
+    if (actuales == null) return;
+    final i = actuales.indexWhere((n) => n.id == id);
+    if (i == -1 || actuales[i].leida) return;
+
+    final original = actuales[i];
+    final optimista = List<NotificacionEntity>.from(actuales)
       ..[i] = original.copyWith(leida: true);
-    state = state.copyWith(items: optimista);
+    state = AsyncData(optimista);
     try {
       await ref.read(marcarNotificacionLeidaUseCaseProvider)(id);
     } catch (_) {
-      // Revertir si falla.
-      final revert = List<NotificacionEntity>.from(state.items)..[i] = original;
-      state = state.copyWith(items: revert);
+      // Revertir si falla (sobre la lista actual, por si cambió mientras tanto).
+      final ahora = state.asData?.value ?? optimista;
+      final j = ahora.indexWhere((n) => n.id == id);
+      if (j != -1) {
+        state = AsyncData(List<NotificacionEntity>.from(ahora)..[j] = original);
+      }
     }
   }
 }

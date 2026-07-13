@@ -1,24 +1,22 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/subscription_entity.dart';
 import '../widgets/payment_method.dart';
 import 'account_providers.dart';
 
 part 'payment_method_provider.g.dart';
 
-/// Estado inmutable de la pantalla "Método de Pago".
+/// Estado de la pantalla "Método de Pago". Mezcla datos async (la suscripción
+/// del resumen, como `AsyncValue`) con estado interactivo (el método
+/// seleccionado y el mensaje de confirmación), por eso se mantiene como
+/// `Notifier` y no como `AsyncNotifier`.
 class PaymentMethodState {
-  final bool loading;
-  final String? errorMessage;
-  final SubscriptionEntity? subscription;
+  final AsyncValue<SubscriptionEntity?> subscription;
   final PaymentMethod selected;
   final String? confirmMessage;
 
   const PaymentMethodState({
-    this.loading = true,
-    this.errorMessage,
-    this.subscription,
+    this.subscription = const AsyncLoading(),
     this.selected = PaymentMethod.conekta,
     this.confirmMessage,
   });
@@ -26,19 +24,12 @@ class PaymentMethodState {
   static const _keep = Object();
 
   PaymentMethodState copyWith({
-    bool? loading,
-    Object? errorMessage = _keep,
-    Object? subscription = _keep,
+    AsyncValue<SubscriptionEntity?>? subscription,
     PaymentMethod? selected,
     Object? confirmMessage = _keep,
   }) {
     return PaymentMethodState(
-      loading: loading ?? this.loading,
-      errorMessage:
-          errorMessage == _keep ? this.errorMessage : errorMessage as String?,
-      subscription: subscription == _keep
-          ? this.subscription
-          : subscription as SubscriptionEntity?,
+      subscription: subscription ?? this.subscription,
       selected: selected ?? this.selected,
       confirmMessage: confirmMessage == _keep
           ? this.confirmMessage
@@ -47,36 +38,26 @@ class PaymentMethodState {
   }
 }
 
-/// Notifier de "Método de Pago". Carga la suscripción activa para el resumen y
-/// gestiona el método seleccionado. Reemplaza al `PaymentMethodViewModel`.
+/// Notifier de "Método de Pago". Carga la suscripción activa para el resumen
+/// (envuelta en `AsyncValue` con `guard`) y gestiona el método seleccionado.
 @riverpod
 class PaymentMethodNotifier extends _$PaymentMethodNotifier {
   @override
   PaymentMethodState build() {
-    // `load` muta `state` en su primera línea síncrona → se difiere para no
-    // mutar el estado mientras el propio build() se construye.
-    Future.microtask(load);
+    // `load` arranca con un `await` (no muta `state` de forma síncrona), así
+    // que puede llamarse directo en build sin el hack de `Future.microtask`.
+    load();
     return const PaymentMethodState();
   }
 
   Future<void> load() async {
-    state = state.copyWith(loading: true, errorMessage: null);
-    try {
+    final resultado = await AsyncValue.guard<SubscriptionEntity?>(() async {
       final subs = await ref.read(obtenerSuscripcionesUseCaseProvider)();
       final activa = subs.where((s) => s.activa);
-      state = state.copyWith(
-        loading: false,
-        subscription: activa.isNotEmpty
-            ? activa.first
-            : (subs.isNotEmpty ? subs.first : null),
-      );
-    } catch (e) {
-      state = state.copyWith(
-        loading: false,
-        errorMessage:
-            e is ApiException ? e.message : 'No se pudo cargar la suscripción.',
-      );
-    }
+      if (activa.isNotEmpty) return activa.first;
+      return subs.isNotEmpty ? subs.first : null;
+    });
+    state = state.copyWith(subscription: resultado);
   }
 
   void seleccionar(PaymentMethod method) {

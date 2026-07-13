@@ -6,23 +6,63 @@ part of 'perfil_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$perfilHash() => r'ad9f92bff1858016407ae85174cbee07a998e8b3';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// AsyncNotifier de la pantalla "Perfil". `build()` carga el perfil
+/// (`GET /api/v1/me/perfil`) y Riverpod expone el resultado como
+/// `AsyncValue<PerfilEntity>` (loading / data / error) automáticamente.
+/// Tras la primera vez el perfil viene de la caché del repositorio.
 
-/// Notifier de la pantalla "Perfil" (Riverpod moderno). Carga el perfil
-/// (`GET /api/v1/me/perfil`) al observarse. Reemplaza al `PerfilViewModel`.
-///
-/// Copied from [Perfil].
 @ProviderFor(Perfil)
-final perfilProvider =
-    AutoDisposeNotifierProvider<Perfil, PerfilState>.internal(
-  Perfil.new,
-  name: r'perfilProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$perfilHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final perfilProvider = PerfilProvider._();
 
-typedef _$Perfil = AutoDisposeNotifier<PerfilState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+/// AsyncNotifier de la pantalla "Perfil". `build()` carga el perfil
+/// (`GET /api/v1/me/perfil`) y Riverpod expone el resultado como
+/// `AsyncValue<PerfilEntity>` (loading / data / error) automáticamente.
+/// Tras la primera vez el perfil viene de la caché del repositorio.
+final class PerfilProvider
+    extends $AsyncNotifierProvider<Perfil, PerfilEntity> {
+  /// AsyncNotifier de la pantalla "Perfil". `build()` carga el perfil
+  /// (`GET /api/v1/me/perfil`) y Riverpod expone el resultado como
+  /// `AsyncValue<PerfilEntity>` (loading / data / error) automáticamente.
+  /// Tras la primera vez el perfil viene de la caché del repositorio.
+  PerfilProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'perfilProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$perfilHash();
+
+  @$internal
+  @override
+  Perfil create() => Perfil();
+}
+
+String _$perfilHash() => r'010076fcdd1e5c47ce9f682ade848bb6fee8e0cc';
+
+/// AsyncNotifier de la pantalla "Perfil". `build()` carga el perfil
+/// (`GET /api/v1/me/perfil`) y Riverpod expone el resultado como
+/// `AsyncValue<PerfilEntity>` (loading / data / error) automáticamente.
+/// Tras la primera vez el perfil viene de la caché del repositorio.
+
+abstract class _$Perfil extends $AsyncNotifier<PerfilEntity> {
+  FutureOr<PerfilEntity> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<PerfilEntity>, PerfilEntity>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<PerfilEntity>, PerfilEntity>,
+        AsyncValue<PerfilEntity>,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

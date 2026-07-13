@@ -5,7 +5,7 @@ part 'http_client_provider.g.dart';
 
 /// Cliente HTTP compartido (core). `keepAlive`: singleton de sesión.
 @Riverpod(keepAlive: true)
-http.Client httpClient(HttpClientRef ref) {
+http.Client httpClient(Ref ref) {
   final client = http.Client();
   ref.onDispose(client.close);
   return client;

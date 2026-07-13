@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../providers/notifications_provider.dart';
 import '../widgets/notif_card.dart';
@@ -10,7 +11,7 @@ class NotificationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vm = ref.watch(notificationsProvider);
+    final notifsAsync = ref.watch(notificationsProvider);
     final notifier = ref.read(notificationsProvider.notifier);
     return Scaffold(
       backgroundColor: context.colors.background,
@@ -26,26 +27,25 @@ class NotificationsScreen extends ConsumerWidget {
             )),
       ),
       body: SafeArea(
-        child: Builder(
-          builder: (context) {
-            if (vm.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (vm.errorMessage != null) {
-              return NotifMessage(text: vm.errorMessage!);
-            }
-            if (vm.items.isEmpty) {
+        child: notifsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => NotifMessage(
+              text: e is ApiException
+                  ? e.message
+                  : 'No se pudieron cargar las notificaciones.'),
+          data: (items) {
+            if (items.isEmpty) {
               return const NotifMessage(text: 'No tienes notificaciones.');
             }
             return RefreshIndicator(
-              onRefresh: notifier.load,
+              onRefresh: () => ref.refresh(notificationsProvider.future),
               child: ListView.separated(
                 padding: const EdgeInsets.all(16),
-                itemCount: vm.items.length,
+                itemCount: items.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (_, i) => NotifCard(
-                  notif: vm.items[i],
-                  onTap: () => notifier.marcarLeida(vm.items[i].id),
+                  notif: items[i],
+                  onTap: () => notifier.marcarLeida(items[i].id),
                 ),
               ),
             );

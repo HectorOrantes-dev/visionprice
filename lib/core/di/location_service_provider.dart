@@ -6,4 +6,4 @@ part 'location_service_provider.g.dart';
 
 /// Servicio de ubicación (core). `keepAlive`: singleton de sesión.
 @Riverpod(keepAlive: true)
-LocationService locationService(LocationServiceRef ref) => LocationService();
+LocationService locationService(Ref ref) => LocationService();

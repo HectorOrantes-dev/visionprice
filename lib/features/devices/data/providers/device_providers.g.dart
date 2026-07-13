@@ -6,63 +6,141 @@ part of 'device_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$dispositivoRemoteDataSourceHash() =>
-    r'1158dddcdbabe4b0b6c9e9f7ca2e6d275086ef9b';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Cadena de dependencias de la feature `devices` (registro de token FCM para
+/// push): datasource → repositorio → use cases → [DeviceRegistrar].
+
+@ProviderFor(dispositivoRemoteDataSource)
+final dispositivoRemoteDataSourceProvider =
+    DispositivoRemoteDataSourceProvider._();
 
 /// Cadena de dependencias de la feature `devices` (registro de token FCM para
 /// push): datasource → repositorio → use cases → [DeviceRegistrar].
-///
-/// Copied from [dispositivoRemoteDataSource].
-@ProviderFor(dispositivoRemoteDataSource)
-final dispositivoRemoteDataSourceProvider =
-    Provider<DispositivoRemoteDataSource>.internal(
-  dispositivoRemoteDataSource,
-  name: r'dispositivoRemoteDataSourceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$dispositivoRemoteDataSourceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DispositivoRemoteDataSourceRef
-    = ProviderRef<DispositivoRemoteDataSource>;
-String _$dispositivoRepositoryHash() =>
-    r'e9754d2d6adb128a2cc70973ce276f6fdf9a4acc';
+final class DispositivoRemoteDataSourceProvider extends $FunctionalProvider<
+    DispositivoRemoteDataSource,
+    DispositivoRemoteDataSource,
+    DispositivoRemoteDataSource> with $Provider<DispositivoRemoteDataSource> {
+  /// Cadena de dependencias de la feature `devices` (registro de token FCM para
+  /// push): datasource → repositorio → use cases → [DeviceRegistrar].
+  DispositivoRemoteDataSourceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'dispositivoRemoteDataSourceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [dispositivoRepository].
+  @override
+  String debugGetCreateSourceHash() => _$dispositivoRemoteDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<DispositivoRemoteDataSource> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DispositivoRemoteDataSource create(Ref ref) {
+    return dispositivoRemoteDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DispositivoRemoteDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DispositivoRemoteDataSource>(value),
+    );
+  }
+}
+
+String _$dispositivoRemoteDataSourceHash() =>
+    r'4685b562ca622f9ef0095f9c6469664b5faeb863';
+
 @ProviderFor(dispositivoRepository)
-final dispositivoRepositoryProvider = Provider<DispositivoRepository>.internal(
-  dispositivoRepository,
-  name: r'dispositivoRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$dispositivoRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final dispositivoRepositoryProvider = DispositivoRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DispositivoRepositoryRef = ProviderRef<DispositivoRepository>;
-String _$deviceRegistrarHash() => r'2e5f505545463df209a397d737cad0456b7031e4';
+final class DispositivoRepositoryProvider extends $FunctionalProvider<
+    DispositivoRepository,
+    DispositivoRepository,
+    DispositivoRepository> with $Provider<DispositivoRepository> {
+  DispositivoRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'dispositivoRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [deviceRegistrar].
+  @override
+  String debugGetCreateSourceHash() => _$dispositivoRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<DispositivoRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DispositivoRepository create(Ref ref) {
+    return dispositivoRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DispositivoRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DispositivoRepository>(value),
+    );
+  }
+}
+
+String _$dispositivoRepositoryHash() =>
+    r'13ee463ee9d55b134e20753c70b663cf4044fd2d';
+
 @ProviderFor(deviceRegistrar)
-final deviceRegistrarProvider = Provider<DeviceRegistrar>.internal(
-  deviceRegistrar,
-  name: r'deviceRegistrarProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$deviceRegistrarHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final deviceRegistrarProvider = DeviceRegistrarProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DeviceRegistrarRef = ProviderRef<DeviceRegistrar>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class DeviceRegistrarProvider extends $FunctionalProvider<DeviceRegistrar,
+    DeviceRegistrar, DeviceRegistrar> with $Provider<DeviceRegistrar> {
+  DeviceRegistrarProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'deviceRegistrarProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$deviceRegistrarHash();
+
+  @$internal
+  @override
+  $ProviderElement<DeviceRegistrar> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DeviceRegistrar create(Ref ref) {
+    return deviceRegistrar(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DeviceRegistrar value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DeviceRegistrar>(value),
+    );
+  }
+}
+
+String _$deviceRegistrarHash() => r'ee2a0c11ae5d946994840c9ae59e2e3eaf192645';

@@ -6,23 +6,62 @@ part of 'subscriptions_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$subscriptionsHash() => r'6af342b97f18de14e21847f88b9aadb0ec2794c0';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// AsyncNotifier de la lista de suscripciones. `build()` carga la lista y
+/// Riverpod la expone como `AsyncValue<List<SubscriptionEntity>>`
+/// (loading / data / error) — la UI la consume con `.when()`.
 
-/// Notifier de suscripciones. Reemplaza al `SubscriptionsViewModel`.
-///
-/// Copied from [Subscriptions].
 @ProviderFor(Subscriptions)
-final subscriptionsProvider =
-    AutoDisposeNotifierProvider<Subscriptions, SubscriptionsState>.internal(
-  Subscriptions.new,
-  name: r'subscriptionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$subscriptionsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final subscriptionsProvider = SubscriptionsProvider._();
 
-typedef _$Subscriptions = AutoDisposeNotifier<SubscriptionsState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+/// AsyncNotifier de la lista de suscripciones. `build()` carga la lista y
+/// Riverpod la expone como `AsyncValue<List<SubscriptionEntity>>`
+/// (loading / data / error) — la UI la consume con `.when()`.
+final class SubscriptionsProvider
+    extends $AsyncNotifierProvider<Subscriptions, List<SubscriptionEntity>> {
+  /// AsyncNotifier de la lista de suscripciones. `build()` carga la lista y
+  /// Riverpod la expone como `AsyncValue<List<SubscriptionEntity>>`
+  /// (loading / data / error) — la UI la consume con `.when()`.
+  SubscriptionsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'subscriptionsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$subscriptionsHash();
+
+  @$internal
+  @override
+  Subscriptions create() => Subscriptions();
+}
+
+String _$subscriptionsHash() => r'37884101515ac6864cdf815752556fe41f365f72';
+
+/// AsyncNotifier de la lista de suscripciones. `build()` carga la lista y
+/// Riverpod la expone como `AsyncValue<List<SubscriptionEntity>>`
+/// (loading / data / error) — la UI la consume con `.when()`.
+
+abstract class _$Subscriptions
+    extends $AsyncNotifier<List<SubscriptionEntity>> {
+  FutureOr<List<SubscriptionEntity>> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref
+        as $Ref<AsyncValue<List<SubscriptionEntity>>, List<SubscriptionEntity>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<SubscriptionEntity>>,
+            List<SubscriptionEntity>>,
+        AsyncValue<List<SubscriptionEntity>>,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

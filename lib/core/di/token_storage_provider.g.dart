@@ -6,23 +6,50 @@ part of 'token_storage_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$tokenStorageHash() => r'6b9eb5c37cb6d16ea55b4e4a93b9f30eb9e0833e';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Almacenamiento del token de sesión (core). `keepAlive`: singleton.
+
+@ProviderFor(tokenStorage)
+final tokenStorageProvider = TokenStorageProvider._();
 
 /// Almacenamiento del token de sesión (core). `keepAlive`: singleton.
-///
-/// Copied from [tokenStorage].
-@ProviderFor(tokenStorage)
-final tokenStorageProvider = Provider<TokenStorage>.internal(
-  tokenStorage,
-  name: r'tokenStorageProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$tokenStorageHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef TokenStorageRef = ProviderRef<TokenStorage>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class TokenStorageProvider
+    extends $FunctionalProvider<TokenStorage, TokenStorage, TokenStorage>
+    with $Provider<TokenStorage> {
+  /// Almacenamiento del token de sesión (core). `keepAlive`: singleton.
+  TokenStorageProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'tokenStorageProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$tokenStorageHash();
+
+  @$internal
+  @override
+  $ProviderElement<TokenStorage> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TokenStorage create(Ref ref) {
+    return tokenStorage(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TokenStorage value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TokenStorage>(value),
+    );
+  }
+}
+
+String _$tokenStorageHash() => r'a42816fb1cf5af728e44ff5c48bfcaf5dc6b12aa';
