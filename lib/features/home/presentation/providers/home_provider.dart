@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/connectivity_service_provider.dart';
@@ -99,6 +100,7 @@ class Home extends _$Home {
       final proyectos = await ref.read(obtenerProyectosUseCaseProvider)();
       state = state.copyWith(proyectos: proyectos, loading: false);
     } catch (e) {
+      debugPrint('PROYECTOS ERROR (Home.cargarProyectos): $e');
       state = state.copyWith(
         loading: false,
         error:

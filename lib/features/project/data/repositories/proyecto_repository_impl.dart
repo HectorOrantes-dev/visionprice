@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../core/storage/local_database.dart';
@@ -14,8 +15,14 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
   @override
   Future<List<ProyectoEntity>> listar() async {
     final db = await _localDatabase.database;
-    final locales = await _leerProyectosLocales(db);
-    
+    List<ProyectoEntity> locales;
+    try {
+      locales = await _leerProyectosLocales(db);
+    } catch (e) {
+      debugPrint('PROYECTOS ERROR (repo.listar, lectura local inicial): $e');
+      rethrow;
+    }
+
     // Si ya tenemos proyectos locales, los retornamos sin llamar al back-end.
     // Solo hace la petición si está vacío.
     if (locales.isNotEmpty) {
@@ -36,6 +43,7 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
       // Leer todo de local (esto incluirá los offline que no se hayan sincronizado)
       return await _leerProyectosLocales(db);
     } catch (e) {
+      debugPrint('PROYECTOS ERROR (repo.listar): $e');
       // Offline fallback
       return locales;
     }

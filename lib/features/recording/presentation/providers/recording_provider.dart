@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:record/record.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -54,7 +55,8 @@ class Recording extends _$Recording {
             (proyectos.isNotEmpty ? proyectos.first : null),
         loadingProyectos: false,
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('PROYECTOS ERROR (Recording.cargarProyectos): $e');
       // Sin proyectos disponibles: el usuario podrá crear uno.
       state = state.copyWith(loadingProyectos: false);
     }
