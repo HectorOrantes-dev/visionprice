@@ -36,7 +36,13 @@ class ProcessingScreen extends ConsumerWidget {
                           const SizedBox(height: 8),
                           TranscriptionCard(
                             transcripcion: transcripcion,
-                            loading: !tieneTranscripcion && !vm.hasError,
+                            // El spinner solo mientras el sondeo sigue vivo: se
+                            // apaga cuando llega la transcripción, hay error,
+                            // termina (aunque venga vacía) o se agota el tope.
+                            loading: !tieneTranscripcion &&
+                                !vm.hasError &&
+                                !vm.isDone &&
+                                !vm.timedOut,
                           ),
                           const SizedBox(height: 20),
                           const ProcessingSectionLabel(

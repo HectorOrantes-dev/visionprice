@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
@@ -55,13 +56,17 @@ class Processing extends _$Processing {
       try {
         final g = await ref.read(obtenerGrabacionUseCaseProvider)(id);
         if (_disposed) return;
+        debugPrint(
+            'POLL id=$id intento=${attempts + 1} estado=${g.estado} trans=${g.tieneTranscripcion}');
         state = state.copyWith(grabacion: g);
         if (g.isSincronizado || g.isError) return; // estado terminal → fin
       } on ApiException catch (e) {
         if (_disposed) return;
+        debugPrint('POLL grabacion id=$id ApiException: ${e.message} (429=${e.isTooManyRequests})');
         if (e.isTooManyRequests) wait = _backoff429; // 429 → espera más
-      } catch (_) {
+      } catch (e) {
         if (_disposed) return;
+        debugPrint('POLL grabacion id=$id error: $e');
       }
 
       if (++attempts >= _maxAttempts) {
