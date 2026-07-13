@@ -68,7 +68,10 @@ class Home extends _$Home {
   @override
   HomeState build() {
     checkConnectivity();
-    cargarProyectos();
+    // `cargarProyectos` muta `state` en su primera línea (síncrona) — Riverpod
+    // no permite mutar el estado mientras el propio build() se está
+    // construyendo. Se difiere con microtask para que corra justo después.
+    Future.microtask(cargarProyectos);
     cargarNombre();
     return const HomeState();
   }
