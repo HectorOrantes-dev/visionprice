@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/perfil_entity.dart';
@@ -12,8 +13,12 @@ part 'perfil_provider.g.dart';
 @riverpod
 class Perfil extends _$Perfil {
   @override
-  Future<PerfilEntity> build() =>
-      ref.read(getPerfilUseCaseProvider)();
+  Future<PerfilEntity> build() async {
+    debugPrint('PERFIL build → cargando…');
+    final p = await ref.read(getPerfilUseCaseProvider)();
+    debugPrint('PERFIL build → listo: ${p.nombre}');
+    return p;
+  }
 
   /// Fuerza una recarga desde el back-end. El contenido anterior permanece
   /// visible durante el `await` (sin parpadeo) y `AsyncValue.guard` captura

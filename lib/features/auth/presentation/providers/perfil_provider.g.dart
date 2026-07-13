@@ -45,7 +45,7 @@ final class PerfilProvider
   Perfil create() => Perfil();
 }
 
-String _$perfilHash() => r'010076fcdd1e5c47ce9f682ade848bb6fee8e0cc';
+String _$perfilHash() => r'20b82f6a31ba4b7fd994357c33265b74a276c553';
 
 /// AsyncNotifier de la pantalla "Perfil". `build()` carga el perfil
 /// (`GET /api/v1/me/perfil`) y Riverpod expone el resultado como

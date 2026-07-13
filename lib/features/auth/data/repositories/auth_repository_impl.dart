@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../core/storage/local_database.dart';
@@ -115,25 +116,38 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final perfil = await _remote.getPerfil();
       _perfilCache = perfil;
-      
-      // Guardar en la base de datos local para modo offline.
-      // SQLite solo acepta num/String/blob → el bool `activo` va como 1/0.
-      final db = await _localDatabase.database;
-      final row = perfil.toJson()..['activo'] = perfil.activo ? 1 : 0;
-      await db.insert('perfil', row, conflictAlgorithm: ConflictAlgorithm.replace);
-      
+      // Guardado local best-effort: si el insert falla (tabla, esquema, etc.)
+      // NO debe tirar el perfil recién bajado de la red. Se registra y sigue.
+      _guardarPerfilLocal(perfil);
       return perfil;
     } catch (e) {
-      // Si falla (por falta de red), intentar recuperar de local
-      final db = await _localDatabase.database;
-      final maps = await db.query('perfil', limit: 1);
-      if (maps.isNotEmpty) {
-        final perfil = PerfilEntity.fromJson(maps.first);
-        _perfilCache = perfil;
-        return perfil;
+      debugPrint('getPerfil: falló la red ($e). Intentando caché local…');
+      // Si falla la red, intentar recuperar de local (best-effort).
+      try {
+        final db = await _localDatabase.database;
+        final maps = await db.query('perfil', limit: 1);
+        if (maps.isNotEmpty) {
+          final perfil = PerfilEntity.fromJson(maps.first);
+          _perfilCache = perfil;
+          return perfil;
+        }
+      } catch (localErr) {
+        debugPrint('getPerfil: tampoco hay perfil local ($localErr).');
       }
-      // Si no hay local, relanzar el error
-      rethrow;
+      rethrow; // sin red ni local → propaga el error original
+    }
+  }
+
+  /// Persiste el perfil en SQLite sin bloquear ni fallar el flujo principal.
+  /// SQLite solo acepta num/String/blob → el bool `activo` va como 1/0.
+  Future<void> _guardarPerfilLocal(PerfilEntity perfil) async {
+    try {
+      final db = await _localDatabase.database;
+      final row = perfil.toJson()..['activo'] = perfil.activo ? 1 : 0;
+      await db.insert('perfil', row,
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      debugPrint('getPerfil: no se pudo guardar el perfil local ($e).');
     }
   }
 
