@@ -20,7 +20,7 @@ class ApiException implements Exception {
   bool get isTooManyRequests => statusCode == 429;
 
   factory ApiException.network([String? detail]) =>
-      ApiException(0, detail ?? 'No hay conexión con el servidor.');
+      ApiException(0, detail ?? 'No tienes internet.');
 
   @override
   String toString() => 'ApiException($statusCode): $message';
