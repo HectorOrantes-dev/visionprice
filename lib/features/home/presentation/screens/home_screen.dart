@@ -7,6 +7,8 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/utils/validation_mixin.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/gradient_button.dart';
+import '../../../collaboration/presentation/screens/join_project_screen.dart';
+import '../../../collaboration/presentation/screens/project_members_screen.dart';
 import '../../../recording/presentation/screens/recording_screen.dart';
 import '../../../sync/presentation/screens/sync_queue_screen.dart';
 import '../../../security/presentation/screens/inactivity_detector.dart';
@@ -165,6 +167,8 @@ class _DashboardView extends ConsumerWidget {
                   _newBudgetButton(context),
                   const SizedBox(height: 12),
                   _createProjectButton(context, notifier),
+                  const SizedBox(height: 12),
+                  _joinProjectButton(context),
                   const SizedBox(height: 24),
                   _SectionTitle('MIS PROYECTOS'),
                   const SizedBox(height: 12),
@@ -421,6 +425,41 @@ Widget _createProjectButton(BuildContext context, Home notifier) {
   );
 }
 
+/// Enganche de preview (colaboración): entra a la pantalla de unirse con código.
+Widget _joinProjectButton(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const JoinProjectScreen()),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: context.colors.textPrimary,
+          side: BorderSide(color: context.colors.border),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.login, size: 20),
+            SizedBox(width: 10),
+            Text(
+              'Unirme con código',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 /// Bottom sheet para dar de alta un proyecto desde la home.
 void showCreateProjectSheet(BuildContext context, Home notifier) {
   showModalBottomSheet<void>(
@@ -583,7 +622,14 @@ class _ProjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final estadoColor = _estadoColor(context, proyecto.estado);
-    return Container(
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      // Enganche de preview (colaboración): abre los miembros del proyecto.
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ProjectMembersScreen()),
+      ),
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
         color: context.colors.surface,
@@ -646,6 +692,7 @@ class _ProjectCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
