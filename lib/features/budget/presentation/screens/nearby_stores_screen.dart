@@ -5,6 +5,7 @@ import '../../../recording/domain/entities/superficie_entity.dart';
 import '../../domain/categoria_material.dart';
 import '../../domain/entities/producto_entity.dart';
 import '../providers/nearby_stores_provider.dart';
+import '../widgets/material_image.dart';
 import 'budget_result_screen.dart';
 
 class NearbyStoresScreen extends ConsumerStatefulWidget {
@@ -244,7 +245,7 @@ class _ProductCard extends StatelessWidget {
             children: [
               if (producto.imageUrl != null &&
                   producto.imageUrl!.isNotEmpty) ...[
-                _MaterialThumb(url: producto.imageUrl!),
+                MaterialImage(url: producto.imageUrl, size: 48, radius: 10),
                 const SizedBox(width: 12),
               ],
               Expanded(
@@ -407,52 +408,3 @@ class _GenerateBar extends StatelessWidget {
   }
 }
 
-/// Miniatura del material. Usa `cacheWidth`/`cacheHeight` para que el engine
-/// decodifique la imagen ya REDIMENSIONADA (fuera del hilo de UI): así una foto
-/// pesada del material no infla la memoria ni causa jank al elegir materiales.
-/// (Un Isolate NO aplica aquí: `Image.network` ya decodifica off-thread.)
-class _MaterialThumb extends StatelessWidget {
-  final String url;
-  const _MaterialThumb({required this.url});
-
-  static const double _size = 48;
-
-  @override
-  Widget build(BuildContext context) {
-    final dpr = MediaQuery.of(context).devicePixelRatio;
-    final cache = (_size * dpr).round(); // resolución real del dispositivo
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: Image.network(
-        url,
-        width: _size,
-        height: _size,
-        fit: BoxFit.cover,
-        cacheWidth: cache,
-        cacheHeight: cache,
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) return child;
-          return Container(
-            width: _size,
-            height: _size,
-            color: context.colors.surfaceVariant,
-            child: const Center(
-              child: SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-          );
-        },
-        errorBuilder: (context, error, stack) => Container(
-          width: _size,
-          height: _size,
-          color: context.colors.surfaceVariant,
-          child: Icon(Icons.broken_image_outlined,
-              size: 20, color: context.colors.textSecondary),
-        ),
-      ),
-    );
-  }
-}

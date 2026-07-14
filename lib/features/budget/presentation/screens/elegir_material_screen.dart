@@ -9,6 +9,7 @@ import '../../../../shared/widgets/gradient_button.dart';
 import '../../domain/entities/producto_entity.dart';
 import '../providers/budget_providers.dart';
 import '../providers/cotizacion_wizard_provider.dart';
+import '../widgets/material_image.dart';
 
 /// 02/03 · Elegir material — misma pantalla para "simple" (un producto) y
 /// "kit" (loseta principal + método + complementos), según lo que diga la
@@ -191,15 +192,7 @@ class _ProductoPickerState extends ConsumerState<_ProductoPicker> {
                   ),
                   child: Row(
                     children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: context.colors.primaryLight,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(Icons.inventory_2_outlined, color: context.colors.primary, size: 22),
-                      ),
+                      MaterialImage(url: p.imageUrl, size: 52, radius: 12),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
@@ -469,15 +462,7 @@ class _KitSection extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: context.colors.primaryLight,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(Icons.inventory_2_outlined, color: context.colors.primary, size: 18),
-                      ),
+                      MaterialImage(url: producto!.imageUrl, size: 40, radius: 10),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
