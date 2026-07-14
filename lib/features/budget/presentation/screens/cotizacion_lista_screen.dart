@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../core/pdf/cotizacion_pdf.dart';
@@ -6,6 +7,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../../domain/entities/cotizacion_entity.dart';
+import '../widgets/mano_obra_card.dart';
 import 'budget_result_screen.dart';
 
 /// 05 · Cotización lista — pantalla final del wizard: total general (suma
@@ -89,6 +91,15 @@ class CotizacionListaScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 18),
+                  for (final cot in cotizaciones)
+                    if (cot.manoObra != null) ...[
+                      ManoObraCard(
+                        manoObra: cot.manoObra,
+                        money: NumberFormat.currency(
+                            locale: 'es_MX', symbol: '\$'),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                   Container(
                     decoration: BoxDecoration(
                       color: context.colors.surface,

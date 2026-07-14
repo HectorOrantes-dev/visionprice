@@ -57,6 +57,12 @@ Future<Uint8List> buildCotizacionPdf(CotizacionEntity cot) {
             ],
           ),
           pw.SizedBox(height: 16),
+          if (cot.manoObra != null)
+            pw.Align(
+              alignment: pw.Alignment.centerRight,
+              child: pw.Text('Mano de obra: ${money(cot.manoObra!)}'),
+            ),
+          if (cot.manoObra != null) pw.SizedBox(height: 4),
           pw.Align(
             alignment: pw.Alignment.centerRight,
             child: pw.Text(

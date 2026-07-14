@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/cotizacion_entity.dart';
+import '../widgets/mano_obra_card.dart';
 import 'export_pdf_screen.dart';
 
 class BudgetResultScreen extends StatelessWidget {
@@ -26,6 +27,10 @@ class BudgetResultScreen extends StatelessWidget {
                     estado: cotizacion.estado,
                     lineas: cotizacion.lineas.length,
                   ),
+                  if (cotizacion.manoObra != null) ...[
+                    const SizedBox(height: 12),
+                    ManoObraCard(manoObra: cotizacion.manoObra, money: money),
+                  ],
                   const SizedBox(height: 20),
                   const _SectionLabel('DESGLOSE DE MATERIALES'),
                   const SizedBox(height: 8),

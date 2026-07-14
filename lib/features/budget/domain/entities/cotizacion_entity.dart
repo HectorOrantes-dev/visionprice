@@ -39,6 +39,11 @@ class CotizacionEntity {
   final int proyectoId;
   final String estado;
   final double total;
+
+  /// Costo de mano de obra, expuesto por el back-end como campo aparte
+  /// (`mano_obra`) además de aparecer como línea en [lineas]/PDF. Es `null`
+  /// si la cotización no incluye mano de obra.
+  final double? manoObra;
   final String fecha;
   final List<LineaCotizacionEntity> lineas;
 
@@ -47,12 +52,36 @@ class CotizacionEntity {
     required this.proyectoId,
     required this.estado,
     required this.total,
+    this.manoObra,
     required this.fecha,
     required this.lineas,
   });
 
   factory CotizacionEntity.fromJson(Map<String, dynamic> json) {
     final lineas = json['lineas'];
+    final parsedLineas = lineas is List
+        ? lineas
+            .whereType<Map<String, dynamic>>()
+            .map(LineaCotizacionEntity.fromJson)
+            .toList()
+        : const <LineaCotizacionEntity>[];
+
+    // `mano_obra` viene del back-end. Si por algún motivo faltara (respuestas
+    // viejas), se deriva de la única línea sin `material_id` (siempre es la de
+    // mano de obra: las demás vienen de Proveedores y traen `material_id`).
+    double? manoObra;
+    final raw = json['mano_obra'];
+    if (raw is num) {
+      manoObra = raw.toDouble();
+    } else {
+      for (final l in parsedLineas) {
+        if (l.materialId == null) {
+          manoObra = l.subtotal;
+          break;
+        }
+      }
+    }
+
     return CotizacionEntity(
       id: json['id'] is int ? json['id'] : int.tryParse('${json['id']}') ?? 0,
       proyectoId: json['proyecto_id'] is int
@@ -60,13 +89,9 @@ class CotizacionEntity {
           : int.tryParse('${json['proyecto_id']}') ?? 0,
       estado: (json['estado'] ?? '').toString(),
       total: json['total'] is num ? (json['total'] as num).toDouble() : 0,
+      manoObra: manoObra,
       fecha: (json['fecha'] ?? '').toString(),
-      lineas: lineas is List
-          ? lineas
-              .whereType<Map<String, dynamic>>()
-              .map(LineaCotizacionEntity.fromJson)
-              .toList()
-          : const [],
+      lineas: parsedLineas,
     );
   }
 }
