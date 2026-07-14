@@ -26,12 +26,14 @@ class CrearCotizacionUseCase {
     required int proyectoId,
     double? pisoM2,
     double? paredesM2,
+    double? manoObra,
     required List<ItemCotizacion> items,
   }) =>
       _repo.crear(
         proyectoId: proyectoId,
         pisoM2: pisoM2,
         paredesM2: paredesM2,
+        manoObra: manoObra,
         items: items,
       );
 }

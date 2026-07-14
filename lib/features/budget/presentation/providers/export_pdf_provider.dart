@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/pdf/cotizacion_pdf.dart';
+import '../../../project/presentation/providers/project_providers.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import 'budget_providers.dart';
 import 'export_pdf_state.dart';
@@ -48,7 +49,8 @@ class ExportPdf extends _$ExportPdf {
   Future<Uint8List?> generarPdfLocal(CotizacionEntity cot) async {
     state = state.copyWith(loading: true, errorMessage: null);
     try {
-      final bytes = await buildCotizacionPdf(cot);
+      final bytes =
+          await buildCotizacionPdf(cot, proyectoNombre: await _nombreProyecto(cot.proyectoId));
       state = state.copyWith(loading: false);
       return bytes;
     } catch (_) {
@@ -58,5 +60,17 @@ class ExportPdf extends _$ExportPdf {
       );
       return null;
     }
+  }
+
+  /// Resuelve el nombre del proyecto por id desde la caché local de proyectos
+  /// (para mostrarlo en el PDF). `null` si no se encuentra o falla.
+  Future<String?> _nombreProyecto(int proyectoId) async {
+    try {
+      final proyectos = await ref.read(obtenerProyectosUseCaseProvider)();
+      for (final p in proyectos) {
+        if (p.id == proyectoId) return p.nombre;
+      }
+    } catch (_) {/* sin nombre: el PDF usa "Proyecto #id" */}
+    return null;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
@@ -10,12 +11,42 @@ import 'elegir_material_screen.dart';
 
 /// 04 · Resumen del proyecto — última confirmación antes de crear la(s)
 /// cotización(es), con acceso rápido a corregir el material de cualquier
-/// superficie antes de enviar.
-class ResumenCotizacionScreen extends ConsumerWidget {
+/// superficie y la captura del costo de **mano de obra** (pintura y/o piso).
+class ResumenCotizacionScreen extends ConsumerStatefulWidget {
   final int proyectoId;
   const ResumenCotizacionScreen({super.key, required this.proyectoId});
 
   static String _fmtArea(double a) => a.truncateToDouble() == a ? a.toStringAsFixed(0) : a.toStringAsFixed(1);
+
+  @override
+  ConsumerState<ResumenCotizacionScreen> createState() =>
+      _ResumenCotizacionScreenState();
+}
+
+class _ResumenCotizacionScreenState
+    extends ConsumerState<ResumenCotizacionScreen> {
+  late final TextEditingController _manoObraSimpleCtrl;
+  late final TextEditingController _manoObraKitCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    final st = ref.read(cotizacionWizardProvider(widget.proyectoId));
+    _manoObraSimpleCtrl = TextEditingController(
+        text: st.manoObraSimple != null ? _fmt(st.manoObraSimple!) : '');
+    _manoObraKitCtrl = TextEditingController(
+        text: st.manoObraKit != null ? _fmt(st.manoObraKit!) : '');
+  }
+
+  static String _fmt(double v) =>
+      v.truncateToDouble() == v ? v.toStringAsFixed(0) : v.toString();
+
+  @override
+  void dispose() {
+    _manoObraSimpleCtrl.dispose();
+    _manoObraKitCtrl.dispose();
+    super.dispose();
+  }
 
   String _resumenMateriales(CotizacionWizardState vm, int i) {
     final regla = vm.reglaDe(i);
@@ -33,7 +64,8 @@ class ResumenCotizacionScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final proyectoId = widget.proyectoId;
     final vm = ref.watch(cotizacionWizardProvider(proyectoId));
     final notifier = ref.read(cotizacionWizardProvider(proyectoId).notifier);
 
@@ -95,7 +127,7 @@ class ResumenCotizacionScreen extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${vm.superficies[i].descripcion} · ${_fmtArea(vm.superficies[i].areaM2)} m²',
+                                    '${vm.superficies[i].descripcion} · ${ResumenCotizacionScreen._fmtArea(vm.superficies[i].areaM2)} m²',
                                     style: AppTextStyles.heading(
                                         size: 14, weight: FontWeight.w700, color: context.colors.textPrimary),
                                   ),
@@ -116,8 +148,37 @@ class ResumenCotizacionScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
                   ],
+
+                  // --- Mano de obra ---
+                  const SizedBox(height: 4),
+                  Text('MANO DE OBRA',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: context.colors.textSecondary,
+                          letterSpacing: 0.5)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Costo de la mano de obra. Se suma al total y aparece como línea en el PDF.',
+                    style: TextStyle(fontSize: 12, color: context.colors.textHint, height: 1.4),
+                  ),
+                  const SizedBox(height: 10),
+                  if (haySimple)
+                    _ManoObraField(
+                      controller: _manoObraSimpleCtrl,
+                      label: mixto ? 'Mano de obra · pintura / materiales' : 'Mano de obra',
+                      onChanged: (v) => notifier.setManoObraSimple(_parse(v)),
+                    ),
+                  if (mixto) const SizedBox(height: 10),
+                  if (hayKit)
+                    _ManoObraField(
+                      controller: _manoObraKitCtrl,
+                      label: mixto ? 'Mano de obra · piso / instalación' : 'Mano de obra',
+                      onChanged: (v) => notifier.setManoObraKit(_parse(v)),
+                    ),
+
                   if (mixto) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
@@ -158,7 +219,10 @@ class ResumenCotizacionScreen extends ConsumerWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CotizacionListaScreen(cotizaciones: creadas),
+                            builder: (_) => CotizacionListaScreen(
+                              cotizaciones: creadas,
+                              proyectoId: proyectoId,
+                            ),
                           ),
                         );
                       },
@@ -179,6 +243,53 @@ class ResumenCotizacionScreen extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Convierte lo tecleado a double (acepta coma o punto). `null` si vacío.
+  static double? _parse(String v) {
+    final t = v.trim().replaceAll(',', '.');
+    if (t.isEmpty) return null;
+    return double.tryParse(t);
+  }
+}
+
+class _ManoObraField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final ValueChanged<String> onChanged;
+  const _ManoObraField({
+    required this.controller,
+    required this.label,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+      ],
+      style: TextStyle(color: context.colors.textPrimary, fontWeight: FontWeight.w600),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixText: '\$ ',
+        prefixStyle: TextStyle(
+            color: context.colors.primary, fontWeight: FontWeight.w800, fontSize: 15),
+        filled: true,
+        fillColor: context.colors.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: context.colors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: context.colors.border),
         ),
       ),
     );

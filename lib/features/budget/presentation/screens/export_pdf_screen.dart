@@ -2,25 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
+import '../../../../core/pdf/pdf_saver.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../providers/export_pdf_provider.dart';
 
 /// Exportar PDF de una cotización. El PDF se genera **localmente** en un isolate
-/// (sin depender del back-end), lo que evita el error de descarga que ocurría al
-/// pedir un enlace remoto que no existía. Desde aquí se puede ver/imprimir/
-/// guardar (`Printing.layoutPdf`) o compartir (`Printing.sharePdf`).
+/// (sin depender del back-end) y se **descarga directo al teléfono** (sin abrir
+/// el diálogo de impresión). También se puede compartir (`Printing.sharePdf`).
 class ExportPdfScreen extends ConsumerWidget {
   final CotizacionEntity cotizacion;
   const ExportPdfScreen({super.key, required this.cotizacion});
 
-  Future<void> _verPdf(WidgetRef ref) async {
+  Future<void> _descargarPdf(BuildContext context, WidgetRef ref) async {
     final bytes =
         await ref.read(exportPdfProvider.notifier).generarPdfLocal(cotizacion);
     if (bytes == null) return;
-    await Printing.layoutPdf(
-      onLayout: (_) async => bytes,
-      name: 'cotizacion_${cotizacion.id}.pdf',
+    final res = await savePdfToDevice(bytes, 'cotizacion_${cotizacion.id}.pdf');
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(res.ok
+            ? (res.enDescargas
+                ? 'PDF guardado en Descargas: cotizacion_${cotizacion.id}.pdf'
+                : 'PDF guardado en: ${res.path}')
+            : 'No se pudo guardar el PDF.'),
+      ),
     );
   }
 
@@ -122,7 +129,8 @@ class ExportPdfScreen extends ConsumerWidget {
               SizedBox(
                 height: 52,
                 child: ElevatedButton.icon(
-                  onPressed: vm.loading ? null : () => _verPdf(ref),
+                  onPressed:
+                      vm.loading ? null : () => _descargarPdf(context, ref),
                   icon: vm.loading
                       ? const SizedBox(
                           width: 18,
@@ -130,8 +138,8 @@ class ExportPdfScreen extends ConsumerWidget {
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white),
                         )
-                      : const Icon(Icons.visibility_outlined, size: 18),
-                  label: Text(vm.loading ? 'Generando…' : 'Ver e imprimir PDF'),
+                      : const Icon(Icons.download_outlined, size: 18),
+                  label: Text(vm.loading ? 'Generando…' : 'Descargar PDF'),
                 ),
               ),
               const SizedBox(height: 12),

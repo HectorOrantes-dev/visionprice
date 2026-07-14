@@ -70,6 +70,14 @@ class CotizacionWizard extends _$CotizacionWizard {
   void seleccionarKitBoquilla(int i, ProductoEntity producto) =>
       _setKit(i, _kitDe(i).copyWith(boquilla: producto));
 
+  /// Captura el costo de mano de obra para materiales SIMPLES (pintura).
+  void setManoObraSimple(double? valor) =>
+      state = state.copyWith(manoObraSimple: valor);
+
+  /// Captura el costo de mano de obra para el KIT (piso/azulejo).
+  void setManoObraKit(double? valor) =>
+      state = state.copyWith(manoObraKit: valor);
+
   /// Crea 1 o 2 cotizaciones (simples / kit) según las superficies. Devuelve
   /// la lista de cotizaciones creadas (vacía si algo falló; ver `errorMessage`).
   Future<List<CotizacionEntity>> crearCotizaciones() async {
@@ -108,12 +116,14 @@ class CotizacionWizard extends _$CotizacionWizard {
       if (itemsSimples.isNotEmpty) {
         creadas.add(await ref.read(crearCotizacionUseCaseProvider)(
           proyectoId: proyectoId,
+          manoObra: state.manoObraSimple,
           items: itemsSimples,
         ));
       }
       if (superficiesKit.isNotEmpty) {
         creadas.add(await ref.read(crearCotizacionKitUseCaseProvider)(
           proyectoId: proyectoId,
+          manoObra: state.manoObraKit,
           superficies: superficiesKit,
         ));
       }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:printing/printing.dart';
 
 import '../../../../core/pdf/cotizacion_pdf.dart';
+import '../../../../core/pdf/pdf_saver.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/gradient_button.dart';
+import '../../../project/presentation/providers/project_providers.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../widgets/mano_obra_card.dart';
 import 'budget_result_screen.dart';
@@ -13,14 +15,16 @@ import 'budget_result_screen.dart';
 /// 05 · Cotización lista — pantalla final del wizard: total general (suma
 /// de todas las cotizaciones creadas, puede ser 1 o 2 si hubo mezcla
 /// simple+kit), desglose combinado de líneas y descarga del PDF.
-class CotizacionListaScreen extends StatelessWidget {
+class CotizacionListaScreen extends ConsumerWidget {
   final List<CotizacionEntity> cotizaciones;
-  const CotizacionListaScreen({super.key, required this.cotizaciones});
+  final int? proyectoId;
+  const CotizacionListaScreen(
+      {super.key, required this.cotizaciones, this.proyectoId});
 
   double get _total => cotizaciones.fold(0, (acc, c) => acc + c.total);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: context.colors.background,
       body: SafeArea(
@@ -159,7 +163,7 @@ class CotizacionListaScreen extends StatelessWidget {
                     flex: 2,
                     child: GradientButton(
                       height: 52,
-                      onPressed: () => _descargarPdf(context),
+                      onPressed: () => _descargarPdf(context, ref),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -222,11 +226,35 @@ class CotizacionListaScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _descargarPdf(BuildContext context) async {
-    final bytes = await buildResumenCotizacionesPdf(cotizaciones);
-    await Printing.layoutPdf(
-      onLayout: (_) async => bytes,
-      name: 'presupuesto_proyecto_${cotizaciones.isNotEmpty ? cotizaciones.first.proyectoId : ''}.pdf',
+  /// Genera el PDF localmente y lo **descarga directo al teléfono** (sin abrir
+  /// el diálogo de impresión). Muestra dónde quedó guardado.
+  Future<void> _descargarPdf(BuildContext context, WidgetRef ref) async {
+    final id = proyectoId ??
+        (cotizaciones.isNotEmpty ? cotizaciones.first.proyectoId : null);
+    final bytes = await buildResumenCotizacionesPdf(
+      cotizaciones,
+      proyectoNombre: id == null ? null : await _nombreProyecto(ref, id),
     );
+    final res = await savePdfToDevice(bytes, 'presupuesto_proyecto_${id ?? ''}.pdf');
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(res.ok
+            ? (res.enDescargas
+                ? 'PDF guardado en Descargas'
+                : 'PDF guardado en: ${res.path}')
+            : 'No se pudo guardar el PDF.'),
+      ),
+    );
+  }
+
+  Future<String?> _nombreProyecto(WidgetRef ref, int id) async {
+    try {
+      final proyectos = await ref.read(obtenerProyectosUseCaseProvider)();
+      for (final p in proyectos) {
+        if (p.id == id) return p.nombre;
+      }
+    } catch (_) {/* sin nombre: el PDF usa "Proyecto #id" */}
+    return null;
   }
 }

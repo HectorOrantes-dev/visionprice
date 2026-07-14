@@ -10,7 +10,9 @@ class CrearCotizacionKitUseCase {
 
   Future<CotizacionEntity> call({
     required int proyectoId,
+    double? manoObra,
     required List<SuperficieKitItem> superficies,
   }) =>
-      _repo.crearKit(proyectoId: proyectoId, superficies: superficies);
+      _repo.crearKit(
+          proyectoId: proyectoId, manoObra: manoObra, superficies: superficies);
 }

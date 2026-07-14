@@ -25,12 +25,14 @@ class CotizacionRepositoryImpl implements CotizacionRepository {
     required int proyectoId,
     double? pisoM2,
     double? paredesM2,
+    double? manoObra,
     required List<ItemCotizacion> items,
   }) {
     return _remote.crear({
       'proyecto_id': proyectoId,
       'piso_m2': pisoM2,       // siempre presente (null si no aplica)
       'paredes_m2': paredesM2, // siempre presente (null si no aplica)
+      if (manoObra != null) 'mano_obra': manoObra,
       'items': items.map((e) => e.toJson()).toList(),
     });
   }
@@ -38,10 +40,12 @@ class CotizacionRepositoryImpl implements CotizacionRepository {
   @override
   Future<CotizacionEntity> crearKit({
     required int proyectoId,
+    double? manoObra,
     required List<SuperficieKitItem> superficies,
   }) {
     return _remote.crearKit({
       'proyecto_id': proyectoId,
+      if (manoObra != null) 'mano_obra': manoObra,
       'superficies': superficies.map((e) => e.toJson()).toList(),
     });
   }

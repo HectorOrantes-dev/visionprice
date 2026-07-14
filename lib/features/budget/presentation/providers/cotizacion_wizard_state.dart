@@ -40,6 +40,13 @@ class CotizacionWizardState {
   final Map<String, MaterialReglaEntity> reglas;
   final Map<int, ProductoEntity> seleccionSimple;
   final Map<int, KitSeleccion> seleccionKit;
+
+  /// Mano de obra (costo) que el usuario captura para la cotización de
+  /// materiales SIMPLES (ej. cambio de pintura). `null` = sin capturar.
+  final double? manoObraSimple;
+
+  /// Mano de obra (costo) para la cotización tipo KIT (ej. cambio de piso).
+  final double? manoObraKit;
   final bool loading;
   final bool creando;
   final String? errorMessage;
@@ -50,6 +57,8 @@ class CotizacionWizardState {
     this.reglas = const {},
     this.seleccionSimple = const {},
     this.seleccionKit = const {},
+    this.manoObraSimple,
+    this.manoObraKit,
     this.loading = false,
     this.creando = false,
     this.errorMessage,
@@ -95,6 +104,8 @@ class CotizacionWizardState {
     Map<String, MaterialReglaEntity>? reglas,
     Map<int, ProductoEntity>? seleccionSimple,
     Map<int, KitSeleccion>? seleccionKit,
+    Object? manoObraSimple = _keep,
+    Object? manoObraKit = _keep,
     bool? loading,
     bool? creando,
     String? errorMessage,
@@ -106,9 +117,16 @@ class CotizacionWizardState {
         reglas: reglas ?? this.reglas,
         seleccionSimple: seleccionSimple ?? this.seleccionSimple,
         seleccionKit: seleccionKit ?? this.seleccionKit,
+        manoObraSimple: manoObraSimple == _keep
+            ? this.manoObraSimple
+            : manoObraSimple as double?,
+        manoObraKit:
+            manoObraKit == _keep ? this.manoObraKit : manoObraKit as double?,
         loading: loading ?? this.loading,
         creando: creando ?? this.creando,
         errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
         cotizacionesCreadas: cotizacionesCreadas ?? this.cotizacionesCreadas,
       );
+
+  static const Object _keep = Object();
 }

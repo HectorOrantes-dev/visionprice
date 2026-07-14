@@ -18,12 +18,14 @@ abstract class CotizacionRepository {
     required int proyectoId,
     double? pisoM2,
     double? paredesM2,
+    double? manoObra,
     required List<ItemCotizacion> items,
   });
 
   /// Crea una cotización tipo KIT (loseta/piso/azulejo/zoclo + complementos).
   Future<CotizacionEntity> crearKit({
     required int proyectoId,
+    double? manoObra,
     required List<SuperficieKitItem> superficies,
   });
 
