@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../recording/domain/entities/superficie_entity.dart';
@@ -36,7 +37,10 @@ class _ParametersView extends ConsumerWidget {
               const Expanded(
                 child: Center(child: CircularProgressIndicator()),
               )
-            else if (vm.errorMessage != null)
+            // Solo se toma la pantalla completa de error cuando NO hay grabación
+            // cargada (fallo de carga inicial). Si ya hay transcripción, el error
+            // de recálculo se muestra inline para poder corregir sin perderla.
+            else if (vm.errorMessage != null && vm.grabacion == null)
               Expanded(child: _ErrorView(message: vm.errorMessage!))
             else ...[
               if (lowConfidence) _LowConfidenceBanner(confianza: confianza),
@@ -49,6 +53,9 @@ class _ParametersView extends ConsumerWidget {
                         grabacionId: grabacionId,
                         textoOriginal: vm.grabacion!.transcripcion!,
                         textoEditado: vm.textoEditado,
+                        requiereAltura: vm.requiereAltura,
+                        recalculando: vm.recalculando,
+                        errorMessage: vm.errorMessage,
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -201,11 +208,17 @@ class _TranscriptionCard extends ConsumerStatefulWidget {
   final int grabacionId;
   final String textoOriginal;
   final String? textoEditado;
+  final bool requiereAltura;
+  final bool recalculando;
+  final String? errorMessage;
 
   const _TranscriptionCard({
     required this.grabacionId,
     required this.textoOriginal,
     this.textoEditado,
+    this.requiereAltura = false,
+    this.recalculando = false,
+    this.errorMessage,
   });
 
   @override
@@ -214,6 +227,7 @@ class _TranscriptionCard extends ConsumerStatefulWidget {
 
 class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
   late TextEditingController _controller;
+  final _alturaController = TextEditingController();
   bool _showRecalcular = false;
 
   @override
@@ -248,11 +262,24 @@ class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
   @override
   void dispose() {
     _controller.dispose();
+    _alturaController.dispose();
     super.dispose();
+  }
+
+  void _recalcular() {
+    FocusScope.of(context).unfocus();
+    final alturaTxt = _alturaController.text.trim().replaceAll(',', '.');
+    final altura = alturaTxt.isEmpty ? null : double.tryParse(alturaTxt);
+    ref
+        .read(parametersProvider(widget.grabacionId).notifier)
+        .recalcular(_controller.text, altura: altura);
   }
 
   @override
   Widget build(BuildContext context) {
+    // El botón aparece si el usuario editó el texto o si el back-end pidió la
+    // altura (para poder reintentar tras capturarla).
+    final mostrarBoton = _showRecalcular || widget.requiereAltura;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -279,19 +306,74 @@ class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
               border: InputBorder.none,
             ),
           ),
-          if (_showRecalcular) ...[
+          if (widget.errorMessage != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: context.colors.errorLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, size: 16, color: context.colors.error),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.errorMessage!,
+                      style: TextStyle(fontSize: 12, color: context.colors.error),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (widget.requiereAltura) ...[
+            const SizedBox(height: 12),
+            _SectionLabel('ALTURA DE LA PARED (m)'),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _alturaController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+              ],
+              onSubmitted: (_) => _recalcular(),
+              style: TextStyle(
+                  color: context.colors.textPrimary, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                hintText: 'Ej. 2.5',
+                suffixText: 'm',
+                isDense: true,
+                filled: true,
+                fillColor: context.colors.background,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.colors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.colors.border),
+                ),
+              ),
+            ),
+          ],
+          if (mostrarBoton) ...[
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
-                onPressed: () {
-                  FocusScope.of(context).unfocus();
-                  ref
-                      .read(parametersProvider(widget.grabacionId).notifier)
-                      .recalcular(_controller.text);
-                },
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Recalcular'),
+                onPressed: widget.recalculando ? null : _recalcular,
+                icon: widget.recalculando
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh, size: 18),
+                label: Text(widget.recalculando ? 'Recalculando…' : 'Recalcular'),
                 style: TextButton.styleFrom(
                   foregroundColor: context.colors.primary,
                   padding:

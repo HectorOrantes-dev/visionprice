@@ -42,8 +42,8 @@ class CalcularMetrosUseCase {
   final GrabacionRepository _repo;
   CalcularMetrosUseCase(this._repo);
 
-  Future<CalculoEntity> call({int? grabacionId, String? texto}) =>
-      _repo.calcular(grabacionId: grabacionId, texto: texto);
+  Future<CalculoEntity> call({int? grabacionId, String? texto, double? altura}) =>
+      _repo.calcular(grabacionId: grabacionId, texto: texto, altura: altura);
 }
 
 class ActualizarTranscripcionUseCase {

@@ -26,39 +26,57 @@ class Parameters extends _$Parameters {
   }
 
   Future<void> load(int grabacionId) async {
-    state = state.copyWith(loading: true, errorMessage: null);
+    state = state.copyWith(
+        loading: true, errorMessage: null, requiereAltura: false);
     try {
       final grabacion = await ref.read(obtenerGrabacionUseCaseProvider)(grabacionId);
+      // Se fija la grabación de inmediato: aunque el cálculo falle abajo (p.ej.
+      // "no se detectó la altura"), la transcripción queda visible/editable.
+      state = state.copyWith(grabacion: grabacion);
       CalculoEntity? calculo = state.calculo;
       if (grabacion.superficies.isEmpty) {
         calculo = await ref.read(calcularMetrosUseCaseProvider)(
             grabacionId: grabacionId);
       }
-      state = state.copyWith(
-          grabacion: grabacion, calculo: calculo, loading: false);
+      state = state.copyWith(calculo: calculo, loading: false);
     } catch (e) {
+      final msg =
+          e is ApiException ? e.message : 'No se pudo calcular los metros.';
       state = state.copyWith(
         loading: false,
-        errorMessage:
-            e is ApiException ? e.message : 'No se pudo calcular los metros.',
+        errorMessage: msg,
+        requiereAltura: _faltaAltura(msg),
       );
     }
   }
 
-  Future<void> recalcular(String texto) async {
+  /// Recalcula los m² con el texto editado y, opcionalmente, la [altura] de
+  /// pared capturada a mano. Usa `recalculando` (no `loading`) para no
+  /// desmontar la tarjeta de transcripción con lo que el usuario escribió.
+  Future<void> recalcular(String texto, {double? altura}) async {
     state = state.copyWith(
-        textoEditado: texto, loading: true, errorMessage: null);
+        textoEditado: texto,
+        recalculando: true,
+        errorMessage: null,
+        requiereAltura: false);
     try {
-      final calculo = await ref.read(calcularMetrosUseCaseProvider)(texto: texto);
-      state = state.copyWith(calculo: calculo, loading: false);
-    } catch (e) {
+      final calculo = await ref
+          .read(calcularMetrosUseCaseProvider)(texto: texto, altura: altura);
       state = state.copyWith(
-        loading: false,
-        errorMessage:
-            e is ApiException ? e.message : 'No se pudo recalcular los metros.',
+          calculo: calculo, recalculando: false, requiereAltura: false);
+    } catch (e) {
+      final msg =
+          e is ApiException ? e.message : 'No se pudo recalcular los metros.';
+      state = state.copyWith(
+        recalculando: false,
+        errorMessage: msg,
+        requiereAltura: _faltaAltura(msg),
       );
     }
   }
+
+  /// Heurística: el back-end no pudo derivar la altura de la pared del texto.
+  bool _faltaAltura(String msg) => msg.toLowerCase().contains('altura');
 
   Future<void> guardarEdicion(int grabacionId) async {
     final texto = state.textoEditado;

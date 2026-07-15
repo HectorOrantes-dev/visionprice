@@ -10,6 +10,6 @@ abstract class GrabacionRemoteDataSource {
   });
   Future<GrabacionEntity> detalle(int id);
   Future<List<GrabacionEntity>> historial();
-  Future<CalculoEntity> calcular({int? grabacionId, String? texto});
+  Future<CalculoEntity> calcular({int? grabacionId, String? texto, double? altura});
   Future<GrabacionEntity> actualizarTranscripcion(int id, String texto);
 }

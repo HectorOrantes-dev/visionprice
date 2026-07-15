@@ -74,10 +74,14 @@ class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
   }
 
   @override
-  Future<CalculoEntity> calcular({int? grabacionId, String? texto}) async {
+  Future<CalculoEntity> calcular(
+      {int? grabacionId, String? texto, double? altura}) async {
     final body = <String, dynamic>{};
     if (grabacionId != null) body['grabacion_id'] = grabacionId;
     if (texto != null) body['texto'] = texto;
+    // Altura de pared capturada a mano cuando el texto no la menciona.
+    // NOTA: si tu back-end espera otro nombre de campo, cámbialo aquí.
+    if (altura != null) body['altura_m'] = altura;
 
     final data = await _client.postJson(
       ApiConfig.cotizacionesCalculo,
