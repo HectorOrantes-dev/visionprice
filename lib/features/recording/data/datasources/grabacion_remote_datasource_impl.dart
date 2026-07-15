@@ -75,13 +75,19 @@ class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
 
   @override
   Future<CalculoEntity> calcular(
-      {int? grabacionId, String? texto, double? altura}) async {
+      {int? grabacionId,
+      String? texto,
+      double? altura,
+      double? paredesM2}) async {
     final body = <String, dynamic>{};
     if (grabacionId != null) body['grabacion_id'] = grabacionId;
     if (texto != null) body['texto'] = texto;
     // Override manual de la altura de pared cuando el texto no la menciona.
     // El back-end lo combina con el largo_m/ancho_m ya detectados.
     if (altura != null) body['alto_m'] = altura;
+    // Área de pared calculada en la app (ancho×alto) para superficies puntuales
+    // (una sola pared, sin largo×ancho de cuarto). El back-end la usa tal cual.
+    if (paredesM2 != null) body['paredes_m2'] = paredesM2;
 
     final data = await _client.postJson(
       ApiConfig.cotizacionesCalculo,

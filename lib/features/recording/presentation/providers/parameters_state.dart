@@ -15,6 +15,11 @@ class ParametersState {
   /// `true` cuando el back-end reportó que no detectó la altura de la pared: la
   /// UI muestra un campo para capturarla y volver a calcular.
   final bool requiereAltura;
+
+  /// `true` cuando es una **pared puntual** (no un cuarto): no hay piso ni
+  /// largo×ancho detectados. La UI pide ancho×alto de esa pared, calcula el
+  /// área y la manda como `paredes_m2`.
+  final bool requiereParedManual;
   final GrabacionEntity? grabacion;
   final CalculoEntity? calculo;
   final String? textoEditado;
@@ -24,6 +29,7 @@ class ParametersState {
     this.recalculando = false,
     this.errorMessage,
     this.requiereAltura = false,
+    this.requiereParedManual = false,
     this.grabacion,
     this.calculo,
     this.textoEditado,
@@ -36,6 +42,7 @@ class ParametersState {
     bool? recalculando,
     Object? errorMessage = _keep,
     bool? requiereAltura,
+    bool? requiereParedManual,
     Object? grabacion = _keep,
     Object? calculo = _keep,
     Object? textoEditado = _keep,
@@ -46,6 +53,7 @@ class ParametersState {
       errorMessage:
           errorMessage == _keep ? this.errorMessage : errorMessage as String?,
       requiereAltura: requiereAltura ?? this.requiereAltura,
+      requiereParedManual: requiereParedManual ?? this.requiereParedManual,
       grabacion:
           grabacion == _keep ? this.grabacion : grabacion as GrabacionEntity?,
       calculo: calculo == _keep ? this.calculo : calculo as CalculoEntity?,

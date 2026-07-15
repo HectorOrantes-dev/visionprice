@@ -18,7 +18,8 @@ abstract class GrabacionRepository {
   Future<List<GrabacionEntity>> historial();
 
   /// Calcula m² a partir de la grabación ya transcrita (o texto editado).
-  Future<CalculoEntity> calcular({int? grabacionId, String? texto, double? altura});
+  Future<CalculoEntity> calcular(
+      {int? grabacionId, String? texto, double? altura, double? paredesM2});
 
   /// Actualiza el texto de la transcripción en el servidor.
   Future<GrabacionEntity> actualizarTranscripcion(int id, String texto);

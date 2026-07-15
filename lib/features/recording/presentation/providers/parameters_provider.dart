@@ -38,7 +38,10 @@ class Parameters extends _$Parameters {
         calculo = await ref.read(calcularMetrosUseCaseProvider)(
             grabacionId: grabacionId);
       }
-      state = state.copyWith(calculo: calculo, loading: false);
+      state = state.copyWith(
+          calculo: calculo,
+          loading: false,
+          requiereParedManual: _esParedPuntual(calculo));
     } catch (e) {
       final msg =
           e is ApiException ? e.message : 'No se pudo calcular los metros.';
@@ -70,7 +73,10 @@ class Parameters extends _$Parameters {
         altura: altura,
       );
       state = state.copyWith(
-          calculo: calculo, recalculando: false, requiereAltura: false);
+          calculo: calculo,
+          recalculando: false,
+          requiereAltura: false,
+          requiereParedManual: _esParedPuntual(calculo));
     } catch (e) {
       final msg =
           e is ApiException ? e.message : 'No se pudo recalcular los metros.';
@@ -82,8 +88,43 @@ class Parameters extends _$Parameters {
     }
   }
 
+  /// Superficie puntual (una sola pared, no un cuarto): el usuario da ancho×alto,
+  /// se calcula el área [paredesM2] en la app y se manda como override. El
+  /// back-end descarta la advertencia de "faltan las paredes".
+  Future<void> aplicarParedManual(double paredesM2) async {
+    state = state.copyWith(recalculando: true, errorMessage: null);
+    try {
+      final calculo = await ref.read(calcularMetrosUseCaseProvider)(
+        grabacionId: grabacionId,
+        paredesM2: paredesM2,
+      );
+      state = state.copyWith(
+          calculo: calculo,
+          recalculando: false,
+          requiereAltura: false,
+          requiereParedManual: _esParedPuntual(calculo));
+    } catch (e) {
+      state = state.copyWith(
+        recalculando: false,
+        errorMessage: e is ApiException
+            ? e.message
+            : 'No se pudo calcular el área de la pared.',
+      );
+    }
+  }
+
   /// Heurística: el back-end no pudo derivar la altura de la pared del texto.
   bool _faltaAltura(String msg) => msg.toLowerCase().contains('altura');
+
+  /// Heurística: es una pared puntual → no hay piso y la advertencia menciona
+  /// que no se detectaron largo y ancho del cuarto.
+  bool _esParedPuntual(CalculoEntity? c) {
+    if (c == null || c.pisoM2 != null) return false;
+    return c.advertencias.any((a) {
+      final t = a.toLowerCase();
+      return t.contains('largo') && t.contains('ancho');
+    });
+  }
 
   Future<void> guardarEdicion(int grabacionId) async {
     final texto = state.textoEditado;

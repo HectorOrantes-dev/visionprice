@@ -54,6 +54,7 @@ class _ParametersView extends ConsumerWidget {
                         textoOriginal: vm.grabacion!.transcripcion!,
                         textoEditado: vm.textoEditado,
                         requiereAltura: vm.requiereAltura,
+                        requiereParedManual: vm.requiereParedManual,
                         recalculando: vm.recalculando,
                         errorMessage: vm.errorMessage,
                       ),
@@ -209,6 +210,7 @@ class _TranscriptionCard extends ConsumerStatefulWidget {
   final String textoOriginal;
   final String? textoEditado;
   final bool requiereAltura;
+  final bool requiereParedManual;
   final bool recalculando;
   final String? errorMessage;
 
@@ -217,6 +219,7 @@ class _TranscriptionCard extends ConsumerStatefulWidget {
     required this.textoOriginal,
     this.textoEditado,
     this.requiereAltura = false,
+    this.requiereParedManual = false,
     this.recalculando = false,
     this.errorMessage,
   });
@@ -228,7 +231,18 @@ class _TranscriptionCard extends ConsumerStatefulWidget {
 class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
   late TextEditingController _controller;
   final _alturaController = TextEditingController();
+  final _anchoParedController = TextEditingController();
+  final _altoParedController = TextEditingController();
   bool _showRecalcular = false;
+
+  /// Modo de corrección elegido por el usuario: `true` = "solo una pared"
+  /// (ancho×alto → paredes_m2), `false` = "es un cuarto" (altura → alto_m).
+  /// `null` = seguir el default que sugiere el back-end.
+  bool? _modoPared;
+
+  /// El usuario abrió el panel de "Ajustar medidas a mano". Siempre disponible,
+  /// aunque el back-end no haya pedido explícitamente altura/medidas.
+  bool _ajusteManual = false;
 
   @override
   void initState() {
@@ -263,23 +277,46 @@ class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
   void dispose() {
     _controller.dispose();
     _alturaController.dispose();
+    _anchoParedController.dispose();
+    _altoParedController.dispose();
     super.dispose();
+  }
+
+  static double? _num(String v) {
+    final t = v.trim().replaceAll(',', '.');
+    return t.isEmpty ? null : double.tryParse(t);
   }
 
   void _recalcular() {
     FocusScope.of(context).unfocus();
-    final alturaTxt = _alturaController.text.trim().replaceAll(',', '.');
-    final altura = alturaTxt.isEmpty ? null : double.tryParse(alturaTxt);
     ref
         .read(parametersProvider(widget.grabacionId).notifier)
-        .recalcular(_controller.text, altura: altura);
+        .recalcular(_controller.text, altura: _num(_alturaController.text));
+  }
+
+  /// Calcula el área de una pared puntual (ancho×alto) y la manda como
+  /// `paredes_m2`. Ignora la pulsación si falta algún valor.
+  void _calcularPared() {
+    FocusScope.of(context).unfocus();
+    final ancho = _num(_anchoParedController.text);
+    final alto = _num(_altoParedController.text);
+    if (ancho == null || alto == null || ancho <= 0 || alto <= 0) return;
+    ref
+        .read(parametersProvider(widget.grabacionId).notifier)
+        .aplicarParedManual(ancho * alto);
   }
 
   @override
   Widget build(BuildContext context) {
-    // El botón aparece si el usuario editó el texto o si el back-end pidió la
-    // altura (para poder reintentar tras capturarla).
-    final mostrarBoton = _showRecalcular || widget.requiereAltura;
+    // El back-end pidió ayuda (altura o largo×ancho), O el usuario abrió el
+    // panel de ajuste manual. Se muestra el selector cuarto/pared.
+    final necesitaCorreccion =
+        widget.requiereAltura || widget.requiereParedManual;
+    final mostrarAjuste = necesitaCorreccion || _ajusteManual;
+    final modoPared = _modoPared ?? widget.requiereParedManual;
+    // El botón "Recalcular" (solo por edición de texto) aparece cuando el panel
+    // de ajuste está cerrado (si está abierto, ya tiene su propio botón).
+    final mostrarBoton = !mostrarAjuste && _showRecalcular;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -328,37 +365,119 @@ class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
               ),
             ),
           ],
-          if (widget.requiereAltura) ...[
-            const SizedBox(height: 12),
-            _SectionLabel('ALTURA DE LA PARED (m)'),
+          // Acceso siempre disponible por si la detección automática no acierta.
+          if (!mostrarAjuste) ...[
             const SizedBox(height: 8),
-            TextField(
-              controller: _alturaController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-              ],
-              onSubmitted: (_) => _recalcular(),
-              style: TextStyle(
-                  color: context.colors.textPrimary, fontWeight: FontWeight.w600),
-              decoration: InputDecoration(
-                hintText: 'Ej. 2.5',
-                suffixText: 'm',
-                isDense: true,
-                filled: true,
-                fillColor: context.colors.background,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: context.colors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: context.colors.border),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => setState(() => _ajusteManual = true),
+                icon: const Icon(Icons.tune, size: 16),
+                label: const Text('Ajustar medidas a mano'),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.primary,
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
             ),
+          ],
+          if (mostrarAjuste) ...[
+            const SizedBox(height: 14),
+            _SectionLabel('¿QUÉ VAS A COTIZAR?'),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _ModoChip(
+                    label: 'Un cuarto',
+                    selected: !modoPared,
+                    onTap: () => setState(() => _modoPared = false),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _ModoChip(
+                    label: 'Solo una pared',
+                    selected: modoPared,
+                    onTap: () => setState(() => _modoPared = true),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Cuarto: falta la altura (el back-end ya tiene largo×ancho).
+            if (!modoPared) ...[
+              _SectionLabel('ALTURA DE LA PARED (m)'),
+              const SizedBox(height: 6),
+              Text(
+                'Escribe la altura y toca Recalcular (no la metas dentro del texto).',
+                style: TextStyle(
+                    fontSize: 12, color: context.colors.textHint, height: 1.4),
+              ),
+              const SizedBox(height: 8),
+              _NumField(
+                controller: _alturaController,
+                hint: 'Ej. 2.5',
+                onSubmit: _recalcular,
+              ),
+              const SizedBox(height: 12),
+              _AccionBtn(
+                loading: widget.recalculando,
+                labelIdle: 'Recalcular',
+                labelBusy: 'Recalculando…',
+                icon: Icons.refresh,
+                onPressed: _recalcular,
+              ),
+            ],
+            // Pared puntual: se pide ancho×alto y se calcula el área en la app.
+            if (modoPared) ...[
+              _SectionLabel('MEDIDAS DE LA PARED (ancho × alto, en m)'),
+              const SizedBox(height: 6),
+              Text(
+                'Ingresa el ancho y el alto de la pared aquí (no dentro del texto). La app calcula el área.',
+                style: TextStyle(
+                    fontSize: 12, color: context.colors.textHint, height: 1.4),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _NumField(
+                      controller: _anchoParedController,
+                      hint: 'Ancho',
+                      onSubmit: _calcularPared,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text('×',
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: context.colors.textSecondary,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _NumField(
+                      controller: _altoParedController,
+                      hint: 'Alto',
+                      onSubmit: _calcularPared,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _AccionBtn(
+                loading: widget.recalculando,
+                labelIdle: 'Calcular pared',
+                labelBusy: 'Calculando…',
+                icon: Icons.calculate_outlined,
+                onPressed: _calcularPared,
+              ),
+            ],
           ],
           if (mostrarBoton) ...[
             const SizedBox(height: 12),
@@ -385,6 +504,122 @@ class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Chip de selección de modo de corrección (cuarto vs. una sola pared).
+class _ModoChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ModoChip(
+      {required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? context.colors.primary : context.colors.surfaceVariant,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+            color: selected ? Colors.white : context.colors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botón de acción a la derecha (Recalcular / Calcular pared) con spinner.
+class _AccionBtn extends StatelessWidget {
+  final bool loading;
+  final String labelIdle;
+  final String labelBusy;
+  final IconData icon;
+  final VoidCallback onPressed;
+  const _AccionBtn({
+    required this.loading,
+    required this.labelIdle,
+    required this.labelBusy,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton.icon(
+        onPressed: loading ? null : onPressed,
+        icon: loading
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Icon(icon, size: 18),
+        label: Text(loading ? labelBusy : labelIdle),
+        style: TextButton.styleFrom(
+          foregroundColor: context.colors.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
+    );
+  }
+}
+
+/// Campo numérico compacto (decimal) reutilizado para altura y medidas de pared.
+class _NumField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final VoidCallback onSubmit;
+  const _NumField({
+    required this.controller,
+    required this.hint,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+      ],
+      onSubmitted: (_) => onSubmit(),
+      style: TextStyle(
+          color: context.colors.textPrimary, fontWeight: FontWeight.w600),
+      decoration: InputDecoration(
+        hintText: hint,
+        suffixText: 'm',
+        isDense: true,
+        filled: true,
+        fillColor: context.colors.background,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: context.colors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: context.colors.border),
+        ),
       ),
     );
   }
