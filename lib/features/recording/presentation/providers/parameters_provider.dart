@@ -61,7 +61,9 @@ class Parameters extends _$Parameters {
         textoEditado: texto,
         recalculando: true,
         errorMessage: null,
-        requiereAltura: false);
+        requiereAltura: false,
+        // Al recalcular por texto/altura se descarta el área manual de pared.
+        areaManualM2: null);
     // Si el texto NO cambió (el usuario solo capturó la altura), se manda
     // `grabacion_id` para que el back-end reuse el largo/ancho ya detectados y
     // combine el override de altura, sin re-correr el regex sobre el mismo texto.
@@ -92,7 +94,10 @@ class Parameters extends _$Parameters {
   /// se calcula el área [paredesM2] en la app y se manda como override. El
   /// back-end descarta la advertencia de "faltan las paredes".
   Future<void> aplicarParedManual(double paredesM2) async {
-    state = state.copyWith(recalculando: true, errorMessage: null);
+    // El área se calculó en la app (ancho×alto): se fija YA para que el widget
+    // MEDIDAS la muestre al instante, sin esperar la respuesta del back-end.
+    state = state.copyWith(
+        recalculando: true, errorMessage: null, areaManualM2: paredesM2);
     try {
       final calculo = await ref.read(calcularMetrosUseCaseProvider)(
         grabacionId: grabacionId,
@@ -102,6 +107,7 @@ class Parameters extends _$Parameters {
           calculo: calculo,
           recalculando: false,
           requiereAltura: false,
+          // Se conserva `areaManualM2` como medida autoritativa a mostrar.
           requiereParedManual: _esParedPuntual(calculo));
     } catch (e) {
       state = state.copyWith(
@@ -112,6 +118,10 @@ class Parameters extends _$Parameters {
       );
     }
   }
+
+  /// Quita la medida de pared capturada a mano (el usuario cerró la tarjeta).
+  void quitarParedManual() =>
+      state = state.copyWith(areaManualM2: null, requiereParedManual: false);
 
   /// Heurística: el back-end no pudo derivar la altura de la pared del texto.
   bool _faltaAltura(String msg) => msg.toLowerCase().contains('altura');

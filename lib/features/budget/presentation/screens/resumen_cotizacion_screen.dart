@@ -73,6 +73,17 @@ class _ResumenCotizacionScreenState
     final haySimple = List.generate(vm.superficies.length, (i) => i).any((i) => !vm.reglaDe(i).requiereKit);
     final mixto = hayKit && haySimple;
 
+    // Áreas por tipo, para mostrar el total en vivo (tarifa × área).
+    var areaSimple = 0.0;
+    var areaKit = 0.0;
+    for (var i = 0; i < vm.superficies.length; i++) {
+      if (vm.reglaDe(i).requiereKit) {
+        areaKit += vm.superficies[i].areaM2;
+      } else {
+        areaSimple += vm.superficies[i].areaM2;
+      }
+    }
+
     return Scaffold(
       backgroundColor: context.colors.background,
       body: SafeArea(
@@ -159,23 +170,27 @@ class _ResumenCotizacionScreenState
                           letterSpacing: 0.5)),
                   const SizedBox(height: 4),
                   Text(
-                    'Costo de la mano de obra. Se suma al total y aparece como línea en el PDF.',
+                    'Tarifa por m². Se multiplica por el área, se suma al total y aparece como línea en el PDF.',
                     style: TextStyle(fontSize: 12, color: context.colors.textHint, height: 1.4),
                   ),
                   const SizedBox(height: 10),
-                  if (haySimple)
+                  if (haySimple) ...[
                     _ManoObraField(
                       controller: _manoObraSimpleCtrl,
-                      label: mixto ? 'Mano de obra · pintura / materiales' : 'Mano de obra',
+                      label: mixto ? 'Mano de obra por m² · pintura' : 'Mano de obra por m²',
                       onChanged: (v) => notifier.setManoObraSimple(_parse(v)),
                     ),
+                    _TotalManoObra(tarifa: vm.manoObraSimple, area: areaSimple),
+                  ],
                   if (mixto) const SizedBox(height: 10),
-                  if (hayKit)
+                  if (hayKit) ...[
                     _ManoObraField(
                       controller: _manoObraKitCtrl,
-                      label: mixto ? 'Mano de obra · piso / instalación' : 'Mano de obra',
+                      label: mixto ? 'Mano de obra por m² · piso' : 'Mano de obra por m²',
                       onChanged: (v) => notifier.setManoObraKit(_parse(v)),
                     ),
+                    _TotalManoObra(tarifa: vm.manoObraKit, area: areaKit),
+                  ],
 
                   if (mixto) ...[
                     const SizedBox(height: 16),
@@ -279,8 +294,11 @@ class _ManoObraField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         prefixText: '\$ ',
+        suffixText: '/m²',
         prefixStyle: TextStyle(
             color: context.colors.primary, fontWeight: FontWeight.w800, fontSize: 15),
+        suffixStyle: TextStyle(
+            color: context.colors.textSecondary, fontWeight: FontWeight.w600),
         filled: true,
         fillColor: context.colors.surface,
         border: OutlineInputBorder(
@@ -290,6 +308,30 @@ class _ManoObraField extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: context.colors.border),
+        ),
+      ),
+    );
+  }
+}
+
+/// Muestra el total en vivo de mano de obra (tarifa × área) bajo cada campo.
+class _TotalManoObra extends StatelessWidget {
+  final double? tarifa;
+  final double area;
+  const _TotalManoObra({required this.tarifa, required this.area});
+
+  @override
+  Widget build(BuildContext context) {
+    if (tarifa == null || tarifa! <= 0) return const SizedBox.shrink();
+    final total = tarifa! * area;
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, left: 4),
+      child: Text(
+        '= \$${total.toStringAsFixed(2)} por ${area.toStringAsFixed(area.truncateToDouble() == area ? 0 : 1)} m²',
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: context.colors.primary,
         ),
       ),
     );

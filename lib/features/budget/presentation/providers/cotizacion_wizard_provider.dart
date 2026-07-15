@@ -70,11 +70,12 @@ class CotizacionWizard extends _$CotizacionWizard {
   void seleccionarKitBoquilla(int i, ProductoEntity producto) =>
       _setKit(i, _kitDe(i).copyWith(boquilla: producto));
 
-  /// Captura el costo de mano de obra para materiales SIMPLES (pintura).
+  /// Captura la **tarifa de mano de obra por m²** para materiales SIMPLES
+  /// (pintura). El total se calcula al crear: tarifa × área.
   void setManoObraSimple(double? valor) =>
       state = state.copyWith(manoObraSimple: valor);
 
-  /// Captura el costo de mano de obra para el KIT (piso/azulejo).
+  /// Captura la **tarifa de mano de obra por m²** para el KIT (piso/azulejo).
   void setManoObraKit(double? valor) =>
       state = state.copyWith(manoObraKit: valor);
 
@@ -83,6 +84,9 @@ class CotizacionWizard extends _$CotizacionWizard {
   Future<List<CotizacionEntity>> crearCotizaciones() async {
     final itemsSimples = <ItemCotizacion>[];
     final superficiesKit = <SuperficieKitItem>[];
+    // Áreas acumuladas por tipo, para convertir la tarifa por m² en total.
+    var areaSimple = 0.0;
+    var areaKit = 0.0;
 
     for (var i = 0; i < state.superficies.length; i++) {
       final sup = state.superficies[i];
@@ -90,6 +94,7 @@ class CotizacionWizard extends _$CotizacionWizard {
       if (!regla.requiereKit) {
         final producto = state.seleccionSimple[i];
         if (producto == null) continue;
+        areaSimple += sup.areaM2;
         itemsSimples.add(ItemCotizacion(
           productoId: producto.productoId,
           areaM2: sup.areaM2,
@@ -98,6 +103,7 @@ class CotizacionWizard extends _$CotizacionWizard {
       } else {
         final kit = state.seleccionKit[i];
         if (kit?.principal == null) continue;
+        areaKit += sup.areaM2;
         superficiesKit.add(SuperficieKitItem(
           areaM2: sup.areaM2,
           principalProductoId: kit!.principal!.productoId,
@@ -110,20 +116,27 @@ class CotizacionWizard extends _$CotizacionWizard {
       }
     }
 
+    // Tarifa por m² → total de mano de obra que espera el back-end.
+    final tarifaSimple = state.manoObraSimple;
+    final tarifaKit = state.manoObraKit;
+    final manoObraSimpleTotal =
+        tarifaSimple != null ? tarifaSimple * areaSimple : null;
+    final manoObraKitTotal = tarifaKit != null ? tarifaKit * areaKit : null;
+
     state = state.copyWith(creando: true, clearError: true);
     final creadas = <CotizacionEntity>[];
     try {
       if (itemsSimples.isNotEmpty) {
         creadas.add(await ref.read(crearCotizacionUseCaseProvider)(
           proyectoId: proyectoId,
-          manoObra: state.manoObraSimple,
+          manoObra: manoObraSimpleTotal,
           items: itemsSimples,
         ));
       }
       if (superficiesKit.isNotEmpty) {
         creadas.add(await ref.read(crearCotizacionKitUseCaseProvider)(
           proyectoId: proyectoId,
-          manoObra: state.manoObraKit,
+          manoObra: manoObraKitTotal,
           superficies: superficiesKit,
         ));
       }

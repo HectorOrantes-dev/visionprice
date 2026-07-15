@@ -53,22 +53,33 @@ class _ParametersView extends ConsumerWidget {
                         grabacionId: grabacionId,
                         textoOriginal: vm.grabacion!.transcripcion!,
                         textoEditado: vm.textoEditado,
-                        requiereAltura: vm.requiereAltura,
-                        requiereParedManual: vm.requiereParedManual,
                         recalculando: vm.recalculando,
                         errorMessage: vm.errorMessage,
                       ),
                       const SizedBox(height: 16),
                     ],
-                    _SectionLabel('MEDIDAS DETECTADAS'),
+                    _SectionLabel('MEDIDAS'),
                     const SizedBox(height: 8),
                     ..._buildMetrics(context, vm),
-                    if ((calculo?.advertencias ?? const []).isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      _SectionLabel('ADVERTENCIAS'),
-                      const SizedBox(height: 8),
-                      ...calculo!.advertencias.map((a) => _WarningItem(text: a)),
-                    ],
+                    const SizedBox(height: 8),
+                    _MedidaManualCard(grabacionId: grabacionId),
+                    ...() {
+                      // Si es solo una pared (sin piso), se ocultan las
+                      // advertencias sobre el "piso": no aplican aquí.
+                      final soloPared =
+                          calculo?.pisoM2 == null && calculo?.paredesM2 != null;
+                      final avisos = (calculo?.advertencias ?? const [])
+                          .where((a) =>
+                              !(soloPared && a.toLowerCase().contains('piso')))
+                          .toList();
+                      if (avisos.isEmpty) return const <Widget>[];
+                      return [
+                        const SizedBox(height: 16),
+                        _SectionLabel('ADVERTENCIAS'),
+                        const SizedBox(height: 8),
+                        ...avisos.map((a) => _WarningItem(text: a)),
+                      ];
+                    }(),
                   ],
                 ),
               ),
@@ -78,6 +89,7 @@ class _ParametersView extends ConsumerWidget {
                 pisoM2: calculo?.pisoM2,
                 paredesM2: calculo?.paredesM2,
                 superficies: vm.grabacion?.superficies,
+                areaManualM2: vm.areaManualM2,
               ),
             ],
           ],
@@ -89,31 +101,39 @@ class _ParametersView extends ConsumerWidget {
   List<Widget> _buildMetrics(BuildContext context, ParametersState vm) {
     final superficies = vm.grabacion?.superficies;
     final c = vm.calculo;
+    final widgets = <Widget>[];
 
+    // 1. Superficies detectadas por el ML.
     if (superficies != null && superficies.isNotEmpty) {
-      return superficies.map((sup) {
-        return Column(
-          children: [
-            _MetricItem(
-              icon: sup.tipo == 'piso' ? Icons.layers_outlined : Icons.square_outlined,
-              title: sup.descripcion.isNotEmpty ? sup.descripcion : sup.tipo,
-              detail: '${sup.areaM2.toStringAsFixed(2)} m²',
-              highlight: true,
-            ),
-            const SizedBox(height: 8),
-          ],
-        );
-      }).toList();
+      for (final sup in superficies) {
+        widgets.add(_MetricItem(
+          icon: sup.tipo == 'piso'
+              ? Icons.layers_outlined
+              : Icons.square_outlined,
+          title: sup.descripcion.isNotEmpty ? sup.descripcion : sup.tipo,
+          detail: '${sup.areaM2.toStringAsFixed(2)} m²',
+          highlight: true,
+        ));
+        widgets.add(const SizedBox(height: 8));
+      }
     }
 
+    // La superficie manual (ancho×alto) se muestra aparte, en _MedidaManualCard.
+    if (widgets.isNotEmpty) return widgets;
+
+    // 2. Sin superficies del ML: se muestra el cálculo del back-end.
     if (c == null) {
-      return [
-        Text('Sin medidas calculadas',
-            style: TextStyle(color: context.colors.textSecondary)),
-      ];
+      // Sin ML y sin cálculo: solo queda la medida manual (su tarjeta) → nada
+      // que mostrar aquí.
+      return const [];
     }
     String dim(double? v) => v != null ? '${v.toStringAsFixed(2)} m' : '—';
     String area(double? v) => v != null ? '${v.toStringAsFixed(2)} m²' : '—';
+
+    // Sin piso (no es un cuarto): la medida la lleva la tarjeta manual, no se
+    // muestran aquí Piso/Paredes/Dimensiones vacíos.
+    if (c.pisoM2 == null) return const [];
+
     return [
       _MetricItem(
         icon: Icons.layers_outlined,
@@ -209,8 +229,6 @@ class _TranscriptionCard extends ConsumerStatefulWidget {
   final int grabacionId;
   final String textoOriginal;
   final String? textoEditado;
-  final bool requiereAltura;
-  final bool requiereParedManual;
   final bool recalculando;
   final String? errorMessage;
 
@@ -218,8 +236,6 @@ class _TranscriptionCard extends ConsumerStatefulWidget {
     required this.grabacionId,
     required this.textoOriginal,
     this.textoEditado,
-    this.requiereAltura = false,
-    this.requiereParedManual = false,
     this.recalculando = false,
     this.errorMessage,
   });
@@ -230,19 +246,7 @@ class _TranscriptionCard extends ConsumerStatefulWidget {
 
 class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
   late TextEditingController _controller;
-  final _alturaController = TextEditingController();
-  final _anchoParedController = TextEditingController();
-  final _altoParedController = TextEditingController();
   bool _showRecalcular = false;
-
-  /// Modo de corrección elegido por el usuario: `true` = "solo una pared"
-  /// (ancho×alto → paredes_m2), `false` = "es un cuarto" (altura → alto_m).
-  /// `null` = seguir el default que sugiere el back-end.
-  bool? _modoPared;
-
-  /// El usuario abrió el panel de "Ajustar medidas a mano". Siempre disponible,
-  /// aunque el back-end no haya pedido explícitamente altura/medidas.
-  bool _ajusteManual = false;
 
   @override
   void initState() {
@@ -276,47 +280,18 @@ class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
   @override
   void dispose() {
     _controller.dispose();
-    _alturaController.dispose();
-    _anchoParedController.dispose();
-    _altoParedController.dispose();
     super.dispose();
-  }
-
-  static double? _num(String v) {
-    final t = v.trim().replaceAll(',', '.');
-    return t.isEmpty ? null : double.tryParse(t);
   }
 
   void _recalcular() {
     FocusScope.of(context).unfocus();
     ref
         .read(parametersProvider(widget.grabacionId).notifier)
-        .recalcular(_controller.text, altura: _num(_alturaController.text));
-  }
-
-  /// Calcula el área de una pared puntual (ancho×alto) y la manda como
-  /// `paredes_m2`. Ignora la pulsación si falta algún valor.
-  void _calcularPared() {
-    FocusScope.of(context).unfocus();
-    final ancho = _num(_anchoParedController.text);
-    final alto = _num(_altoParedController.text);
-    if (ancho == null || alto == null || ancho <= 0 || alto <= 0) return;
-    ref
-        .read(parametersProvider(widget.grabacionId).notifier)
-        .aplicarParedManual(ancho * alto);
+        .recalcular(_controller.text);
   }
 
   @override
   Widget build(BuildContext context) {
-    // El back-end pidió ayuda (altura o largo×ancho), O el usuario abrió el
-    // panel de ajuste manual. Se muestra el selector cuarto/pared.
-    final necesitaCorreccion =
-        widget.requiereAltura || widget.requiereParedManual;
-    final mostrarAjuste = necesitaCorreccion || _ajusteManual;
-    final modoPared = _modoPared ?? widget.requiereParedManual;
-    // El botón "Recalcular" (solo por edición de texto) aparece cuando el panel
-    // de ajuste está cerrado (si está abierto, ya tiene su propio botón).
-    final mostrarBoton = !mostrarAjuste && _showRecalcular;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -365,121 +340,7 @@ class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
               ),
             ),
           ],
-          // Acceso siempre disponible por si la detección automática no acierta.
-          if (!mostrarAjuste) ...[
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () => setState(() => _ajusteManual = true),
-                icon: const Icon(Icons.tune, size: 16),
-                label: const Text('Ajustar medidas a mano'),
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.primary,
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-            ),
-          ],
-          if (mostrarAjuste) ...[
-            const SizedBox(height: 14),
-            _SectionLabel('¿QUÉ VAS A COTIZAR?'),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _ModoChip(
-                    label: 'Un cuarto',
-                    selected: !modoPared,
-                    onTap: () => setState(() => _modoPared = false),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _ModoChip(
-                    label: 'Solo una pared',
-                    selected: modoPared,
-                    onTap: () => setState(() => _modoPared = true),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Cuarto: falta la altura (el back-end ya tiene largo×ancho).
-            if (!modoPared) ...[
-              _SectionLabel('ALTURA DE LA PARED (m)'),
-              const SizedBox(height: 6),
-              Text(
-                'Escribe la altura y toca Recalcular (no la metas dentro del texto).',
-                style: TextStyle(
-                    fontSize: 12, color: context.colors.textHint, height: 1.4),
-              ),
-              const SizedBox(height: 8),
-              _NumField(
-                controller: _alturaController,
-                hint: 'Ej. 2.5',
-                onSubmit: _recalcular,
-              ),
-              const SizedBox(height: 12),
-              _AccionBtn(
-                loading: widget.recalculando,
-                labelIdle: 'Recalcular',
-                labelBusy: 'Recalculando…',
-                icon: Icons.refresh,
-                onPressed: _recalcular,
-              ),
-            ],
-            // Pared puntual: se pide ancho×alto y se calcula el área en la app.
-            if (modoPared) ...[
-              _SectionLabel('MEDIDAS DE LA PARED (ancho × alto, en m)'),
-              const SizedBox(height: 6),
-              Text(
-                'Ingresa el ancho y el alto de la pared aquí (no dentro del texto). La app calcula el área.',
-                style: TextStyle(
-                    fontSize: 12, color: context.colors.textHint, height: 1.4),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _NumField(
-                      controller: _anchoParedController,
-                      hint: 'Ancho',
-                      onSubmit: _calcularPared,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text('×',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: context.colors.textSecondary,
-                            fontWeight: FontWeight.w700)),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _NumField(
-                      controller: _altoParedController,
-                      hint: 'Alto',
-                      onSubmit: _calcularPared,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _AccionBtn(
-                loading: widget.recalculando,
-                labelIdle: 'Calcular pared',
-                labelBusy: 'Calculando…',
-                icon: Icons.calculate_outlined,
-                onPressed: _calcularPared,
-              ),
-            ],
-          ],
-          if (mostrarBoton) ...[
+          if (_showRecalcular) ...[
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerRight,
@@ -509,34 +370,189 @@ class _TranscriptionCardState extends ConsumerState<_TranscriptionCard> {
   }
 }
 
-/// Chip de selección de modo de corrección (cuarto vs. una sola pared).
-class _ModoChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _ModoChip(
-      {required this.label, required this.selected, required this.onTap});
+/// Tarjeta de superficie MANUAL en MEDIDAS: una tarjeta unificada que "espera la
+/// info necesaria" (ancho×alto). Colapsada muestra "+ Agregar medida a mano";
+/// abierta pide las medidas y calcula el área (`paredes_m2`). Se auto-abre si el
+/// back-end pidió medidas o si ya hay un área capturada.
+class _MedidaManualCard extends ConsumerStatefulWidget {
+  final int grabacionId;
+  const _MedidaManualCard({required this.grabacionId});
+
+  @override
+  ConsumerState<_MedidaManualCard> createState() => _MedidaManualCardState();
+}
+
+class _MedidaManualCardState extends ConsumerState<_MedidaManualCard> {
+  final _anchoController = TextEditingController();
+  final _altoController = TextEditingController();
+  bool _abierto = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _abierto =
+        ref.read(parametersProvider(widget.grabacionId)).areaManualM2 != null;
+    _anchoController.addListener(_refresh);
+    _altoController.addListener(_refresh);
+  }
+
+  void _refresh() => setState(() {});
+
+  @override
+  void dispose() {
+    _anchoController.dispose();
+    _altoController.dispose();
+    super.dispose();
+  }
+
+  static double? _num(String v) {
+    final t = v.trim().replaceAll(',', '.');
+    return t.isEmpty ? null : double.tryParse(t);
+  }
+
+  void _calcular() {
+    FocusScope.of(context).unfocus();
+    final ancho = _num(_anchoController.text);
+    final alto = _num(_altoController.text);
+    if (ancho == null || alto == null || ancho <= 0 || alto <= 0) return;
+    ref
+        .read(parametersProvider(widget.grabacionId).notifier)
+        .aplicarParedManual(ancho * alto);
+  }
+
+  void _quitar() {
+    _anchoController.clear();
+    _altoController.clear();
+    ref
+        .read(parametersProvider(widget.grabacionId).notifier)
+        .quitarParedManual();
+    setState(() => _abierto = false);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(10),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? context.colors.primary : context.colors.surfaceVariant,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-            color: selected ? Colors.white : context.colors.textPrimary,
+    final vm = ref.watch(parametersProvider(widget.grabacionId));
+    final area = vm.areaManualM2;
+    // Se auto-abre si el back-end pide medidas (pared puntual / falta altura).
+    final abierto =
+        _abierto || area != null || vm.requiereParedManual || vm.requiereAltura;
+
+    if (!abierto) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => setState(() => _abierto = true),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Agregar medida a mano'),
+            style: TextButton.styleFrom(
+              foregroundColor: context.colors.primary,
+              padding: EdgeInsets.zero,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
           ),
         ),
+      );
+    }
+
+    final ancho = _num(_anchoController.text);
+    final alto = _num(_altoController.text);
+    final areaViva = (ancho != null && alto != null) ? ancho * alto : null;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.colors.primary.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.square_outlined,
+                  size: 18, color: context.colors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text('Pared (medida a mano)',
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.textPrimary)),
+              ),
+              InkWell(
+                onTap: _quitar,
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(Icons.close,
+                      size: 18, color: context.colors.textSecondary),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _NumField(
+                  controller: _anchoController,
+                  hint: 'Ancho',
+                  onSubmit: _calcular,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text('×',
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: context.colors.textSecondary,
+                        fontWeight: FontWeight.w700)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _NumField(
+                  controller: _altoController,
+                  hint: 'Alto',
+                  onSubmit: _calcular,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  area != null
+                      ? '✓ Área: ${area.toStringAsFixed(2)} m²'
+                      : areaViva != null
+                          ? '= ${areaViva.toStringAsFixed(2)} m²'
+                          : 'Ingresa ancho y alto',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: area != null
+                        ? context.colors.success
+                        : context.colors.textSecondary,
+                  ),
+                ),
+              ),
+              _AccionBtn(
+                loading: vm.recalculando,
+                labelIdle: area != null ? 'Actualizar' : 'Calcular',
+                labelBusy: 'Calculando…',
+                icon: Icons.calculate_outlined,
+                onPressed: _calcular,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -776,19 +792,33 @@ class _ConfirmButton extends ConsumerWidget {
   final double? pisoM2;
   final double? paredesM2;
   final List<SuperficieEntity>? superficies;
+  final double? areaManualM2;
   const _ConfirmButton({
     required this.grabacionId,
     required this.proyectoId,
     required this.pisoM2,
     required this.paredesM2,
     this.superficies,
+    this.areaManualM2,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Se cotizan LOS DOS: las superficies del ML + la pared calculada a mano
+    // (como una superficie de pintura extra), así ninguna se pierde.
+    final superficiesCombinadas = <SuperficieEntity>[
+      ...?superficies,
+      if (areaManualM2 != null && areaManualM2! > 0)
+        SuperficieEntity(
+          tipo: 'pared',
+          descripcion: 'Pared (medida a mano)',
+          areaM2: areaManualM2!,
+          categoria: 'pintura',
+        ),
+    ];
     // Necesitamos el proyecto (obligatorio para crear la cotización) y al menos
     // una superficie calculada.
-    final hasNewFormat = superficies != null && superficies!.isNotEmpty;
+    final hasNewFormat = superficiesCombinadas.isNotEmpty;
     final hasLegacyFormat = pisoM2 != null || paredesM2 != null;
     final enabled = proyectoId != null && (hasNewFormat || hasLegacyFormat);
     return Padding(
@@ -816,13 +846,13 @@ class _ConfirmButton extends ConsumerWidget {
                         builder: (_) => hasNewFormat
                             ? SuperficiesDetectadasScreen(
                                 proyectoId: proyectoId!,
-                                superficies: superficies!,
+                                superficies: superficiesCombinadas,
                               )
                             : NearbyStoresScreen(
                                 proyectoId: proyectoId!,
                                 pisoM2: pisoM2,
                                 paredesM2: paredesM2,
-                                superficies: superficies,
+                                superficies: superficiesCombinadas,
                               ),
                       ),
                     );

@@ -20,6 +20,11 @@ class ParametersState {
   /// largo×ancho detectados. La UI pide ancho×alto de esa pared, calcula el
   /// área y la manda como `paredes_m2`.
   final bool requiereParedManual;
+
+  /// Área de pared (m²) calculada a mano en la app (ancho×alto). Cuando está
+  /// presente, es la medida autoritativa que se muestra y se usa: refresca el
+  /// widget MEDIDAS al instante y tiene prioridad sobre las superficies del ML.
+  final double? areaManualM2;
   final GrabacionEntity? grabacion;
   final CalculoEntity? calculo;
   final String? textoEditado;
@@ -30,6 +35,7 @@ class ParametersState {
     this.errorMessage,
     this.requiereAltura = false,
     this.requiereParedManual = false,
+    this.areaManualM2,
     this.grabacion,
     this.calculo,
     this.textoEditado,
@@ -43,6 +49,7 @@ class ParametersState {
     Object? errorMessage = _keep,
     bool? requiereAltura,
     bool? requiereParedManual,
+    Object? areaManualM2 = _keep,
     Object? grabacion = _keep,
     Object? calculo = _keep,
     Object? textoEditado = _keep,
@@ -54,6 +61,9 @@ class ParametersState {
           errorMessage == _keep ? this.errorMessage : errorMessage as String?,
       requiereAltura: requiereAltura ?? this.requiereAltura,
       requiereParedManual: requiereParedManual ?? this.requiereParedManual,
+      areaManualM2: areaManualM2 == _keep
+          ? this.areaManualM2
+          : areaManualM2 as double?,
       grabacion:
           grabacion == _keep ? this.grabacion : grabacion as GrabacionEntity?,
       calculo: calculo == _keep ? this.calculo : calculo as CalculoEntity?,
