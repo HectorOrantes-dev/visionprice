@@ -11,7 +11,7 @@ import 'package:safe_device/safe_device.dart';
 ///
 /// Solo tiene efecto en debug: en release ([kDebugMode] == false) la
 /// verificación corre siempre, independientemente de este valor.
-const bool kRaspForceCheckInDebug = true;
+const bool kRaspForceCheckInDebug = false;
 
 /// Módulo RASP (Runtime Application Self-Protection) para VisionPrice.
 ///

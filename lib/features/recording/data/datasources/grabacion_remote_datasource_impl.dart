@@ -79,9 +79,9 @@ class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
     final body = <String, dynamic>{};
     if (grabacionId != null) body['grabacion_id'] = grabacionId;
     if (texto != null) body['texto'] = texto;
-    // Altura de pared capturada a mano cuando el texto no la menciona.
-    // NOTA: si tu back-end espera otro nombre de campo, cámbialo aquí.
-    if (altura != null) body['altura_m'] = altura;
+    // Override manual de la altura de pared cuando el texto no la menciona.
+    // El back-end lo combina con el largo_m/ancho_m ya detectados.
+    if (altura != null) body['alto_m'] = altura;
 
     final data = await _client.postJson(
       ApiConfig.cotizacionesCalculo,

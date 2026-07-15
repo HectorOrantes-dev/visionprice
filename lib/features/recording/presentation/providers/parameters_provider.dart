@@ -59,9 +59,16 @@ class Parameters extends _$Parameters {
         recalculando: true,
         errorMessage: null,
         requiereAltura: false);
+    // Si el texto NO cambió (el usuario solo capturó la altura), se manda
+    // `grabacion_id` para que el back-end reuse el largo/ancho ya detectados y
+    // combine el override de altura, sin re-correr el regex sobre el mismo texto.
+    final editado = texto.trim() != (state.grabacion?.transcripcion ?? '').trim();
     try {
-      final calculo = await ref
-          .read(calcularMetrosUseCaseProvider)(texto: texto, altura: altura);
+      final calculo = await ref.read(calcularMetrosUseCaseProvider)(
+        grabacionId: editado ? null : grabacionId,
+        texto: editado ? texto : null,
+        altura: altura,
+      );
       state = state.copyWith(
           calculo: calculo, recalculando: false, requiereAltura: false);
     } catch (e) {
