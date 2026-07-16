@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../domain/entities/cotizacion_entity.dart';
+import '../../domain/entities/cotizacion_pdf_entity.dart';
 import '../../domain/entities/material_regla_entity.dart';
 import '../../domain/entities/producto_entity.dart';
 import 'cotizacion_remote_datasource.dart';
@@ -69,5 +70,21 @@ class CotizacionRemoteDataSourceImpl implements CotizacionRemoteDataSource {
   @override
   Future<Map<String, dynamic>> pdf(int cotizacionId) {
     return _client.getJson(ApiConfig.cotizacionPdf(cotizacionId), auth: true);
+  }
+
+  @override
+  Future<List<CotizacionPdfEntity>> listarPdfs() async {
+    final data = await _client.getJsonList(ApiConfig.cotizacionesPdfs, auth: true);
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map(CotizacionPdfEntity.fromJson)
+        .toList();
+  }
+
+  @override
+  Future<Uint8List> pdfBytes(int cotizacionId) {
+    // Se usa la ruta conocida + baseUrl de la app (no la URL absoluta del back)
+    // para respetar el dominio configurado y adjuntar el Bearer token.
+    return _client.getBytes(ApiConfig.cotizacionPdf(cotizacionId), auth: true);
   }
 }

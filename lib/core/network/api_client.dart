@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -135,6 +136,25 @@ class ApiClient {
     final data = await _send(
         () => _client.get(_uri(path, query), headers: _headers(auth: auth)));
     return data is List ? data : const [];
+  }
+
+  /// GET que devuelve los **bytes** crudos de la respuesta (p. ej. descargar el
+  /// PDF de una cotización desde su enlace real). Lanza [ApiException] en error.
+  Future<Uint8List> getBytes(String path, {bool auth = true}) async {
+    try {
+      final res = await _client
+          .get(_uri(path), headers: _headers(auth: auth))
+          .timeout(_timeout);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        return res.bodyBytes;
+      }
+      throw ApiException(
+          res.statusCode, 'No se pudo descargar el archivo (${res.statusCode}).');
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException.network('No se pudo descargar el archivo.');
+    }
   }
 
   /// Verificación rápida de conectividad real: intenta `GET /health` con un

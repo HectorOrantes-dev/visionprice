@@ -10,11 +10,11 @@ import '../../../security/presentation/screens/inactivity_detector.dart';
 import '../../../sync/presentation/screens/sync_queue_screen.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/dashboard_tab.dart';
-import '../widgets/mis_obras_tab.dart';
+import '../widgets/mis_cotizaciones_tab.dart';
 import '../widgets/perfil_tab.dart';
 
-/// Shell de la zona autenticada: navegación inferior entre Inicio, Mis Obras,
-/// Sync y Perfil, protegida por el detector de inactividad.
+/// Shell de la zona autenticada: navegación inferior entre Inicio,
+/// Mis Cotizaciones, Sync y Perfil, protegida por el detector de inactividad.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -37,7 +37,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   final List<Widget> _pages = const [
     DashboardTab(),
-    MisObrasTab(),
+    MisCotizacionesTab(),
     SyncQueueScreen(),
     SizedBox.shrink(), // index 3 (Perfil) se construye con onLogout en build()
   ];

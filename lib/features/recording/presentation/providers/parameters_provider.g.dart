@@ -66,7 +66,7 @@ final class ParametersProvider
   }
 }
 
-String _$parametersHash() => r'aca392a10f35dcd2b4c338932cbd940918e96f22';
+String _$parametersHash() => r'5985b7b839e413ec684c752cc48092cd36b1d1f0';
 
 /// Notifier `.family` (por `grabacionId`) de la pantalla de parámetros. Trae el
 /// detalle de la grabación (transcripción + confianza + extracción) y el

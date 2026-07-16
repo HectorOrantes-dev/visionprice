@@ -19,7 +19,8 @@ class LocalDatabase {
       // v3: repara instalaciones donde faltaban las tablas `perfil`/`proyectos`
       // (el `_createDB` antiguo metía varios CREATE en un solo execute() y
       // sqflite solo ejecuta la PRIMERA sentencia → solo se creaba sync_queue).
-      version: 3,
+      // v4: agrega `cotizaciones_pdf` (caché offline de la pestaña Mis Cotizaciones).
+      version: 4,
       onCreate: (db, version) => _createAllTables(db),
       onUpgrade: (db, oldVersion, newVersion) => _createAllTables(db),
     );
@@ -69,6 +70,19 @@ class LocalDatabase {
         estado TEXT NOT NULL,
         total_presupuestos INTEGER NOT NULL DEFAULT 0,
         is_synced INTEGER NOT NULL DEFAULT 1
+      );
+    ''');
+
+    // Caché offline de la pestaña "Mis Cotizaciones" (GET /cotizaciones/pdfs).
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS cotizaciones_pdf (
+        id INTEGER PRIMARY KEY,
+        proyecto_id INTEGER NOT NULL,
+        proyecto_nombre TEXT NOT NULL,
+        estado TEXT NOT NULL,
+        total REAL NOT NULL DEFAULT 0,
+        fecha TEXT NOT NULL,
+        url_pdf TEXT NOT NULL
       );
     ''');
   }

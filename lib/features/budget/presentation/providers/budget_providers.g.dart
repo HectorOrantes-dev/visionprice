@@ -58,6 +58,51 @@ final class CotizacionRemoteDataSourceProvider extends $FunctionalProvider<
 String _$cotizacionRemoteDataSourceHash() =>
     r'9a8f3d8082763ab8560c14704f29a6467e12de20';
 
+@ProviderFor(cotizacionPdfLocalDataSource)
+final cotizacionPdfLocalDataSourceProvider =
+    CotizacionPdfLocalDataSourceProvider._();
+
+final class CotizacionPdfLocalDataSourceProvider extends $FunctionalProvider<
+    CotizacionPdfLocalDataSource,
+    CotizacionPdfLocalDataSource,
+    CotizacionPdfLocalDataSource> with $Provider<CotizacionPdfLocalDataSource> {
+  CotizacionPdfLocalDataSourceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'cotizacionPdfLocalDataSourceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$cotizacionPdfLocalDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<CotizacionPdfLocalDataSource> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CotizacionPdfLocalDataSource create(Ref ref) {
+    return cotizacionPdfLocalDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CotizacionPdfLocalDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CotizacionPdfLocalDataSource>(value),
+    );
+  }
+}
+
+String _$cotizacionPdfLocalDataSourceHash() =>
+    r'5687b5085dd07696ac809e407debfc2baef45724';
+
 @ProviderFor(cotizacionRepository)
 final cotizacionRepositoryProvider = CotizacionRepositoryProvider._();
 
@@ -100,7 +145,7 @@ final class CotizacionRepositoryProvider extends $FunctionalProvider<
 }
 
 String _$cotizacionRepositoryHash() =>
-    r'f2794969767c60888eaaa2b092336aff50bea70a';
+    r'9b71a6785d7c975cdc2b1d5dc626a410066df2f7';
 
 @ProviderFor(obtenerProductosUseCase)
 final obtenerProductosUseCaseProvider = ObtenerProductosUseCaseProvider._();
@@ -320,3 +365,141 @@ final class CrearCotizacionKitUseCaseProvider extends $FunctionalProvider<
 
 String _$crearCotizacionKitUseCaseHash() =>
     r'f644d46a51a4e97dd0361f55aba8f395d7572933';
+
+@ProviderFor(listarCotizacionesPdfUseCase)
+final listarCotizacionesPdfUseCaseProvider =
+    ListarCotizacionesPdfUseCaseProvider._();
+
+final class ListarCotizacionesPdfUseCaseProvider extends $FunctionalProvider<
+    ListarCotizacionesPdfUseCase,
+    ListarCotizacionesPdfUseCase,
+    ListarCotizacionesPdfUseCase> with $Provider<ListarCotizacionesPdfUseCase> {
+  ListarCotizacionesPdfUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'listarCotizacionesPdfUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$listarCotizacionesPdfUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ListarCotizacionesPdfUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ListarCotizacionesPdfUseCase create(Ref ref) {
+    return listarCotizacionesPdfUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ListarCotizacionesPdfUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ListarCotizacionesPdfUseCase>(value),
+    );
+  }
+}
+
+String _$listarCotizacionesPdfUseCaseHash() =>
+    r'fb454d41ab4ea69de6780014e8add195fa6392aa';
+
+@ProviderFor(listarCotizacionesPdfLocalesUseCase)
+final listarCotizacionesPdfLocalesUseCaseProvider =
+    ListarCotizacionesPdfLocalesUseCaseProvider._();
+
+final class ListarCotizacionesPdfLocalesUseCaseProvider
+    extends $FunctionalProvider<
+        ListarCotizacionesPdfLocalesUseCase,
+        ListarCotizacionesPdfLocalesUseCase,
+        ListarCotizacionesPdfLocalesUseCase>
+    with $Provider<ListarCotizacionesPdfLocalesUseCase> {
+  ListarCotizacionesPdfLocalesUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'listarCotizacionesPdfLocalesUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$listarCotizacionesPdfLocalesUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ListarCotizacionesPdfLocalesUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ListarCotizacionesPdfLocalesUseCase create(Ref ref) {
+    return listarCotizacionesPdfLocalesUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ListarCotizacionesPdfLocalesUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<ListarCotizacionesPdfLocalesUseCase>(value),
+    );
+  }
+}
+
+String _$listarCotizacionesPdfLocalesUseCaseHash() =>
+    r'905101e3da188e7d39ca34fba07501af023e49ee';
+
+@ProviderFor(descargarPdfBytesUseCase)
+final descargarPdfBytesUseCaseProvider = DescargarPdfBytesUseCaseProvider._();
+
+final class DescargarPdfBytesUseCaseProvider extends $FunctionalProvider<
+    DescargarPdfBytesUseCase,
+    DescargarPdfBytesUseCase,
+    DescargarPdfBytesUseCase> with $Provider<DescargarPdfBytesUseCase> {
+  DescargarPdfBytesUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'descargarPdfBytesUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$descargarPdfBytesUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<DescargarPdfBytesUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DescargarPdfBytesUseCase create(Ref ref) {
+    return descargarPdfBytesUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DescargarPdfBytesUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DescargarPdfBytesUseCase>(value),
+    );
+  }
+}
+
+String _$descargarPdfBytesUseCaseHash() =>
+    r'8591c179ec41e2b290175c7786c417ed583fa28a';

@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import '../entities/cotizacion_entity.dart';
+import '../entities/cotizacion_pdf_entity.dart';
 import '../entities/item_cotizacion.dart';
 import '../entities/material_regla_entity.dart';
 import '../entities/producto_entity.dart';
@@ -34,4 +37,15 @@ abstract class CotizacionRepository {
 
   /// Obtiene el PDF de la cotización (respuesta JSON del back-end).
   Future<Map<String, dynamic>> pdf(int cotizacionId);
+
+  /// Todas las cotizaciones/PDFs del usuario (todas sus obras): pide al
+  /// back-end, guarda el snapshot en local y devuelve lo fresco. Si el back-end
+  /// falla, devuelve la caché local.
+  Future<List<CotizacionPdfEntity>> listarPdfs();
+
+  /// Solo la caché local (sin red): sirve para pintar la pantalla al instante.
+  Future<List<CotizacionPdfEntity>> listarPdfsLocales();
+
+  /// Bytes del PDF de una cotización, para descargar/compartir en el dispositivo.
+  Future<Uint8List> pdfBytes(int cotizacionId);
 }

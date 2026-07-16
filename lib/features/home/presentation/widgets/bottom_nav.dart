@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Barra de navegación inferior de la zona autenticada (Inicio / Mis Obras /
-/// Sync / Perfil).
+/// Barra de navegación inferior de la zona autenticada (Inicio /
+/// Mis Cotizaciones / Sync / Perfil).
 class BottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -24,7 +24,7 @@ class BottomNav extends StatelessWidget {
         NavigationDestination(
           icon: Icon(Icons.description_outlined),
           selectedIcon: Icon(Icons.description),
-          label: 'Mis Obras',
+          label: 'Mis Cotizaciones',
         ),
         NavigationDestination(
           // Badge de M3: punto rojo indicando audios en cola por sincronizar.

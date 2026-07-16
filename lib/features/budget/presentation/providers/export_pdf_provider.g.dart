@@ -47,7 +47,7 @@ final class ExportPdfProvider
   }
 }
 
-String _$exportPdfHash() => r'915ea6fb1788be0bb7b5291ec135c655bc99bba6';
+String _$exportPdfHash() => r'ba5057e47209fc5c1782f34f7c635b3bedc85478';
 
 /// Notifier de "Exportar PDF" (Riverpod moderno). Pide el PDF de la cotización;
 /// el back-end responde JSON y se busca defensivamente un enlace de descarga.
