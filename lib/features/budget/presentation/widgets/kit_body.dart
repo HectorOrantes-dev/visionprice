@@ -25,11 +25,17 @@ class KitBody extends ConsumerWidget {
     ('nivelacion', 'Nivelación'),
   ];
 
+  /// Clave del complemento que manda el back-end → (label en la UI, categoría
+  /// con la que se consulta el catálogo `?categoria=`).
+  ///
+  /// Se aceptan las dos claves posibles del back-end (`boquilla`/`boquillado`),
+  /// igual que `pegazulejo`/`adhesivo`, para no depender del nombre exacto.
   static const _complementoInfo = {
     'pegazulejo': ('Pegazulejo', 'pegazulejo'),
     'adhesivo': ('Pegazulejo', 'pegazulejo'),
     'cruceta': ('Crucetas', 'cruceta'),
-    'boquilla': ('Boquilla', 'boquilla'),
+    'boquilla': ('Emboquillador', 'emboquillador'),
+    'boquillado': ('Emboquillador', 'emboquillador'),
   };
 
   @override
@@ -86,7 +92,7 @@ class KitBody extends ConsumerWidget {
                     producto: switch (categoria) {
                       'pegazulejo' => kit?.adhesivo,
                       'cruceta' => kit?.cruceta,
-                      'boquilla' => kit?.boquilla,
+                      'emboquillador' => kit?.boquilla,
                       _ => null,
                     },
                     onTap: () => _elegirComplemento(
@@ -95,13 +101,13 @@ class KitBody extends ConsumerWidget {
                       seleccionado: switch (categoria) {
                         'pegazulejo' => kit?.adhesivo,
                         'cruceta' => kit?.cruceta,
-                        'boquilla' => kit?.boquilla,
+                        'emboquillador' => kit?.boquilla,
                         _ => null,
                       },
                       onConfirm: (p) => switch (categoria) {
                         'pegazulejo' => notifier.seleccionarKitAdhesivo(index, p),
                         'cruceta' => notifier.seleccionarKitCruceta(index, p),
-                        'boquilla' => notifier.seleccionarKitBoquilla(index, p),
+                        'emboquillador' => notifier.seleccionarKitBoquilla(index, p),
                         _ => null,
                       },
                     ),
@@ -134,6 +140,7 @@ class KitBody extends ConsumerWidget {
         case 'cruceta':
           if (kit.cruceta != null) n++;
         case 'boquilla':
+        case 'boquillado':
           if (kit.boquilla != null) n++;
       }
     }

@@ -86,6 +86,7 @@ class CotizacionWizardState {
         case 'cruceta':
           if (kit.cruceta == null) return false;
         case 'boquilla':
+        case 'boquillado':
           if (kit.boquilla == null) return false;
       }
     }
