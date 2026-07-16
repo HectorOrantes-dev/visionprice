@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_palette.dart';
 import 'sync_status.dart';
 
-/// Indicador visual del estado de un audio (porcentaje, "Pendiente", "Listo"
-/// o "Error · Reintentar"). Antes era el privado `_StatusWidget`.
-class SyncStatusBadge extends StatelessWidget {
+/// Indicador de estado (porcentaje, "Procesando", "Pendiente", "Listo",
+/// "Error") de un item de la cola. Antes el privado `_StatusWidget`.
+class StatusWidget extends StatelessWidget {
   final SyncStatus status;
   final double? progress;
 
-  const SyncStatusBadge({super.key, required this.status, this.progress});
+  const StatusWidget({super.key, required this.status, this.progress});
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +21,32 @@ class SyncStatusBadge extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w700,
             color: context.colors.primary,
+          ),
+        );
+      case SyncStatus.processing:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Row(
+            children: [
+              SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue),
+              ),
+              SizedBox(width: 6),
+              Text(
+                'Procesando',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
           ),
         );
       case SyncStatus.pending:

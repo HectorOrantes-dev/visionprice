@@ -5,9 +5,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/field_label.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../models/project_role.dart';
-
-/// Estados simulados de la pantalla de unirse (sin backend).
-enum _JoinStatus { idle, validando, exito, error }
+import '../widgets/join_status.dart';
 
 /// Unirse a un proyecto con un código (mock). Los estados idle / validando /
 /// éxito / error se simulan localmente con un pequeño delay.
@@ -20,7 +18,7 @@ class JoinProjectScreen extends StatefulWidget {
 
 class _JoinProjectScreenState extends State<JoinProjectScreen> {
   final _codigoController = TextEditingController();
-  _JoinStatus _status = _JoinStatus.idle;
+  JoinStatus _status = JoinStatus.idle;
 
   @override
   void dispose() {
@@ -31,13 +29,13 @@ class _JoinProjectScreenState extends State<JoinProjectScreen> {
   Future<void> _unirse() async {
     final codigo = _codigoController.text.trim();
     if (codigo.isEmpty) return;
-    setState(() => _status = _JoinStatus.validando);
+    setState(() => _status = JoinStatus.validando);
     await Future.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
     // Mock: "VP-…" válido; cualquier otra cosa → error.
     final valido = codigo.toUpperCase().startsWith('VP-');
     setState(() =>
-        _status = valido ? _JoinStatus.exito : _JoinStatus.error);
+        _status = valido ? JoinStatus.exito : JoinStatus.error);
   }
 
   @override
@@ -79,8 +77,8 @@ class _JoinProjectScreenState extends State<JoinProjectScreen> {
                 controller: _codigoController,
                 textCapitalization: TextCapitalization.characters,
                 onChanged: (_) {
-                  if (_status != _JoinStatus.idle) {
-                    setState(() => _status = _JoinStatus.idle);
+                  if (_status != JoinStatus.idle) {
+                    setState(() => _status = JoinStatus.idle);
                   }
                 },
                 decoration: InputDecoration(
@@ -90,13 +88,13 @@ class _JoinProjectScreenState extends State<JoinProjectScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (_status == _JoinStatus.exito) _resultBanner(context, true),
-              if (_status == _JoinStatus.error) _resultBanner(context, false),
+              if (_status == JoinStatus.exito) _resultBanner(context, true),
+              if (_status == JoinStatus.error) _resultBanner(context, false),
               const SizedBox(height: 8),
               GradientButton(
                 onPressed:
-                    _status == _JoinStatus.validando ? null : _unirse,
-                child: _status == _JoinStatus.validando
+                    _status == JoinStatus.validando ? null : _unirse,
+                child: _status == JoinStatus.validando
                     ? const SizedBox(
                         width: 20,
                         height: 20,

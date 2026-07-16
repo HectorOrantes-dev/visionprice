@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Etiqueta de sección (mayúsculas, espaciada) del módulo de presupuesto.
-/// Antes el privado `_SectionLabel`.
+/// Etiqueta de sección en mayúsculas usada en las pantallas de presupuesto.
 class BudgetSectionLabel extends StatelessWidget {
   final String text;
   const BudgetSectionLabel(this.text, {super.key});

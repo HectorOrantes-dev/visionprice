@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Fila de una advertencia del análisis. Antes el privado `_WarningItem`.
+/// Fila de advertencia (icono + texto) en la sección de advertencias.
 class WarningItem extends StatelessWidget {
   final String text;
   const WarningItem({super.key, required this.text});
@@ -19,8 +19,8 @@ class WarningItem extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                  fontSize: 13, color: context.colors.textSecondary),
+              style:
+                  TextStyle(fontSize: 13, color: context.colors.textSecondary),
             ),
           ),
         ],

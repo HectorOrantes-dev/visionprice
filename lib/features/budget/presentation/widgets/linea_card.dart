@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 
-/// Fila de un material dentro del desglose. Antes el privado `_LineaCard`.
+/// Tarjeta de una línea del desglose de materiales de la cotización. Antes el
+/// privado `_LineaCard`.
 class LineaCard extends StatelessWidget {
   final LineaCotizacionEntity linea;
   final NumberFormat money;

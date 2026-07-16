@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Estado de error de la carga del perfil, con reintento. Antes `_PerfilError`.
+/// Estado de error de la carga del perfil, con botón de reintento.
 class PerfilError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

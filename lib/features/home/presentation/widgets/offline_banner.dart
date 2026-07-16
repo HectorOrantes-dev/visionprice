@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Banner "Sin conexión" de la home. Antes el privado `_OfflineBanner`.
-class HomeOfflineBanner extends StatelessWidget {
-  const HomeOfflineBanner({super.key});
+/// Banner que avisa que no hay conexión (los audios se guardan localmente).
+class OfflineBanner extends StatelessWidget {
+  const OfflineBanner({super.key});
 
   @override
   Widget build(BuildContext context) {

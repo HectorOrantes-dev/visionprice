@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Estado vacío de la lista de proyectos. Antes el privado `_EmptyProjects`.
+/// Estado vacío de la lista de proyectos del dashboard.
 class EmptyProjects extends StatelessWidget {
   const EmptyProjects({super.key});
 

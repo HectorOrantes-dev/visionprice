@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Estado de error de la revisión de parámetros. Antes el privado `_ErrorView`.
+/// Vista de error de la carga inicial de la revisión de transcripción.
 class ReviewErrorView extends StatelessWidget {
   final String message;
   const ReviewErrorView({super.key, required this.message});

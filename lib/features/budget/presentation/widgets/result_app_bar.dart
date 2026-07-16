@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Encabezado de la pantalla de resultado de cotización. Antes `_ResultAppBar`.
+/// Encabezado de la pantalla de resultado de cotización. Antes el privado
+/// `_ResultAppBar`.
 class ResultAppBar extends StatelessWidget {
   const ResultAppBar({super.key});
 

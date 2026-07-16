@@ -6,6 +6,7 @@ import '../../../../core/pdf/pdf_saver.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../providers/export_pdf_provider.dart';
+import '../widgets/resumen_row.dart';
 
 /// Exportar PDF de una cotización. El PDF se genera **localmente** en un isolate
 /// (sin depender del back-end) y se **descarga directo al teléfono** (sin abrir
@@ -101,13 +102,13 @@ class ExportPdfScreen extends ConsumerWidget {
                     Divider(color: context.colors.divider, height: 1),
                     const SizedBox(height: 16),
                     if (cotizacion.manoObra != null) ...[
-                      _ResumenRow(
+                      ResumenRow(
                         label: 'Mano de obra',
                         value: money.format(cotizacion.manoObra),
                       ),
                       const SizedBox(height: 8),
                     ],
-                    _ResumenRow(
+                    ResumenRow(
                       label: 'Total',
                       value: money.format(cotizacion.total),
                       emphasize: true,
@@ -155,45 +156,6 @@ class ExportPdfScreen extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ResumenRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool emphasize;
-  const _ResumenRow({
-    required this.label,
-    required this.value,
-    this.emphasize = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: emphasize ? 15 : 14,
-            fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
-            color: emphasize
-                ? context.colors.textPrimary
-                : context.colors.textSecondary,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: emphasize ? 18 : 14,
-            fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
-            color:
-                emphasize ? context.colors.primary : context.colors.textPrimary,
-          ),
-        ),
-      ],
     );
   }
 }

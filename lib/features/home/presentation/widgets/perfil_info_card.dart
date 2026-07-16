@@ -3,10 +3,9 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../auth/domain/entities/perfil_entity.dart';
-import 'perfil_info_row.dart';
+import 'info_row.dart';
 
 /// Tarjeta con los datos de la cuenta que devuelve `/me/perfil`.
-/// Antes el privado `_PerfilInfoCard`.
 class PerfilInfoCard extends StatelessWidget {
   final PerfilEntity perfil;
 
@@ -22,31 +21,32 @@ class PerfilInfoCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          PerfilInfoRow(
+          InfoRow(
             icon: Icons.badge_outlined,
             label: 'Rol',
             value: _capitalize(perfil.rol.replaceAll('_', ' ')),
           ),
           if (perfil.telefono.isNotEmpty)
-            PerfilInfoRow(
+            InfoRow(
               icon: Icons.phone_outlined,
               label: 'Teléfono',
               value: perfil.telefono,
             ),
-          PerfilInfoRow(
+          InfoRow(
             icon: Icons.workspace_premium_outlined,
             label: 'Plan',
             value: perfil.tienePlan ? perfil.planActivo! : 'Sin plan activo',
-            valueColor:
-                perfil.tienePlan ? context.colors.primary : context.colors.textSecondary,
+            valueColor: perfil.tienePlan
+                ? context.colors.primary
+                : context.colors.textSecondary,
           ),
           if (perfil.vigenciaHasta != null)
-            PerfilInfoRow(
+            InfoRow(
               icon: Icons.event_available_outlined,
               label: 'Vigencia',
               value: _fmtDate(perfil.vigenciaHasta!),
             ),
-          PerfilInfoRow(
+          InfoRow(
             icon: Icons.lock_outline,
             label: 'Inicio de sesión',
             value: perfil.proveedorAuth == 'google'
@@ -54,7 +54,7 @@ class PerfilInfoCard extends StatelessWidget {
                 : 'Correo y contraseña',
           ),
           if (perfil.fechaRegistro != null)
-            PerfilInfoRow(
+            InfoRow(
               icon: Icons.calendar_today_outlined,
               label: 'Miembro desde',
               value: _fmtDate(perfil.fechaRegistro!),

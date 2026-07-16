@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Fila de acción del perfil (con chevron). Antes el privado `_ProfileItem`.
+/// Fila clickable del menú de perfil (icono + etiqueta + chevron), con estilo
+/// de peligro opcional (para "Cerrar sesión").
 class ProfileItem extends StatelessWidget {
   final IconData icon;
   final String label;

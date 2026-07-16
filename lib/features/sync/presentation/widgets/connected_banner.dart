@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-class SyncConnectedBanner extends StatelessWidget {
-  const SyncConnectedBanner({super.key});
+/// Banner "Conexión detectada · sincronizando automáticamente". Antes el
+/// privado `_ConnectedBanner`.
+class ConnectedBanner extends StatelessWidget {
+  const ConnectedBanner({super.key});
 
   @override
   Widget build(BuildContext context) {

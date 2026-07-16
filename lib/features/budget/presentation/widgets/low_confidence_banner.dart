@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Aviso de baja confianza del análisis. Antes el privado `_LowConfidenceBanner`.
+/// Aviso de baja confianza de la transcripción (pide revisar cantidades).
 class LowConfidenceBanner extends StatelessWidget {
   final double? confianza;
   const LowConfidenceBanner({super.key, this.confianza});
@@ -16,7 +16,8 @@ class LowConfidenceBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.warningLight,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: context.colors.warning.withValues(alpha: 0.3)),
+        border:
+            Border.all(color: context.colors.warning.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

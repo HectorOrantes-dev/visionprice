@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/cotizacion_entity.dart';
+import '../widgets/budget_section_label.dart';
+import '../widgets/linea_card.dart';
 import '../widgets/mano_obra_card.dart';
+import '../widgets/result_app_bar.dart';
+import '../widgets/total_card.dart';
 import 'export_pdf_screen.dart';
 
 class BudgetResultScreen extends StatelessWidget {
@@ -17,12 +21,12 @@ class BudgetResultScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _ResultAppBar(),
+            const ResultAppBar(),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _TotalCard(
+                  TotalCard(
                     total: money.format(cotizacion.total),
                     estado: cotizacion.estado,
                     lineas: cotizacion.lineas.length,
@@ -32,14 +36,14 @@ class BudgetResultScreen extends StatelessWidget {
                     ManoObraCard(manoObra: cotizacion.manoObra, money: money),
                   ],
                   const SizedBox(height: 20),
-                  const _SectionLabel('DESGLOSE DE MATERIALES'),
+                  const BudgetSectionLabel('DESGLOSE DE MATERIALES'),
                   const SizedBox(height: 8),
                   if (cotizacion.lineas.isEmpty)
                     Text('Sin líneas',
                         style: TextStyle(color: context.colors.textSecondary))
                   else
                     ...cotizacion.lineas.map(
-                      (l) => _LineaCard(linea: l, money: money),
+                      (l) => LineaCard(linea: l, money: money),
                     ),
                 ],
               ),
@@ -63,177 +67,6 @@ class BudgetResultScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ResultAppBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.arrow_back_ios,
-                size: 18, color: context.colors.textPrimary),
-            onPressed: () => Navigator.pop(context),
-          ),
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: context.colors.primaryLight,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.receipt_long_outlined,
-                color: context.colors.primary, size: 20),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Cotización',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textPrimary,
-                ),
-              ),
-              Text(
-                'Materiales y precios',
-                style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  const _SectionLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: context.colors.textSecondary,
-        letterSpacing: 1.0,
-      ),
-    );
-  }
-}
-
-class _TotalCard extends StatelessWidget {
-  final String total;
-  final String estado;
-  final int lineas;
-  const _TotalCard({
-    required this.total,
-    required this.estado,
-    required this.lineas,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [context.colors.info, context.colors.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('TOTAL ESTIMADO',
-              style: TextStyle(
-                fontSize: 11,
-                color: Colors.white70,
-                letterSpacing: 1,
-                fontWeight: FontWeight.w600,
-              )),
-          const SizedBox(height: 6),
-          Text(
-            total,
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            '$lineas materiales · $estado',
-            style: const TextStyle(fontSize: 13, color: Colors.white70),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LineaCard extends StatelessWidget {
-  final LineaCotizacionEntity linea;
-  final NumberFormat money;
-  const _LineaCard({required this.linea, required this.money});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.colors.border),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  linea.descripcion,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${linea.cantidad.toStringAsFixed(2)} ${linea.unidad} × ${money.format(linea.precioUnitario)}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            money.format(linea.subtotal),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: context.colors.textPrimary,
-            ),
-          ),
-        ],
       ),
     );
   }

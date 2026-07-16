@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Chip "Piso"/"Paredes" para asignar un material a una superficie.
-/// Antes el privado `_SurfaceChip`.
+/// Chip seleccionable de superficie (Piso/Paredes o superficies detectadas) en
+/// la tarjeta de producto. Antes el privado `_SurfaceChip`.
 class SurfaceChip extends StatelessWidget {
   final String label;
   final bool selected;

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../providers/cotizacion_wizard_provider.dart';
+import '../widgets/mano_obra_field.dart';
+import '../widgets/total_mano_obra.dart';
 import 'cotizacion_lista_screen.dart';
 import 'elegir_material_screen.dart';
 
@@ -175,21 +176,21 @@ class _ResumenCotizacionScreenState
                   ),
                   const SizedBox(height: 10),
                   if (haySimple) ...[
-                    _ManoObraField(
+                    ManoObraField(
                       controller: _manoObraSimpleCtrl,
                       label: mixto ? 'Mano de obra por m² · pintura' : 'Mano de obra por m²',
                       onChanged: (v) => notifier.setManoObraSimple(_parse(v)),
                     ),
-                    _TotalManoObra(tarifa: vm.manoObraSimple, area: areaSimple),
+                    TotalManoObra(tarifa: vm.manoObraSimple, area: areaSimple),
                   ],
                   if (mixto) const SizedBox(height: 10),
                   if (hayKit) ...[
-                    _ManoObraField(
+                    ManoObraField(
                       controller: _manoObraKitCtrl,
                       label: mixto ? 'Mano de obra por m² · piso' : 'Mano de obra por m²',
                       onChanged: (v) => notifier.setManoObraKit(_parse(v)),
                     ),
-                    _TotalManoObra(tarifa: vm.manoObraKit, area: areaKit),
+                    TotalManoObra(tarifa: vm.manoObraKit, area: areaKit),
                   ],
 
                   if (mixto) ...[
@@ -268,72 +269,5 @@ class _ResumenCotizacionScreenState
     final t = v.trim().replaceAll(',', '.');
     if (t.isEmpty) return null;
     return double.tryParse(t);
-  }
-}
-
-class _ManoObraField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final ValueChanged<String> onChanged;
-  const _ManoObraField({
-    required this.controller,
-    required this.label,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-      ],
-      style: TextStyle(color: context.colors.textPrimary, fontWeight: FontWeight.w600),
-      decoration: InputDecoration(
-        labelText: label,
-        prefixText: '\$ ',
-        suffixText: '/m²',
-        prefixStyle: TextStyle(
-            color: context.colors.primary, fontWeight: FontWeight.w800, fontSize: 15),
-        suffixStyle: TextStyle(
-            color: context.colors.textSecondary, fontWeight: FontWeight.w600),
-        filled: true,
-        fillColor: context.colors.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: context.colors.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: context.colors.border),
-        ),
-      ),
-    );
-  }
-}
-
-/// Muestra el total en vivo de mano de obra (tarifa × área) bajo cada campo.
-class _TotalManoObra extends StatelessWidget {
-  final double? tarifa;
-  final double area;
-  const _TotalManoObra({required this.tarifa, required this.area});
-
-  @override
-  Widget build(BuildContext context) {
-    if (tarifa == null || tarifa! <= 0) return const SizedBox.shrink();
-    final total = tarifa! * area;
-    return Padding(
-      padding: const EdgeInsets.only(top: 6, left: 4),
-      child: Text(
-        '= \$${total.toStringAsFixed(2)} por ${area.toStringAsFixed(area.truncateToDouble() == area ? 0 : 1)} m²',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: context.colors.primary,
-        ),
-      ),
-    );
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Encabezado de la pantalla de revisión de parámetros. Antes `_ReviewAppBar`.
+/// Encabezado de la pantalla de revisión de transcripción.
 class ReviewAppBar extends StatelessWidget {
   const ReviewAppBar({super.key});
 
@@ -24,8 +24,8 @@ class ReviewAppBar extends StatelessWidget {
               color: context.colors.primaryLight,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.edit_note,
-                color: context.colors.primary, size: 20),
+            child:
+                Icon(Icons.edit_note, color: context.colors.primary, size: 20),
           ),
           const SizedBox(width: 10),
           Column(

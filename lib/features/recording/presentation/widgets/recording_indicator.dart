@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Indicador "Grabando..." con punto rojo. Antes el privado `_RecordingIndicator`.
+/// Punto rojo + texto "Grabando..." mientras se captura audio. Antes el privado
+/// `_RecordingIndicator`.
 class RecordingIndicator extends StatelessWidget {
   const RecordingIndicator({super.key});
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Fila de una medida detectada (piso, paredes, dimensiones). Antes `_MetricItem`.
+/// Fila de una medida detectada (icono + título + valor destacado).
 class MetricItem extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -53,7 +53,9 @@ class MetricItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: highlight ? context.colors.primary : context.colors.textPrimary,
+              color: highlight
+                  ? context.colors.primary
+                  : context.colors.textPrimary,
             ),
           ),
         ],

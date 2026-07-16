@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Título de sección de la home (mayúsculas). Antes el privado `_SectionTitle`.
-class HomeSectionTitle extends StatelessWidget {
+/// Título de sección en mayúsculas (p. ej. "MIS PROYECTOS").
+class SectionTitle extends StatelessWidget {
   final String text;
-  const HomeSectionTitle(this.text, {super.key});
+  const SectionTitle(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {

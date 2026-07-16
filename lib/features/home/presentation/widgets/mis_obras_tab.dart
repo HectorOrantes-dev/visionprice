@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Pestaña "Mis Obras" (placeholder). Antes el privado `_MisObrasTab`.
+/// Placeholder de la pestaña "Mis Obras".
 class MisObrasTab extends StatelessWidget {
   const MisObrasTab({super.key});
 

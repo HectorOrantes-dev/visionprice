@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Tarjeta destacada con el total estimado. Antes el privado `_TotalCard`.
+/// Tarjeta destacada con el total estimado de la cotización. Antes el privado
+/// `_TotalCard`.
 class TotalCard extends StatelessWidget {
   final String total;
   final String estado;

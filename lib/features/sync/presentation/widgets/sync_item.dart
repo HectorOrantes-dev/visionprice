@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
+import 'status_widget.dart';
 import 'sync_status.dart';
-import 'sync_status_badge.dart';
 
-/// Tarjeta de un audio en la cola de sincronización. Antes `_SyncItem`.
+/// Tarjeta de un audio en la cola de sincronización. Antes el privado
+/// `_SyncItem`.
 class SyncItem extends StatelessWidget {
   final String name;
   final String duration;
@@ -12,6 +13,7 @@ class SyncItem extends StatelessWidget {
   final String time;
   final SyncStatus status;
   final double? progress;
+  final VoidCallback? onTap;
 
   const SyncItem({
     super.key,
@@ -21,11 +23,13 @@ class SyncItem extends StatelessWidget {
     required this.time,
     required this.status,
     this.progress,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
@@ -69,7 +73,7 @@ class SyncItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                SyncStatusBadge(status: status, progress: progress),
+                StatusWidget(status: status, progress: progress),
               ],
             ),
             if (status == SyncStatus.uploading && progress != null) ...[
@@ -84,6 +88,24 @@ class SyncItem extends StatelessWidget {
                 ),
               ),
             ],
+            if (onTap != null) ...[
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Ver transcripción y resultado',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.colors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_forward_rounded, size: 14, color: context.colors.primary),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -94,6 +116,8 @@ class SyncItem extends StatelessWidget {
     switch (status) {
       case SyncStatus.uploading:
         return context.colors.primaryLight;
+      case SyncStatus.processing:
+        return Colors.blue.withValues(alpha: 0.1);
       case SyncStatus.pending:
         return context.colors.warningLight;
       case SyncStatus.ready:
@@ -107,6 +131,8 @@ class SyncItem extends StatelessWidget {
     switch (status) {
       case SyncStatus.uploading:
         return context.colors.primary;
+      case SyncStatus.processing:
+        return Colors.blue;
       case SyncStatus.pending:
         return context.colors.warning;
       case SyncStatus.ready:

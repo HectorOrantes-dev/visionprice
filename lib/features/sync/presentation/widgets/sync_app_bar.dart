@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
+/// Encabezado de la pantalla de cola de sincronización. Antes el privado
+/// `_SyncAppBar`.
 class SyncAppBar extends StatelessWidget {
   const SyncAppBar({super.key});
 

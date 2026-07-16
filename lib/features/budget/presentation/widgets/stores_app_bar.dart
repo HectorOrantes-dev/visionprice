@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Encabezado de la pantalla de materiales cercanos. Antes `_StoresAppBar`.
+/// Encabezado de la pantalla de materiales cercanos. Antes el privado
+/// `_StoresAppBar`.
 class StoresAppBar extends StatelessWidget {
   final int count;
   const StoresAppBar({super.key, required this.count});
@@ -41,7 +42,7 @@ class StoresAppBar extends StatelessWidget {
                 ),
               ),
               Text(
-                '$count productos · elige piso o paredes',
+                '$count productos · elige los adecuados',
                 style: TextStyle(
                   fontSize: 12,
                   color: context.colors.textSecondary,

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 
-/// Aviso de ubicación aproximada (sin permiso de GPS). Antes
-/// el privado `_ApproxLocationBanner`.
+/// Aviso de ubicación aproximada (sin permiso de GPS). Antes el privado
+/// `_ApproxLocationBanner`.
 class ApproxLocationBanner extends StatelessWidget {
   const ApproxLocationBanner({super.key});
 

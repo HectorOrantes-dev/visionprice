@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 /// Encabezado de la pantalla de grabación. Antes el privado `_RecordingAppBar`.
 class RecordingAppBar extends StatelessWidget {
@@ -22,9 +23,9 @@ class RecordingAppBar extends StatelessWidget {
             children: [
               Text(
                 'Nueva grabación',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
+                style: AppTextStyles.heading(
+                  size: 17,
+                  weight: FontWeight.w700,
                   color: context.colors.textPrimary,
                 ),
               ),

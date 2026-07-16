@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../models/member_vm.dart';
+import 'owner_badge.dart';
 import 'role_chip.dart';
 
 /// Ítem de la lista de miembros: avatar de iniciales + nombre + correo +
@@ -61,7 +62,7 @@ class MemberTile extends StatelessWidget {
                     ),
                     if (member.esDueno) ...[
                       const SizedBox(width: 8),
-                      _OwnerBadge(),
+                      const OwnerBadge(),
                     ],
                   ],
                 ),
@@ -86,27 +87,6 @@ class MemberTile extends StatelessWidget {
               onPressed: onRemove,
             ),
         ],
-      ),
-    );
-  }
-}
-
-class _OwnerBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: context.colors.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        'Dueño',
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: context.colors.primary,
-        ),
       ),
     );
   }
