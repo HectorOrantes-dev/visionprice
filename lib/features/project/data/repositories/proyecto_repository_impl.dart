@@ -55,9 +55,19 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
   }
 
   @override
-  Future<ProyectoEntity> crear({required String nombre, String? direccion}) async {
+  Future<ProyectoEntity> crear({
+    required String nombre,
+    String? direccion,
+    double? latitud,
+    double? longitud,
+  }) async {
     try {
-      final proyecto = await _remote.crear(nombre, direccion: direccion);
+      final proyecto = await _remote.crear(
+        nombre,
+        direccion: direccion,
+        latitud: latitud,
+        longitud: longitud,
+      );
       final db = await _localDatabase.database;
       final map = proyecto.toJson();
       map['is_synced'] = 1;
@@ -66,23 +76,44 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
     } catch (e) {
       // Creación offline
       final db = await _localDatabase.database;
-      
+
       // Generamos un ID negativo temporal basado en el tiempo
       final offlineId = -DateTime.now().millisecondsSinceEpoch;
-      
+
       final offlineProyecto = ProyectoEntity(
         id: offlineId,
         nombre: nombre,
         direccion: direccion,
         estado: 'activo',
         totalPresupuestos: 0,
+        latitud: latitud,
+        longitud: longitud,
       );
-      
+
       final map = offlineProyecto.toJson();
       map['is_synced'] = 0; // Pendiente de sincronizar
       await db.insert('proyectos', map);
-      
+
       return offlineProyecto;
     }
+  }
+
+  @override
+  Future<ProyectoEntity> actualizarUbicacion({
+    required int id,
+    required double latitud,
+    required double longitud,
+  }) async {
+    final proyecto = await _remote.actualizarUbicacion(
+      id,
+      latitud: latitud,
+      longitud: longitud,
+    );
+    final db = await _localDatabase.database;
+    final map = proyecto.toJson();
+    map['is_synced'] = 1;
+    await db.insert('proyectos', map,
+        conflictAlgorithm: ConflictAlgorithm.replace);
+    return proyecto;
   }
 }

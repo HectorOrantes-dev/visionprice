@@ -41,6 +41,11 @@ class CotizacionWizardState {
   final Map<int, ProductoEntity> seleccionSimple;
   final Map<int, KitSeleccion> seleccionKit;
 
+  /// `recomendacion_id` que devolvió el back-end por superficie (índice), cuando
+  /// el usuario pidió "Usar recomendados". Se devuelve al crear el kit para
+  /// cerrar el loop; si no pidió recomendación, la superficie no está aquí.
+  final Map<int, int> recomendacionIds;
+
   /// Mano de obra (costo) que el usuario captura para la cotización de
   /// materiales SIMPLES (ej. cambio de pintura). `null` = sin capturar.
   final double? manoObraSimple;
@@ -57,6 +62,7 @@ class CotizacionWizardState {
     this.reglas = const {},
     this.seleccionSimple = const {},
     this.seleccionKit = const {},
+    this.recomendacionIds = const {},
     this.manoObraSimple,
     this.manoObraKit,
     this.loading = false,
@@ -105,6 +111,7 @@ class CotizacionWizardState {
     Map<String, MaterialReglaEntity>? reglas,
     Map<int, ProductoEntity>? seleccionSimple,
     Map<int, KitSeleccion>? seleccionKit,
+    Map<int, int>? recomendacionIds,
     Object? manoObraSimple = _keep,
     Object? manoObraKit = _keep,
     bool? loading,
@@ -118,6 +125,7 @@ class CotizacionWizardState {
         reglas: reglas ?? this.reglas,
         seleccionSimple: seleccionSimple ?? this.seleccionSimple,
         seleccionKit: seleccionKit ?? this.seleccionKit,
+        recomendacionIds: recomendacionIds ?? this.recomendacionIds,
         manoObraSimple: manoObraSimple == _keep
             ? this.manoObraSimple
             : manoObraSimple as double?,

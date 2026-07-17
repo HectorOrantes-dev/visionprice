@@ -70,6 +70,14 @@ class CotizacionWizard extends _$CotizacionWizard {
   void seleccionarKitBoquilla(int i, ProductoEntity producto) =>
       _setKit(i, _kitDe(i).copyWith(boquilla: producto));
 
+  /// Guarda el `recomendacion_id` que devolvió el back-end para la superficie
+  /// [i] (el usuario pulsó "Usar recomendados"). Se devuelve al crear el kit.
+  void setRecomendacionId(int i, int recomendacionId) {
+    final next = Map<int, int>.from(state.recomendacionIds);
+    next[i] = recomendacionId;
+    state = state.copyWith(recomendacionIds: next);
+  }
+
   /// Captura la **tarifa de mano de obra por m²** para materiales SIMPLES
   /// (pintura). El total se calcula al crear: tarifa × área.
   void setManoObraSimple(double? valor) =>
@@ -87,6 +95,9 @@ class CotizacionWizard extends _$CotizacionWizard {
     // Áreas acumuladas por tipo, para convertir la tarifa por m² en total.
     var areaSimple = 0.0;
     var areaKit = 0.0;
+    // `recomendacion_id` de las superficies de kit para las que el usuario pidió
+    // recomendación (una por superficie).
+    final recomendacionIdsKit = <int>[];
 
     for (var i = 0; i < state.superficies.length; i++) {
       final sup = state.superficies[i];
@@ -104,6 +115,9 @@ class CotizacionWizard extends _$CotizacionWizard {
         final kit = state.seleccionKit[i];
         if (kit?.principal == null) continue;
         areaKit += sup.areaM2;
+        // Solo si el usuario pidió recomendación para ESTA superficie.
+        final rid = state.recomendacionIds[i];
+        if (rid != null) recomendacionIdsKit.add(rid);
         superficiesKit.add(SuperficieKitItem(
           areaM2: sup.areaM2,
           principalProductoId: kit!.principal!.productoId,
@@ -137,6 +151,11 @@ class CotizacionWizard extends _$CotizacionWizard {
         creadas.add(await ref.read(crearCotizacionKitUseCaseProvider)(
           proyectoId: proyectoId,
           manoObra: manoObraKitTotal,
+          // El contrato tiene UN `recomendacion_id` por cotización, pero la UI
+          // pide recomendación por superficie: se manda la primera. Si el
+          // back-end acepta una lista, cambiar a `recomendacionIdsKit`.
+          recomendacionId:
+              recomendacionIdsKit.isEmpty ? null : recomendacionIdsKit.first,
           superficies: superficiesKit,
         ));
       }

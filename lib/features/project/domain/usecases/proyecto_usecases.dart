@@ -13,6 +13,30 @@ class CrearProyectoUseCase {
   final ProyectoRepository _repo;
   CrearProyectoUseCase(this._repo);
 
-  Future<ProyectoEntity> call({required String nombre, String? direccion}) =>
-      _repo.crear(nombre: nombre, direccion: direccion);
+  Future<ProyectoEntity> call({
+    required String nombre,
+    String? direccion,
+    double? latitud,
+    double? longitud,
+  }) =>
+      _repo.crear(
+        nombre: nombre,
+        direccion: direccion,
+        latitud: latitud,
+        longitud: longitud,
+      );
+}
+
+/// Completa la ubicación de una obra creada sin coordenadas
+/// (`PATCH /api/v1/proyectos/{id}`), para que entre al dataset de entrenamiento.
+class ActualizarUbicacionProyectoUseCase {
+  final ProyectoRepository _repo;
+  ActualizarUbicacionProyectoUseCase(this._repo);
+
+  Future<ProyectoEntity> call({
+    required int id,
+    required double latitud,
+    required double longitud,
+  }) =>
+      _repo.actualizarUbicacion(id: id, latitud: latitud, longitud: longitud);
 }

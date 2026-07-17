@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../account/presentation/screens/subscriptions_screen.dart';
 import '../../../auth/presentation/providers/perfil_provider.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
+import '../../../recommendations/presentation/screens/entrenar_modelos_screen.dart';
 import '../../../security/presentation/screens/sensitive_data_screen.dart';
 import 'perfil_error.dart';
 import 'perfil_info_card.dart';
@@ -99,6 +100,19 @@ class PerfilTab extends ConsumerWidget {
               MaterialPageRoute(builder: (_) => const SensitiveDataScreen()),
             ),
           ),
+          // Entrenar los modelos de recomendación: el back-end solo lo permite
+          // al rol `ingeniero_civil`, así que solo a él se le muestra la opción.
+          if (perfil?.rol == 'ingeniero_civil') ...[
+            const SizedBox(height: 10),
+            ProfileItem(
+              icon: Icons.model_training_outlined,
+              label: 'Entrenar modelos',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EntrenarModelosScreen()),
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           ProfileItem(
             icon: Icons.logout,

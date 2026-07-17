@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../collaboration/presentation/screens/project_members_screen.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
+import 'agregar_ubicacion_button.dart';
 
 /// Tarjeta de un proyecto real del usuario.
 class ProjectCard extends StatelessWidget {
@@ -63,6 +64,11 @@ class ProjectCard extends StatelessWidget {
                       color: context.colors.textSecondary,
                     ),
                   ),
+                  // Obra sin coordenadas: no sirve para entrenar el modelo.
+                  if (!proyecto.tieneUbicacion) ...[
+                    const SizedBox(height: 4),
+                    AgregarUbicacionButton(proyectoId: proyecto.id),
+                  ],
                 ],
               ),
             ),

@@ -35,6 +35,7 @@ class ApiConfig {
 
   // --- Proyectos ---
   static const String proyectos = '$apiPrefix/proyectos';
+  static String proyecto(int id) => '$apiPrefix/proyectos/$id';
 
   // --- Grabaciones (flujo de audio del maestro de obra) ---
   static const String grabaciones = '$apiPrefix/grabaciones';
@@ -49,6 +50,11 @@ class ApiConfig {
   static const String cotizacionesKit = '$apiPrefix/cotizaciones/kit';
   static String cotizacionPdf(int id) => '$apiPrefix/cotizaciones/$id/pdf';
   static const String cotizacionesPdfs = '$apiPrefix/cotizaciones/pdfs';
+
+  // --- Recomendaciones (modelo de kits) ---
+  static const String recomendacionesEntrenar =
+      '$apiPrefix/recomendaciones/entrenar';
+  static const String recomendacionesKit = '$apiPrefix/recomendaciones/kit';
 
   // --- Notificaciones ---
   static const String notificaciones = '$apiPrefix/notificaciones';

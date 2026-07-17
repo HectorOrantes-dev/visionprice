@@ -49,7 +49,7 @@ final class HomeProvider extends $NotifierProvider<Home, HomeState> {
   }
 }
 
-String _$homeHash() => r'c70ac32ff5ec4540502590e5476b8bb7c1e07ee9';
+String _$homeHash() => r'34a2913f9f7117fd9d9086b28c370b233f68798c';
 
 /// Notifier de la pantalla de inicio (Riverpod moderno). Reúne proyectos,
 /// conectividad real (ping) y creación de proyectos. Reemplaza al

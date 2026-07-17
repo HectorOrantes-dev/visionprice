@@ -188,3 +188,50 @@ final class CrearProyectoUseCaseProvider extends $FunctionalProvider<
 
 String _$crearProyectoUseCaseHash() =>
     r'e972fe80a9c332f06cc5d083f60c77b997aed94a';
+
+@ProviderFor(actualizarUbicacionProyectoUseCase)
+final actualizarUbicacionProyectoUseCaseProvider =
+    ActualizarUbicacionProyectoUseCaseProvider._();
+
+final class ActualizarUbicacionProyectoUseCaseProvider
+    extends $FunctionalProvider<ActualizarUbicacionProyectoUseCase,
+        ActualizarUbicacionProyectoUseCase, ActualizarUbicacionProyectoUseCase>
+    with $Provider<ActualizarUbicacionProyectoUseCase> {
+  ActualizarUbicacionProyectoUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'actualizarUbicacionProyectoUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$actualizarUbicacionProyectoUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ActualizarUbicacionProyectoUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ActualizarUbicacionProyectoUseCase create(Ref ref) {
+    return actualizarUbicacionProyectoUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ActualizarUbicacionProyectoUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<ActualizarUbicacionProyectoUseCase>(value),
+    );
+  }
+}
+
+String _$actualizarUbicacionProyectoUseCaseHash() =>
+    r'69460d485f7391d99c9cb80c5da9cf3c5f6c0bf8';

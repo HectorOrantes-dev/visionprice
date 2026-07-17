@@ -45,11 +45,14 @@ class CotizacionRepositoryImpl implements CotizacionRepository {
   Future<CotizacionEntity> crearKit({
     required int proyectoId,
     double? manoObra,
+    int? recomendacionId,
     required List<SuperficieKitItem> superficies,
   }) {
     return _remote.crearKit({
       'proyecto_id': proyectoId,
       if (manoObra != null) 'mano_obra': manoObra,
+      // Opcional: solo si hubo recomendación para esta cotización.
+      if (recomendacionId != null) 'recomendacion_id': recomendacionId,
       'superficies': superficies.map((e) => e.toJson()).toList(),
     });
   }

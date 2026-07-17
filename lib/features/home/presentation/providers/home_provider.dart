@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/connectivity_service_provider.dart';
+import '../../../../core/di/location_service_provider.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../project/domain/entities/proyecto_entity.dart';
@@ -116,13 +117,44 @@ class Home extends _$Home {
   }
 
   /// Crea un proyecto nuevo y lo coloca al inicio de la lista.
+  ///
+  /// Adjunta la **ubicación** del dispositivo: es lo que permite que la obra
+  /// entre al dataset real de recomendaciones. Si no hay permiso/GPS se manda
+  /// sin coordenadas (NO se usa la ubicación de respaldo: una coordenada falsa
+  /// contaminaría el entrenamiento) y se puede completar después con
+  /// [completarUbicacion].
   Future<ProyectoEntity> crearProyecto({
     required String nombre,
     String? direccion,
   }) async {
+    final ubic = await ref.read(locationServiceProvider).current();
     final proyecto = await ref.read(crearProyectoUseCaseProvider)(
-        nombre: nombre, direccion: direccion);
+      nombre: nombre,
+      direccion: direccion,
+      latitud: ubic?.lat,
+      longitud: ubic?.lng,
+    );
     state = state.copyWith(proyectos: [proyecto, ...state.proyectos]);
     return proyecto;
+  }
+
+  /// Completa la ubicación de una obra creada sin coordenadas, usando la
+  /// posición actual (`PATCH /proyectos/{id}`). Devuelve `false` si no se pudo
+  /// obtener la ubicación del dispositivo.
+  Future<bool> completarUbicacion(int proyectoId) async {
+    final ubic = await ref.read(locationServiceProvider).current();
+    if (ubic == null) return false;
+    final actualizado = await ref.read(actualizarUbicacionProyectoUseCaseProvider)(
+      id: proyectoId,
+      latitud: ubic.lat,
+      longitud: ubic.lng,
+    );
+    state = state.copyWith(
+      proyectos: [
+        for (final p in state.proyectos)
+          if (p.id == actualizado.id) actualizado else p,
+      ],
+    );
+    return true;
   }
 }

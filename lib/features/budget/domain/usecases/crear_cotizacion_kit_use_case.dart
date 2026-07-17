@@ -8,11 +8,18 @@ class CrearCotizacionKitUseCase {
   final CotizacionRepository _repo;
   CrearCotizacionKitUseCase(this._repo);
 
+  /// [recomendacionId] solo se manda si el usuario pidió una recomendación para
+  /// esta cotización ("Usar recomendados"); es opcional en el back-end.
   Future<CotizacionEntity> call({
     required int proyectoId,
     double? manoObra,
+    int? recomendacionId,
     required List<SuperficieKitItem> superficies,
   }) =>
       _repo.crearKit(
-          proyectoId: proyectoId, manoObra: manoObra, superficies: superficies);
+        proyectoId: proyectoId,
+        manoObra: manoObra,
+        recomendacionId: recomendacionId,
+        superficies: superficies,
+      );
 }

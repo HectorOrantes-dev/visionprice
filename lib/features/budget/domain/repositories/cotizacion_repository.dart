@@ -26,9 +26,12 @@ abstract class CotizacionRepository {
   });
 
   /// Crea una cotización tipo KIT (loseta/piso/azulejo/zoclo + complementos).
+  /// [recomendacionId] cierra el loop del modelo: solo se manda si el usuario
+  /// pidió la recomendación ("Usar recomendados").
   Future<CotizacionEntity> crearKit({
     required int proyectoId,
     double? manoObra,
+    int? recomendacionId,
     required List<SuperficieKitItem> superficies,
   });
 

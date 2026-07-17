@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../shared/widgets/gradient_button.dart';
+import '../../../recommendations/presentation/widgets/recomendacion_kit_card.dart';
 import '../../domain/entities/producto_entity.dart';
 import '../providers/cotizacion_wizard_provider.dart';
 import 'kit_section.dart';
@@ -52,6 +53,14 @@ class KitBody extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
             children: [
+              // "Usar recomendados": bajo demanda, no consulta solo.
+              RecomendacionKitCard(
+                proyectoId: proyectoId,
+                index: index,
+                categoria: sup.categoria,
+                areaM2: sup.areaM2,
+              ),
+              const SizedBox(height: 18),
               KitSection(
                 titulo: 'Loseta / piso principal',
                 producto: kit?.principal,

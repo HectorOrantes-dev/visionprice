@@ -72,7 +72,7 @@ final class CotizacionWizardProvider
   }
 }
 
-String _$cotizacionWizardHash() => r'e35ae93a6e75c54dfb39a5c4f24312e79f0cfb32';
+String _$cotizacionWizardHash() => r'87662247ce06e91193cffcaa3835c6c7c71092a5';
 
 /// Notifier `.family` (por `proyectoId`) del flujo "superficies detectadas →
 /// elegir material (simple/kit) → resumen → cotización". Sobrevive la

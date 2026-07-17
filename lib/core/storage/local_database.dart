@@ -20,10 +20,28 @@ class LocalDatabase {
       // (el `_createDB` antiguo metía varios CREATE en un solo execute() y
       // sqflite solo ejecuta la PRIMERA sentencia → solo se creaba sync_queue).
       // v4: agrega `cotizaciones_pdf` (caché offline de la pestaña Mis Cotizaciones).
-      version: 4,
+      // v5: agrega `latitud`/`longitud` a `proyectos` (ubicación de la obra).
+      version: 5,
       onCreate: (db, version) => _createAllTables(db),
-      onUpgrade: (db, oldVersion, newVersion) => _createAllTables(db),
+      onUpgrade: (db, oldVersion, newVersion) async {
+        await _createAllTables(db);
+        // Las columnas nuevas NO las agrega `CREATE TABLE IF NOT EXISTS` en
+        // tablas ya existentes: hay que hacer ALTER TABLE.
+        await _addColumnIfMissing(db, 'proyectos', 'latitud', 'REAL');
+        await _addColumnIfMissing(db, 'proyectos', 'longitud', 'REAL');
+      },
     );
+  }
+
+  /// Agrega una columna solo si la tabla aún no la tiene (idempotente).
+  /// El nombre de tabla/columna viene de constantes del código, nunca del
+  /// usuario, y los valores nunca se concatenan aquí.
+  Future<void> _addColumnIfMissing(
+      Database db, String tabla, String columna, String tipo) async {
+    final info = await db.rawQuery('PRAGMA table_info($tabla)');
+    final existe = info.any((row) => row['name'] == columna);
+    if (existe) return;
+    await db.execute('ALTER TABLE $tabla ADD COLUMN $columna $tipo');
   }
 
   /// Crea TODAS las tablas de forma idempotente. Se usa tanto en `onCreate`
@@ -69,7 +87,9 @@ class LocalDatabase {
         direccion TEXT,
         estado TEXT NOT NULL,
         total_presupuestos INTEGER NOT NULL DEFAULT 0,
-        is_synced INTEGER NOT NULL DEFAULT 1
+        is_synced INTEGER NOT NULL DEFAULT 1,
+        latitud REAL,
+        longitud REAL
       );
     ''');
 

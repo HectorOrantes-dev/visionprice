@@ -32,3 +32,8 @@ ObtenerProyectosUseCase obtenerProyectosUseCase(
 @riverpod
 CrearProyectoUseCase crearProyectoUseCase(Ref ref) =>
     CrearProyectoUseCase(ref.watch(proyectoRepositoryProvider));
+
+@riverpod
+ActualizarUbicacionProyectoUseCase actualizarUbicacionProyectoUseCase(
+        Ref ref) =>
+    ActualizarUbicacionProyectoUseCase(ref.watch(proyectoRepositoryProvider));
