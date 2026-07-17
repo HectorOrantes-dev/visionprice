@@ -91,8 +91,7 @@ class CotizacionWizardState {
           if (kit.adhesivo == null) return false;
         case 'cruceta':
           if (kit.cruceta == null) return false;
-        case 'boquilla':
-        case 'boquillado':
+        case 'emboquillado':
           if (kit.boquilla == null) return false;
       }
     }
