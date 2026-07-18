@@ -36,6 +36,7 @@ dependencies:
   dio: ^5.10.0
   connectivity_plus: ^7.2.0
   audioplayers: ^6.8.1
+  dartz: ^0.10.1
 
 dev_dependencies:
   flutter_test:

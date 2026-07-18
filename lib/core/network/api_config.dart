@@ -37,6 +37,13 @@ class ApiConfig {
   static const String proyectos = '$apiPrefix/proyectos';
   static String proyecto(int id) => '$apiPrefix/proyectos/$id';
 
+  // --- Collaboration (Miembros e Invitaciones) ---
+  static String proyectoMiembros(int id) => '$apiPrefix/proyectos/$id/miembros';
+  static String proyectoMiembro(int id, int uid) => '$apiPrefix/proyectos/$id/miembros/$uid';
+  static String proyectoInvitaciones(int id) => '$apiPrefix/proyectos/$id/invitaciones';
+  static String proyectoInvitacionRevocar(int id, int invId) => '$apiPrefix/proyectos/$id/invitaciones/$invId';
+  static const String proyectosUnirse = '$apiPrefix/proyectos/unirse';
+
   // --- Grabaciones (flujo de audio del maestro de obra) ---
   static const String grabaciones = '$apiPrefix/grabaciones';
   static String grabacion(int id) => '$apiPrefix/grabaciones/$id';

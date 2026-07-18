@@ -1,79 +1,139 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
-import '../mock/collab_mock_data.dart';
-import '../models/invitation_vm.dart';
-import '../widgets/collab_empty_state.dart';
-import '../widgets/invitation_tile.dart';
+import '../providers/collaboration_providers.dart';
 
-/// Códigos de invitación activos (mock). Se pueden revocar (solo UI: se quitan
-/// de la lista local en memoria).
-class ActiveInvitationsScreen extends StatefulWidget {
-  const ActiveInvitationsScreen({super.key});
+class ActiveInvitationsScreen extends ConsumerWidget {
+  final int proyectoId;
+
+  const ActiveInvitationsScreen({super.key, required this.proyectoId});
 
   @override
-  State<ActiveInvitationsScreen> createState() =>
-      _ActiveInvitationsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final asyncValue = ref.watch(invitacionesProvider(proyectoId));
 
-class _ActiveInvitationsScreenState extends State<ActiveInvitationsScreen> {
-  final List<InvitationVM> _codigos = List.of(CollabMock.invitaciones);
-
-  Future<void> _confirmarRevocar(InvitationVM inv) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Revocar código'),
-        content: Text('El código ${inv.codigo} dejará de funcionar. '
-            '¿Revocarlo?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: context.colors.error),
-            child: const Text('Revocar'),
-          ),
-        ],
-      ),
-    );
-    if (ok == true) setState(() => _codigos.remove(inv));
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.colors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: context.colors.background,
-        elevation: 0,
-        leading: BackButton(color: context.colors.textPrimary),
-        title: Text('Códigos activos',
-            style: TextStyle(
-              color: context.colors.textPrimary,
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-            )),
+        title: const Text('Códigos de Invitación'),
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
       ),
-      body: SafeArea(
-        child: _codigos.isEmpty
-            ? CollabEmptyState(
-                icon: Icons.qr_code_2,
-                title: 'No hay códigos activos',
-                message:
-                    'Genera un código de invitación para que otros se unan al proyecto.',
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: _codigos.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (_, i) => InvitationTile(
-                  invitation: _codigos[i],
-                  onRevoke: () => _confirmarRevocar(_codigos[i]),
+      body: asyncValue.when(
+        data: (invitaciones) {
+          if (invitaciones.isEmpty) {
+            return Center(
+              child: Text('No hay invitaciones activas.', style: TextStyle(color: colors.textSecondary)),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: invitaciones.length,
+            itemBuilder: (context, index) {
+              final inv = invitaciones[index];
+              final expires = inv.expiraEn;
+              final isExpired = expires.inSeconds <= 0;
+
+              return Card(
+                color: colors.surface,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            inv.codigo,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                              color: colors.primary,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.copy, color: colors.primary),
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: inv.codigo));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Código copiado')),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text('Rol: ${inv.rol.label}', style: TextStyle(color: colors.textPrimary)),
+                      Text('Usos: ${inv.usos}', style: TextStyle(color: colors.textSecondary)),
+                      Text(
+                        isExpired
+                            ? 'Expirado'
+                            : 'Expira en: ${expires.inHours}h ${expires.inMinutes.remainder(60)}m',
+                        style: TextStyle(
+                          color: isExpired ? colors.error : colors.textSecondary,
+                          fontWeight: isExpired ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(foregroundColor: colors.error),
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (c) => AlertDialog(
+                                title: const Text('Revocar invitación'),
+                                content: const Text('El código ya no podrá usarse.'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancelar')),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(c, true),
+                                    child: const Text('Revocar', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) {
+                              try {
+                                await ref.read(invitacionesProvider(proyectoId).notifier).revocar(inv.id);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invitación revocada')));
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: colors.error));
+                                }
+                              }
+                            }
+                          },
+                          child: const Text('Revocar'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              );
+            },
+          );
+        },
+        loading: () => Center(child: CircularProgressIndicator(color: colors.primary)),
+        error: (err, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, color: colors.error, size: 48),
+              const SizedBox(height: 16),
+              Text(err.toString(), style: TextStyle(color: colors.textPrimary), textAlign: TextAlign.center),
+            ],
+          ),
+        ),
       ),
     );
   }

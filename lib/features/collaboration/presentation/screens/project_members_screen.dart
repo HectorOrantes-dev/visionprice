@@ -1,139 +1,156 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
-import '../../../../shared/widgets/gradient_button.dart';
-import '../mock/collab_mock_data.dart';
-import '../models/member_vm.dart';
-import '../widgets/collab_empty_state.dart';
-import '../widgets/member_tile.dart';
+import '../providers/collaboration_providers.dart';
 import 'active_invitations_screen.dart';
 import 'generate_invitation_screen.dart';
 
-/// Miembros del proyecto (mock). El dueño puede invitar, ver códigos activos y
-/// quitar colaboradores. Estado local: la lista de miembros es mutable en
-/// memoria para simular "quitar" (sin backend).
-class ProjectMembersScreen extends StatefulWidget {
-  const ProjectMembersScreen({super.key});
+class ProjectMembersScreen extends ConsumerWidget {
+  final int proyectoId;
+
+  const ProjectMembersScreen({super.key, required this.proyectoId});
 
   @override
-  State<ProjectMembersScreen> createState() => _ProjectMembersScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final asyncValue = ref.watch(miembrosProvider(proyectoId));
 
-class _ProjectMembersScreenState extends State<ProjectMembersScreen> {
-  final List<MemberVM> _members = List.of(CollabMock.miembros);
-
-  Future<void> _confirmarQuitar(MemberVM member) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Quitar del proyecto'),
-        content: Text(
-            '¿Seguro que quieres quitar a ${member.nombre} del proyecto?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: context.colors.error),
-            child: const Text('Quitar'),
-          ),
-        ],
-      ),
-    );
-    if (ok == true) {
-      setState(() => _members.remove(member));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final soloDueno = _members.where((m) => !m.esDueno).isEmpty;
     return Scaffold(
-      backgroundColor: context.colors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: context.colors.background,
-        elevation: 0,
-        leading: BackButton(color: context.colors.textPrimary),
-        title: Text('Miembros del proyecto',
-            style: TextStyle(
-              color: context.colors.textPrimary,
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-            )),
+        title: const Text('Colaboradores'),
+        backgroundColor: colors.surface,
+        foregroundColor: colors.textPrimary,
         actions: [
           IconButton(
-            tooltip: 'Códigos activos',
-            icon: Icon(Icons.qr_code_2, color: context.colors.primary),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => const ActiveInvitationsScreen()),
-            ),
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.read(miembrosProvider(proyectoId).notifier).recargar(),
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Row(
-                children: [
-                  Icon(Icons.folder_outlined,
-                      size: 18, color: context.colors.textSecondary),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      CollabMock.proyectoNombre,
-                      style: TextStyle(
-                          fontSize: 13, color: context.colors.textSecondary),
-                    ),
+      body: asyncValue.when(
+        data: (result) {
+          final miembros = result.miembros;
+          final esDueno = result.esDueno;
+
+          return Column(
+            children: [
+              if (esDueno)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => GenerateInvitationScreen(proyectoId: proyectoId),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.person_add),
+                          label: const Text('Invitar'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.primary,
+                            foregroundColor: colors.textOnPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ActiveInvitationsScreen(proyectoId: proyectoId),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.qr_code),
+                          label: const Text('Códigos'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: colors.primary,
+                            side: BorderSide(color: colors.primary),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: soloDueno
-                  ? CollabEmptyState(
-                      icon: Icons.group_add_outlined,
-                      title: 'Aún trabajas solo aquí',
-                      message:
-                          'Invita colaboradores con un código para que se unan al proyecto.',
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _members.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) {
-                        final m = _members[i];
-                        return MemberTile(
-                          member: m,
-                          onRemove: m.esDueno ? null : () => _confirmarQuitar(m),
-                        );
-                      },
-                    ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-              child: GradientButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const GenerateInvitationScreen()),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.person_add_alt_1, size: 18, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text('Invitar'),
-                  ],
-                ),
+              Expanded(
+                child: miembros.isEmpty
+                    ? Center(child: Text('No hay miembros', style: TextStyle(color: colors.textSecondary)))
+                    : ListView.builder(
+                        itemCount: miembros.length,
+                        itemBuilder: (context, index) {
+                          final miembro = miembros[index];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: colors.surfaceVariant,
+                              child: Text(miembro.nombre.substring(0, 1).toUpperCase(),
+                                  style: TextStyle(color: colors.textPrimary)),
+                            ),
+                            title: Text(miembro.nombre, style: TextStyle(color: colors.textPrimary)),
+                            subtitle: Text('${miembro.correo}\n${miembro.rolEnProyecto.label}',
+                                style: TextStyle(color: colors.textSecondary)),
+                            isThreeLine: true,
+                            trailing: (esDueno && !miembro.esDueno)
+                                ? IconButton(
+                                    icon: Icon(Icons.remove_circle_outline, color: colors.error),
+                                    onPressed: () async {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (c) => AlertDialog(
+                                          title: const Text('Quitar miembro'),
+                                          content: Text('¿Seguro que deseas quitar a ${miembro.nombre}?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(c, false),
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(c, true),
+                                              child: const Text('Quitar', style: TextStyle(color: Colors.red)),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirm == true) {
+                                        try {
+                                          await ref.read(miembrosProvider(proyectoId).notifier).quitarMiembro(miembro.usuarioId);
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Miembro quitado')));
+                                          }
+                                        } catch (e) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: colors.error));
+                                          }
+                                        }
+                                      }
+                                    },
+                                  )
+                                : null,
+                          );
+                        },
+                      ),
               ),
-            ),
-          ],
+            ],
+          );
+        },
+        loading: () => Center(child: CircularProgressIndicator(color: colors.primary)),
+        error: (err, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, color: colors.error, size: 48),
+              const SizedBox(height: 16),
+              Text(err.toString(), style: TextStyle(color: colors.textPrimary), textAlign: TextAlign.center),
+            ],
+          ),
         ),
       ),
     );
