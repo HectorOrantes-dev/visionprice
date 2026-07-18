@@ -8,6 +8,8 @@ import '../../features/projects/presentation/pages/create_project_page.dart';
 import '../../features/materials/presentation/pages/materials_page.dart';
 import '../../features/budget/presentation/pages/budget_page.dart';
 
+import '../../features/roles/presentation/pages/main_role_switcher_page.dart';
+
 /// Rutas nombradas de VisionPrice
 abstract final class AppRoutes {
   static const onboarding = '/onboarding';
@@ -17,12 +19,18 @@ abstract final class AppRoutes {
   static const createProject = '/projects/create';
   static const materials = '/materials';
   static const budget = '/budget';
+  static const roles = '/roles';
 }
 
 final appRouter = GoRouter(
-  initialLocation: AppRoutes.onboarding,
+  initialLocation: AppRoutes.roles, // Cambiado temporalmente
   debugLogDiagnostics: false,
   routes: [
+    GoRoute(
+      path: AppRoutes.roles,
+      name: 'roles',
+      builder: (context, state) => const MainRoleSwitcherPage(),
+    ),
     GoRoute(
       path: AppRoutes.onboarding,
       name: 'onboarding',
