@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/location_service_provider.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../budget/domain/entities/producto_entity.dart';
 import '../../../budget/presentation/providers/cotizacion_wizard_provider.dart';
 import '../../domain/entities/recomendacion_kit_entity.dart';
 import 'recomendacion_providers.dart';
@@ -14,10 +15,12 @@ const int kRecomendacionVecinos = 15;
 /// Recomendación de kit **por superficie** (family: proyectoId + índice).
 ///
 /// No se pide sola: arranca en `null` y solo consulta cuando el usuario pulsa
-/// "Usar recomendados" ([pedir]). Al llegar la respuesta:
-///  - aplica el `metodo_crucetas_recomendado` a esa superficie, y
-///  - guarda el `recomendacion_id` en el wizard, que lo devuelve en
-///    `POST /cotizaciones/kit` para cerrar el loop.
+/// "Usar recomendados" ([pedir]). Al llegar la respuesta **autollena** los
+/// widgets del kit de esa superficie con los productos más cercanos que sugiere
+/// el modelo (principal + pegazulejo + cruceta + emboquillado), aplica el método
+/// de crucetas y guarda el `recomendacion_id` (se devuelve en
+/// `POST /cotizaciones/kit` para cerrar el loop). El usuario puede cambiar
+/// cualquiera después: es autocompletado, no una imposición.
 @riverpod
 class RecomendacionSuperficie extends _$RecomendacionSuperficie {
   @override
@@ -50,9 +53,21 @@ class RecomendacionSuperficie extends _$RecomendacionSuperficie {
     if (r == null) return;
 
     final wizard = ref.read(cotizacionWizardProvider(proyectoId).notifier);
-    // "Usar recomendados": se aplica lo accionable (el método de crucetas). Los
-    // complementos son categorías: el producto concreto lo sigue eligiendo el
-    // usuario, la tarjeta solo le indica cuáles se sugieren.
+
+    // Autollenar cada widget con el primer producto recomendado (más cercano).
+    // Si una categoría vino vacía/ausente, ese widget queda para elegir a mano.
+    final principal = _producto(r, categoria); // azulejo / piso / zoclo
+    if (principal != null) wizard.seleccionarKitPrincipal(index, principal);
+
+    final pegazulejo = _producto(r, 'pegazulejo');
+    if (pegazulejo != null) wizard.seleccionarKitAdhesivo(index, pegazulejo);
+
+    final cruceta = _producto(r, 'cruceta');
+    if (cruceta != null) wizard.seleccionarKitCruceta(index, cruceta);
+
+    final emboquillado = _producto(r, 'emboquillado');
+    if (emboquillado != null) wizard.seleccionarKitBoquilla(index, emboquillado);
+
     if (r.metodoCrucetasRecomendado.isNotEmpty) {
       wizard.seleccionarKitMetodo(index, r.metodoCrucetasRecomendado);
     }
@@ -60,5 +75,12 @@ class RecomendacionSuperficie extends _$RecomendacionSuperficie {
     if (r.recomendacionId != null) {
       wizard.setRecomendacionId(index, r.recomendacionId!);
     }
+  }
+
+  /// Convierte el primer producto recomendado de [categoria] (JSON crudo) a
+  /// [ProductoEntity], o `null` si no hay ninguno.
+  ProductoEntity? _producto(RecomendacionKitEntity r, String categoria) {
+    final json = r.primerProducto(categoria);
+    return json == null ? null : ProductoEntity.fromJson(json);
   }
 }

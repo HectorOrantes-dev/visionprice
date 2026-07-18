@@ -11,10 +11,12 @@ part of 'recomendacion_superficie_provider.dart';
 /// Recomendación de kit **por superficie** (family: proyectoId + índice).
 ///
 /// No se pide sola: arranca en `null` y solo consulta cuando el usuario pulsa
-/// "Usar recomendados" ([pedir]). Al llegar la respuesta:
-///  - aplica el `metodo_crucetas_recomendado` a esa superficie, y
-///  - guarda el `recomendacion_id` en el wizard, que lo devuelve en
-///    `POST /cotizaciones/kit` para cerrar el loop.
+/// "Usar recomendados" ([pedir]). Al llegar la respuesta **autollena** los
+/// widgets del kit de esa superficie con los productos más cercanos que sugiere
+/// el modelo (principal + pegazulejo + cruceta + emboquillado), aplica el método
+/// de crucetas y guarda el `recomendacion_id` (se devuelve en
+/// `POST /cotizaciones/kit` para cerrar el loop). El usuario puede cambiar
+/// cualquiera después: es autocompletado, no una imposición.
 
 @ProviderFor(RecomendacionSuperficie)
 final recomendacionSuperficieProvider = RecomendacionSuperficieFamily._();
@@ -22,19 +24,23 @@ final recomendacionSuperficieProvider = RecomendacionSuperficieFamily._();
 /// Recomendación de kit **por superficie** (family: proyectoId + índice).
 ///
 /// No se pide sola: arranca en `null` y solo consulta cuando el usuario pulsa
-/// "Usar recomendados" ([pedir]). Al llegar la respuesta:
-///  - aplica el `metodo_crucetas_recomendado` a esa superficie, y
-///  - guarda el `recomendacion_id` en el wizard, que lo devuelve en
-///    `POST /cotizaciones/kit` para cerrar el loop.
+/// "Usar recomendados" ([pedir]). Al llegar la respuesta **autollena** los
+/// widgets del kit de esa superficie con los productos más cercanos que sugiere
+/// el modelo (principal + pegazulejo + cruceta + emboquillado), aplica el método
+/// de crucetas y guarda el `recomendacion_id` (se devuelve en
+/// `POST /cotizaciones/kit` para cerrar el loop). El usuario puede cambiar
+/// cualquiera después: es autocompletado, no una imposición.
 final class RecomendacionSuperficieProvider extends $AsyncNotifierProvider<
     RecomendacionSuperficie, RecomendacionKitEntity?> {
   /// Recomendación de kit **por superficie** (family: proyectoId + índice).
   ///
   /// No se pide sola: arranca en `null` y solo consulta cuando el usuario pulsa
-  /// "Usar recomendados" ([pedir]). Al llegar la respuesta:
-  ///  - aplica el `metodo_crucetas_recomendado` a esa superficie, y
-  ///  - guarda el `recomendacion_id` en el wizard, que lo devuelve en
-  ///    `POST /cotizaciones/kit` para cerrar el loop.
+  /// "Usar recomendados" ([pedir]). Al llegar la respuesta **autollena** los
+  /// widgets del kit de esa superficie con los productos más cercanos que sugiere
+  /// el modelo (principal + pegazulejo + cruceta + emboquillado), aplica el método
+  /// de crucetas y guarda el `recomendacion_id` (se devuelve en
+  /// `POST /cotizaciones/kit` para cerrar el loop). El usuario puede cambiar
+  /// cualquiera después: es autocompletado, no una imposición.
   RecomendacionSuperficieProvider._(
       {required RecomendacionSuperficieFamily super.from,
       required (
@@ -77,15 +83,17 @@ final class RecomendacionSuperficieProvider extends $AsyncNotifierProvider<
 }
 
 String _$recomendacionSuperficieHash() =>
-    r'777fe4c9c4f8511c3a9f974d06c4b3b769d0652b';
+    r'a618f749fb53fdd47fe1c621bf7390de8a9cd760';
 
 /// Recomendación de kit **por superficie** (family: proyectoId + índice).
 ///
 /// No se pide sola: arranca en `null` y solo consulta cuando el usuario pulsa
-/// "Usar recomendados" ([pedir]). Al llegar la respuesta:
-///  - aplica el `metodo_crucetas_recomendado` a esa superficie, y
-///  - guarda el `recomendacion_id` en el wizard, que lo devuelve en
-///    `POST /cotizaciones/kit` para cerrar el loop.
+/// "Usar recomendados" ([pedir]). Al llegar la respuesta **autollena** los
+/// widgets del kit de esa superficie con los productos más cercanos que sugiere
+/// el modelo (principal + pegazulejo + cruceta + emboquillado), aplica el método
+/// de crucetas y guarda el `recomendacion_id` (se devuelve en
+/// `POST /cotizaciones/kit` para cerrar el loop). El usuario puede cambiar
+/// cualquiera después: es autocompletado, no una imposición.
 
 final class RecomendacionSuperficieFamily extends $Family
     with
@@ -110,10 +118,12 @@ final class RecomendacionSuperficieFamily extends $Family
   /// Recomendación de kit **por superficie** (family: proyectoId + índice).
   ///
   /// No se pide sola: arranca en `null` y solo consulta cuando el usuario pulsa
-  /// "Usar recomendados" ([pedir]). Al llegar la respuesta:
-  ///  - aplica el `metodo_crucetas_recomendado` a esa superficie, y
-  ///  - guarda el `recomendacion_id` en el wizard, que lo devuelve en
-  ///    `POST /cotizaciones/kit` para cerrar el loop.
+  /// "Usar recomendados" ([pedir]). Al llegar la respuesta **autollena** los
+  /// widgets del kit de esa superficie con los productos más cercanos que sugiere
+  /// el modelo (principal + pegazulejo + cruceta + emboquillado), aplica el método
+  /// de crucetas y guarda el `recomendacion_id` (se devuelve en
+  /// `POST /cotizaciones/kit` para cerrar el loop). El usuario puede cambiar
+  /// cualquiera después: es autocompletado, no una imposición.
 
   RecomendacionSuperficieProvider call(
     int proyectoId,
@@ -131,10 +141,12 @@ final class RecomendacionSuperficieFamily extends $Family
 /// Recomendación de kit **por superficie** (family: proyectoId + índice).
 ///
 /// No se pide sola: arranca en `null` y solo consulta cuando el usuario pulsa
-/// "Usar recomendados" ([pedir]). Al llegar la respuesta:
-///  - aplica el `metodo_crucetas_recomendado` a esa superficie, y
-///  - guarda el `recomendacion_id` en el wizard, que lo devuelve en
-///    `POST /cotizaciones/kit` para cerrar el loop.
+/// "Usar recomendados" ([pedir]). Al llegar la respuesta **autollena** los
+/// widgets del kit de esa superficie con los productos más cercanos que sugiere
+/// el modelo (principal + pegazulejo + cruceta + emboquillado), aplica el método
+/// de crucetas y guarda el `recomendacion_id` (se devuelve en
+/// `POST /cotizaciones/kit` para cerrar el loop). El usuario puede cambiar
+/// cualquiera después: es autocompletado, no una imposición.
 
 abstract class _$RecomendacionSuperficie
     extends $AsyncNotifier<RecomendacionKitEntity?> {
