@@ -405,7 +405,7 @@ final class MiembrosNotifierProvider
   }
 }
 
-String _$miembrosNotifierHash() => r'56e3a24b7547353ba9c7c40801e932a1c008944a';
+String _$miembrosNotifierHash() => r'60c8266e29b2ab8b2899d3ce845e833dc68011de';
 
 final class MiembrosNotifierFamily extends $Family
     with
@@ -496,7 +496,7 @@ final class InvitacionesNotifierProvider extends $AsyncNotifierProvider<
 }
 
 String _$invitacionesNotifierHash() =>
-    r'44d15fbe5e83233020e9949d1bcec4e76cf4c487';
+    r'd40549b30d663ecca925eccc0ddda4f7b8085d7c';
 
 final class InvitacionesNotifierFamily extends $Family
     with
@@ -553,8 +553,8 @@ abstract class _$InvitacionesNotifier
 @ProviderFor(UnirseAProyectoNotifier)
 final unirseAProyectoProvider = UnirseAProyectoNotifierProvider._();
 
-final class UnirseAProyectoNotifierProvider extends $NotifierProvider<
-    UnirseAProyectoNotifier, AsyncValue<UnirseResultEntity?>> {
+final class UnirseAProyectoNotifierProvider extends $AsyncNotifierProvider<
+    UnirseAProyectoNotifier, UnirseResultEntity?> {
   UnirseAProyectoNotifierProvider._()
       : super(
           from: null,
@@ -572,31 +572,21 @@ final class UnirseAProyectoNotifierProvider extends $NotifierProvider<
   @$internal
   @override
   UnirseAProyectoNotifier create() => UnirseAProyectoNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<UnirseResultEntity?> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride:
-          $SyncValueProvider<AsyncValue<UnirseResultEntity?>>(value),
-    );
-  }
 }
 
 String _$unirseAProyectoNotifierHash() =>
-    r'5d5f697bdbc455c010b3f484af1988c5493136ba';
+    r'4a398ccff0ebfe3760b811ac3be09b87eb88e5b8';
 
 abstract class _$UnirseAProyectoNotifier
-    extends $Notifier<AsyncValue<UnirseResultEntity?>> {
-  AsyncValue<UnirseResultEntity?> build();
+    extends $AsyncNotifier<UnirseResultEntity?> {
+  FutureOr<UnirseResultEntity?> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<UnirseResultEntity?>,
-        AsyncValue<UnirseResultEntity?>>;
+    final ref =
+        this.ref as $Ref<AsyncValue<UnirseResultEntity?>, UnirseResultEntity?>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<UnirseResultEntity?>,
-            AsyncValue<UnirseResultEntity?>>,
+        AnyNotifier<AsyncValue<UnirseResultEntity?>, UnirseResultEntity?>,
         AsyncValue<UnirseResultEntity?>,
         Object?,
         Object?>;
@@ -607,8 +597,8 @@ abstract class _$UnirseAProyectoNotifier
 @ProviderFor(GenerarInvitacionNotifier)
 final generarInvitacionProvider = GenerarInvitacionNotifierProvider._();
 
-final class GenerarInvitacionNotifierProvider extends $NotifierProvider<
-    GenerarInvitacionNotifier, AsyncValue<InvitacionEntity?>> {
+final class GenerarInvitacionNotifierProvider extends $AsyncNotifierProvider<
+    GenerarInvitacionNotifier, InvitacionEntity?> {
   GenerarInvitacionNotifierProvider._()
       : super(
           from: null,
@@ -626,31 +616,21 @@ final class GenerarInvitacionNotifierProvider extends $NotifierProvider<
   @$internal
   @override
   GenerarInvitacionNotifier create() => GenerarInvitacionNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<InvitacionEntity?> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride:
-          $SyncValueProvider<AsyncValue<InvitacionEntity?>>(value),
-    );
-  }
 }
 
 String _$generarInvitacionNotifierHash() =>
-    r'3141261b3f1b1be22825cc5e1d2b1aad10e14a85';
+    r'add12a1e777aec3d2f393e0c4c201f77e5ddb121';
 
 abstract class _$GenerarInvitacionNotifier
-    extends $Notifier<AsyncValue<InvitacionEntity?>> {
-  AsyncValue<InvitacionEntity?> build();
+    extends $AsyncNotifier<InvitacionEntity?> {
+  FutureOr<InvitacionEntity?> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref
-        as $Ref<AsyncValue<InvitacionEntity?>, AsyncValue<InvitacionEntity?>>;
+    final ref =
+        this.ref as $Ref<AsyncValue<InvitacionEntity?>, InvitacionEntity?>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<InvitacionEntity?>,
-            AsyncValue<InvitacionEntity?>>,
+        AnyNotifier<AsyncValue<InvitacionEntity?>, InvitacionEntity?>,
         AsyncValue<InvitacionEntity?>,
         Object?,
         Object?>;

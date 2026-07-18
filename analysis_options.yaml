@@ -9,6 +9,12 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  # `security_practice/` es un proyecto Flutter APARTE (práctica de SSL pinning),
+  # no forma parte de la app: se excluye del análisis del proyecto principal.
+  exclude:
+    - security_practice/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

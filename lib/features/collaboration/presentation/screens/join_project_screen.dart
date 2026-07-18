@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/gradient_button.dart';
 import '../providers/collaboration_providers.dart';
 
+/// Unirse a un proyecto con un código de invitación (`POST /proyectos/unirse`).
 class JoinProjectScreen extends ConsumerStatefulWidget {
   const JoinProjectScreen({super.key});
 
@@ -20,113 +24,174 @@ class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen> {
     super.dispose();
   }
 
-  void _unirse() async {
+  Future<void> _unirse() async {
     final code = _codeController.text.trim().toUpperCase();
     if (code.isEmpty) return;
-
     await ref.read(unirseAProyectoProvider.notifier).unirse(code);
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    final c = context.colors;
     final asyncState = ref.watch(unirseAProyectoProvider);
 
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: c.background,
       appBar: AppBar(
-        title: const Text('Unirse a Proyecto'),
-        backgroundColor: colors.surface,
-        foregroundColor: colors.textPrimary,
+        backgroundColor: c.background,
+        elevation: 0,
+        leading: BackButton(color: c.textPrimary),
+        title: Text('Unirme a un proyecto',
+            style: TextStyle(
+                color: c.textPrimary, fontSize: 17, fontWeight: FontWeight.w700)),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.group_add, size: 80, color: colors.primary),
-            const SizedBox(height: 24),
-            Text(
-              'Ingresa el código de invitación',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colors.textPrimary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Pídele al dueño del proyecto que genere un código para ti.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: colors.textSecondary),
-            ),
-            const SizedBox(height: 32),
-            TextField(
-              controller: _codeController,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24, letterSpacing: 4, fontWeight: FontWeight.bold, color: colors.textPrimary),
-              textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(
-                hintText: 'CÓDIGO',
-                hintStyle: TextStyle(color: colors.textHint, letterSpacing: 4),
-                filled: true,
-                fillColor: colors.surfaceVariant,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 12),
+              Center(
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: c.primaryLight,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.group_add_outlined, size: 34, color: c.primary),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            asyncState.when(
-              data: (result) {
-                if (result == null) {
-                  return SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: colors.primary, foregroundColor: colors.textOnPrimary),
-                      onPressed: _unirse,
-                      child: const Text('Unirme', style: TextStyle(fontSize: 18)),
-                    ),
-                  );
-                }
-
-                return Column(
-                  children: [
-                    Icon(Icons.check_circle, color: colors.success, size: 48),
-                    const SizedBox(height: 16),
-                    Text('¡Te has unido a "${result.proyectoNombre}"!',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: colors.success, fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Text('Tu rol: ${result.rol.label}', style: TextStyle(color: colors.textPrimary)),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(foregroundColor: colors.primary, side: BorderSide(color: colors.primary)),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Volver a mis proyectos'),
+              const SizedBox(height: 16),
+              Center(
+                child: Text('Ingresa el código de invitación',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.heading(size: 20, color: c.textPrimary)),
+              ),
+              const SizedBox(height: 6),
+              Center(
+                child: Text(
+                  'Pídele al dueño del proyecto que genere un código para ti.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: c.textSecondary, height: 1.4),
+                ),
+              ),
+              const SizedBox(height: 28),
+              TextField(
+                controller: _codeController,
+                textAlign: TextAlign.center,
+                textCapitalization: TextCapitalization.characters,
+                style: TextStyle(
+                    fontSize: 22,
+                    letterSpacing: 3,
+                    fontWeight: FontWeight.w800,
+                    color: c.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'CÓDIGO',
+                  hintStyle: TextStyle(color: c.textHint, letterSpacing: 3),
+                  filled: true,
+                  fillColor: c.surface,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: c.border),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: c.border),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              asyncState.when(
+                data: (result) => result == null
+                    ? GradientButton(
+                        height: 52,
+                        onPressed: _unirse,
+                        child: const Text('Unirme'),
+                      )
+                    : _Exito(
+                        nombre: result.proyectoNombre,
+                        rol: result.rol.label,
+                        onVolver: () => Navigator.pop(context),
                       ),
-                    )
-                  ],
-                );
-              },
-              loading: () => CircularProgressIndicator(color: colors.primary),
-              error: (err, _) => Column(
-                children: [
-                  Text(err.toString(), style: TextStyle(color: colors.error), textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: colors.primary, foregroundColor: colors.textOnPrimary),
-                      onPressed: _unirse,
-                      child: const Text('Reintentar', style: TextStyle(fontSize: 18)),
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (e, _) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: c.errorLight,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, size: 16, color: c.error),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              e is ApiException
+                                  ? e.message
+                                  : 'No se pudo unir al proyecto.',
+                              style: TextStyle(fontSize: 12, color: c.error),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  )
-                ],
+                    const SizedBox(height: 12),
+                    GradientButton(
+                      height: 52,
+                      onPressed: _unirse,
+                      child: const Text('Reintentar'),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Estado de éxito tras unirse: confirma proyecto + rol y ofrece volver.
+class _Exito extends StatelessWidget {
+  final String nombre;
+  final String rol;
+  final VoidCallback onVolver;
+  const _Exito({required this.nombre, required this.rol, required this.onVolver});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Column(
+      children: [
+        Icon(Icons.check_circle, color: c.success, size: 48),
+        const SizedBox(height: 12),
+        Text('¡Te uniste a "$nombre"!',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.heading(size: 18, color: c.success)),
+        const SizedBox(height: 6),
+        Text('Tu rol: $rol', style: TextStyle(color: c.textSecondary)),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: OutlinedButton(
+            onPressed: onVolver,
+            child: const Text('Volver a mis proyectos'),
+          ),
+        ),
+      ],
     );
   }
 }

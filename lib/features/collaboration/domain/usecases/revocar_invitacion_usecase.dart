@@ -1,14 +1,9 @@
-import 'package:dartz/dartz.dart';
-
-import '../../../../core/error/failures.dart';
 import '../repositories/collaboration_repository.dart';
 
 class RevocarInvitacionUseCase {
-  final CollaborationRepository repository;
+  final CollaborationRepository _repo;
+  RevocarInvitacionUseCase(this._repo);
 
-  RevocarInvitacionUseCase(this.repository);
-
-  Future<Either<Failure, void>> call(int proyectoId, int invitacionId) {
-    return repository.revocarInvitacion(proyectoId, invitacionId);
-  }
+  Future<void> call(int proyectoId, int invitacionId) =>
+      _repo.revocarInvitacion(proyectoId, invitacionId);
 }

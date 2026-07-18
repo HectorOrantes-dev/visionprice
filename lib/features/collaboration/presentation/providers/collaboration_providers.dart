@@ -63,27 +63,18 @@ class MiembrosNotifier extends _$MiembrosNotifier {
     return _fetch();
   }
 
-  Future<MiembrosResultEntity> _fetch() async {
-    final useCase = ref.read(obtenerMiembrosUseCaseProvider);
-    final result = await useCase(proyectoId);
-    return result.fold(
-      (failure) => throw Exception(failure.message),
-      (data) => data,
-    );
-  }
+  Future<MiembrosResultEntity> _fetch() =>
+      ref.read(obtenerMiembrosUseCaseProvider)(proyectoId);
 
   Future<void> recargar() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(_fetch);
   }
 
+  /// Quita un miembro y refresca la lista. Lanza si falla (la UI lo captura).
   Future<void> quitarMiembro(int usuarioId) async {
-    final useCase = ref.read(quitarMiembroUseCaseProvider);
-    final result = await useCase(proyectoId, usuarioId);
-    result.fold(
-      (failure) => throw Exception(failure.message), // Manejar en UI
-      (_) => recargar(), // Recargar la lista después de quitar
-    );
+    await ref.read(quitarMiembroUseCaseProvider)(proyectoId, usuarioId);
+    await recargar();
   }
 }
 
@@ -94,45 +85,32 @@ class InvitacionesNotifier extends _$InvitacionesNotifier {
     return _fetch();
   }
 
-  Future<List<InvitacionEntity>> _fetch() async {
-    final useCase = ref.read(obtenerInvitacionesUseCaseProvider);
-    final result = await useCase(proyectoId);
-    return result.fold(
-      (failure) => throw Exception(failure.message),
-      (data) => data,
-    );
-  }
+  Future<List<InvitacionEntity>> _fetch() =>
+      ref.read(obtenerInvitacionesUseCaseProvider)(proyectoId);
 
   Future<void> recargar() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(_fetch);
   }
 
+  /// Revoca un código y refresca la lista. Lanza si falla (la UI lo captura).
   Future<void> revocar(int invitacionId) async {
-    final useCase = ref.read(revocarInvitacionUseCaseProvider);
-    final result = await useCase(proyectoId, invitacionId);
-    result.fold(
-      (failure) => throw Exception(failure.message),
-      (_) => recargar(),
-    );
+    await ref.read(revocarInvitacionUseCaseProvider)(proyectoId, invitacionId);
+    await recargar();
   }
 }
 
 @riverpod
 class UnirseAProyectoNotifier extends _$UnirseAProyectoNotifier {
   @override
-  AsyncValue<UnirseResultEntity?> build() {
-    return const AsyncValue.data(null);
-  }
+  FutureOr<UnirseResultEntity?> build() => null;
 
+  /// Une al usuario al proyecto con [codigo]. `guard` traduce el resultado o el
+  /// error del back-end (código inválido/expirado) al subtipo de `AsyncValue`.
   Future<void> unirse(String codigo) async {
-    state = const AsyncValue.loading();
-    final useCase = ref.read(unirseAProyectoUseCaseProvider);
-    final result = await useCase(codigo);
-    
-    state = result.fold(
-      (failure) => AsyncValue.error(failure.message, StackTrace.current),
-      (data) => AsyncValue.data(data),
+    state = const AsyncLoading<UnirseResultEntity?>();
+    state = await AsyncValue.guard<UnirseResultEntity?>(
+      () => ref.read(unirseAProyectoUseCaseProvider)(codigo),
     );
   }
 }
@@ -140,18 +118,17 @@ class UnirseAProyectoNotifier extends _$UnirseAProyectoNotifier {
 @riverpod
 class GenerarInvitacionNotifier extends _$GenerarInvitacionNotifier {
   @override
-  AsyncValue<InvitacionEntity?> build() {
-    return const AsyncValue.data(null);
-  }
+  FutureOr<InvitacionEntity?> build() => null;
 
-  Future<void> generar(int proyectoId, String rol, {List<String>? correos}) async {
-    state = const AsyncValue.loading();
-    final useCase = ref.read(generarInvitacionUseCaseProvider);
-    final result = await useCase(proyectoId, rol, correos: correos);
-    
-    state = result.fold(
-      (failure) => AsyncValue.error(failure.message, StackTrace.current),
-      (data) => AsyncValue.data(data),
+  Future<void> generar(int proyectoId, String rol,
+      {List<String>? correos}) async {
+    state = const AsyncLoading<InvitacionEntity?>();
+    state = await AsyncValue.guard<InvitacionEntity?>(
+      () => ref.read(generarInvitacionUseCaseProvider)(
+        proyectoId,
+        rol,
+        correos: correos,
+      ),
     );
   }
 }

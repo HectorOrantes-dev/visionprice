@@ -1,14 +1,9 @@
-import 'package:dartz/dartz.dart';
-
-import '../../../../core/error/failures.dart';
 import '../repositories/collaboration_repository.dart';
 
 class QuitarMiembroUseCase {
-  final CollaborationRepository repository;
+  final CollaborationRepository _repo;
+  QuitarMiembroUseCase(this._repo);
 
-  QuitarMiembroUseCase(this.repository);
-
-  Future<Either<Failure, void>> call(int proyectoId, int usuarioId) {
-    return repository.quitarMiembro(proyectoId, usuarioId);
-  }
+  Future<void> call(int proyectoId, int usuarioId) =>
+      _repo.quitarMiembro(proyectoId, usuarioId);
 }
