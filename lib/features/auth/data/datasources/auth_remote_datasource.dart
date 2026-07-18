@@ -1,59 +1,18 @@
-import 'package:injectable/injectable.dart';
-import '../models/user_model.dart';
+import '../../domain/entities/auth_session_entity.dart';
+import '../../domain/entities/perfil_entity.dart';
+import '../../domain/entities/register_result_entity.dart';
+import '../../domain/entities/role_entity.dart';
 
-/// Contrato del datasource remoto de autenticación.
-abstract interface class AuthRemoteDatasource {
-  Future<UserModel> login({required String email, required String password});
-  Future<UserModel> register({
-    required String name,
-    required String email,
-    required String password,
-  });
-  Future<void> logout();
-  Future<UserModel?> getCurrentUser();
-}
-
-/// Implementación del datasource con datos mock.
-@Injectable(as: AuthRemoteDatasource)
-class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
-  const AuthRemoteDatasourceImpl();
-
-  @override
-  Future<UserModel> login({
-    required String email,
-    required String password,
-  }) async {
-    // TODO: reemplazar con Dio/Firebase Auth real
-    await Future.delayed(const Duration(milliseconds: 800));
-    return UserModel(
-      id: 'user_demo',
-      name: 'Usuario Demo',
-      email: email,
-    );
-  }
-
-  @override
-  Future<UserModel> register({
-    required String name,
-    required String email,
-    required String password,
-  }) async {
-    await Future.delayed(const Duration(milliseconds: 1000));
-    return UserModel(
-      id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-      name: name,
-      email: email,
-    );
-  }
-
-  @override
-  Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 200));
-  }
-
-  @override
-  Future<UserModel?> getCurrentUser() async {
-    // Retorna null si no hay sesión activa
-    return null;
-  }
+abstract class AuthRemoteDataSource {
+  Future<AuthSessionEntity?> login(String correo, String contrasena);
+  Future<AuthSessionEntity> verifyTwoFactor(String correo, String code);
+  Future<List<RoleEntity>> getRoles();
+  Future<RegisterResultEntity> register(Map<String, dynamic> body);
+  Future<AuthSessionEntity> googleLogin(String idToken);
+  Future<AuthSessionEntity> googleRegister(String idToken, String rol);
+  Future<void> forgotPassword(String correo);
+  Future<String> verifyResetCode(String correo, String code);
+  Future<AuthSessionEntity?> resetPassword(
+      String correo, String resetToken, String nuevaContrasena);
+  Future<PerfilEntity> getPerfil();
 }

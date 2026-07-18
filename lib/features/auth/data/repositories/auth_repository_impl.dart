@@ -1,76 +1,159 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/user.dart';
+import 'package:flutter/foundation.dart';
+import 'package:sqflite/sqflite.dart';
+
+import '../../../../core/storage/local_database.dart';
+import '../../../../core/storage/token_storage.dart';
+import '../../domain/entities/auth_session_entity.dart';
+import '../../domain/entities/perfil_entity.dart';
+import '../../domain/entities/register_result_entity.dart';
+import '../../domain/entities/role_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 
-/// Implementación concreta de [AuthRepository] — capa Data.
-@Injectable(as: AuthRepository)
+/// Implementación del contrato de dominio. Orquesta el datasource remoto y la
+/// persistencia local del token. Registrada como la interfaz `AuthRepository`.
 class AuthRepositoryImpl implements AuthRepository {
-  const AuthRepositoryImpl(this._remoteDatasource);
+  final AuthRemoteDataSource _remote;
+  final TokenStorage _tokenStorage;
+  final LocalDatabase _localDatabase;
 
-  final AuthRemoteDatasource _remoteDatasource;
+  AuthRepositoryImpl(this._remote, this._tokenStorage, this._localDatabase);
+
+  /// Caché en memoria del perfil. Como este repositorio es `@LazySingleton`,
+  /// vive toda la sesión: el perfil se pide UNA vez a la red y luego se
+  /// reutiliza (se limpia en [logout]).
+  PerfilEntity? _perfilCache;
 
   @override
-  Future<Either<Failure, User>> login({
-    required String email,
-    required String password,
+  Future<AuthSessionEntity?> login({
+    required String correo,
+    required String contrasena,
   }) async {
-    try {
-      final model =
-          await _remoteDatasource.login(email: email, password: password);
-      return Right(model);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on AuthException catch (e) {
-      return Left(AuthFailure(e.message));
+    final session = await _remote.login(correo, contrasena);
+    // Login directo (sin 2FA): persiste el token igual que verifyTwoFactor.
+    if (session != null) {
+      await _tokenStorage.saveToken(session.accessToken);
     }
+    return session;
   }
 
   @override
-  Future<Either<Failure, User>> register({
-    required String name,
-    required String email,
-    required String password,
+  Future<AuthSessionEntity> verifyTwoFactor({
+    required String correo,
+    required String code,
   }) async {
+    final session = await _remote.verifyTwoFactor(correo, code);
+    await _tokenStorage.saveToken(session.accessToken);
+    return session;
+  }
+
+  @override
+  Future<List<RoleEntity>> getRoles() => _remote.getRoles();
+
+  @override
+  Future<RegisterResultEntity> register({
+    required String nombre,
+    required String correo,
+    required String contrasena,
+    required String rol,
+    String? telefono,
+  }) {
+    return _remote.register({
+      'nombre': nombre,
+      'correo': correo,
+      'contrasena': contrasena,
+      'rol': rol,
+      if (telefono != null && telefono.isNotEmpty) 'telefono': telefono,
+    });
+  }
+
+  @override
+  Future<AuthSessionEntity> googleLogin({required String idToken}) async {
+    final session = await _remote.googleLogin(idToken);
+    await _tokenStorage.saveToken(session.accessToken);
+    return session;
+  }
+
+  @override
+  Future<AuthSessionEntity> googleRegister({
+    required String idToken,
+    required String rol,
+  }) async {
+    final session = await _remote.googleRegister(idToken, rol);
+    await _tokenStorage.saveToken(session.accessToken);
+    return session;
+  }
+
+  @override
+  Future<void> forgotPassword({required String correo}) =>
+      _remote.forgotPassword(correo);
+
+  @override
+  Future<String> verifyResetCode({
+    required String correo,
+    required String code,
+  }) =>
+      _remote.verifyResetCode(correo, code);
+
+  @override
+  Future<AuthSessionEntity?> resetPassword({
+    required String correo,
+    required String resetToken,
+    required String nuevaContrasena,
+  }) async {
+    final session =
+        await _remote.resetPassword(correo, resetToken, nuevaContrasena);
+    // Auto-login tras el reset: persiste el token igual que verifyTwoFactor.
+    if (session != null) {
+      await _tokenStorage.saveToken(session.accessToken);
+    }
+    return session;
+  }
+
+  @override
+  Future<PerfilEntity> getPerfil({bool forceRefresh = false}) async {
+    if (!forceRefresh && _perfilCache != null) return _perfilCache!;
     try {
-      final model = await _remoteDatasource.register(
-        name: name,
-        email: email,
-        password: password,
-      );
-      return Right(model);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on AuthException catch (e) {
-      return Left(AuthFailure(e.message));
+      final perfil = await _remote.getPerfil();
+      _perfilCache = perfil;
+      // Guardado local best-effort: si el insert falla (tabla, esquema, etc.)
+      // NO debe tirar el perfil recién bajado de la red. Se registra y sigue.
+      _guardarPerfilLocal(perfil);
+      return perfil;
+    } catch (e) {
+      debugPrint('getPerfil: falló la red ($e). Intentando caché local…');
+      // Si falla la red, intentar recuperar de local (best-effort).
+      try {
+        final db = await _localDatabase.database;
+        final maps = await db.query('perfil', limit: 1);
+        if (maps.isNotEmpty) {
+          final perfil = PerfilEntity.fromJson(maps.first);
+          _perfilCache = perfil;
+          return perfil;
+        }
+      } catch (localErr) {
+        debugPrint('getPerfil: tampoco hay perfil local ($localErr).');
+      }
+      rethrow; // sin red ni local → propaga el error original
+    }
+  }
+
+  /// Persiste el perfil en SQLite sin bloquear ni fallar el flujo principal.
+  /// SQLite solo acepta num/String/blob → el bool `activo` va como 1/0.
+  Future<void> _guardarPerfilLocal(PerfilEntity perfil) async {
+    try {
+      final db = await _localDatabase.database;
+      final row = perfil.toJson()..['activo'] = perfil.activo ? 1 : 0;
+      await db.insert('perfil', row,
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      debugPrint('getPerfil: no se pudo guardar el perfil local ($e).');
     }
   }
 
   @override
-  Future<Either<Failure, User>> loginWithBiometrics() async {
-    // TODO: integrar local_auth
-    return const Left(AuthFailure('Biometría no implementada'));
+  Future<void> logout() async {
+    _perfilCache = null;
+    await _tokenStorage.clear();
   }
-
-  @override
-  Future<Either<Failure, void>> logout() async {
-    try {
-      await _remoteDatasource.logout();
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    }
-  }
-
-  @override
-  Future<Either<Failure, bool>> enableBiometrics() async {
-    // TODO: integrar local_auth
-    return const Left(AuthFailure('Biometría no implementada'));
-  }
-
-  @override
-  Future<User?> getCurrentUser() => _remoteDatasource.getCurrentUser();
 }

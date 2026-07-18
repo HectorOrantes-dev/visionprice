@@ -1,87 +1,135 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-enum LoginState { idle, loading, success, error }
+import '../../../devices/data/providers/device_providers.dart';
+import '../../../../core/network/api_exception.dart';
+import '../../../../core/utils/validation_mixin.dart';
+import 'auth_providers.dart';
+import 'login_state.dart';
 
-class LoginViewModel extends ChangeNotifier {
-  LoginState _state = LoginState.idle;
-  String? _errorMessage;
-  bool _keepSession = true;
-  bool _obscurePassword = true;
+export 'login_state.dart';
 
-  String? emailError;
-  String? passwordError;
+part 'login_provider.g.dart';
 
-  LoginState get state => _state;
-  String? get errorMessage => _errorMessage;
-  bool get keepSession => _keepSession;
-  bool get obscurePassword => _obscurePassword;
-  bool get isLoading => _state == LoginState.loading;
+/// Notifier del login (enfoque moderno de Riverpod). Reemplaza al antiguo
+/// `LoginViewModel` (ChangeNotifier). El estado vive en [LoginState] inmutable;
+/// las dependencias (use cases, device registrar) se resuelven vía `ref`.
+///
+/// Usa [ValidationMixin] para la validación de formularios (sin duplicar).
+@riverpod
+class Login extends _$Login with ValidationMixin {
+  String _correo = '';
 
-  void toggleKeepSession() {
-    _keepSession = !_keepSession;
-    notifyListeners();
+  @override
+  LoginState build() => const LoginState();
+
+  void toggleKeepSession() =>
+      state = state.copyWith(keepSession: !state.keepSession);
+
+  void toggleObscurePassword() =>
+      state = state.copyWith(obscurePassword: !state.obscurePassword);
+
+  void onEmailChanged(String value) {
+    state = state.copyWith(
+        emailError: value.isEmpty ? null : validateEmail(value));
   }
 
-  void toggleObscurePassword() {
-    _obscurePassword = !_obscurePassword;
-    notifyListeners();
+  void onPasswordChanged(String value) {
+    state = state.copyWith(
+        passwordError: value.isEmpty ? null : validatePassword(value));
   }
 
-  void validateEmail(String value) {
-    if (value.isEmpty) {
-      emailError = null;
-    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-      emailError = 'Ingresa un correo válido';
-    } else {
-      emailError = null;
-    }
-    notifyListeners();
-  }
-
-  void validatePassword(String value) {
-    if (value.isEmpty) {
-      passwordError = null;
-    } else if (value.length < 8) {
-      passwordError = 'Mínimo 8 caracteres';
-    } else {
-      passwordError = null;
-    }
-    notifyListeners();
-  }
-
+  /// Paso 1: valida y hace login. Si el back-end responde con token (2FA
+  /// desactivado), inicia sesión directo y llama a [onSuccess]. Si en su lugar
+  /// envió un código, pasa al paso de verificación (2FA).
   Future<void> login({
     required String email,
     required String password,
     required VoidCallback onSuccess,
   }) async {
-    if (email.isEmpty) {
-      emailError = 'El correo es obligatorio';
-      notifyListeners();
+    final emailError = validateEmail(email);
+    final passwordError = validatePassword(password);
+    if (emailError != null || passwordError != null) {
+      state = state.copyWith(
+          emailError: emailError, passwordError: passwordError);
       return;
     }
-    if (password.isEmpty) {
-      passwordError = 'La contraseña es obligatoria';
-      notifyListeners();
-      return;
+
+    _correo = email;
+    state = state.copyWith(status: LoginStatus.loading, errorMessage: null);
+    try {
+      final session = await ref.read(loginUseCaseProvider)(
+        correo: email,
+        contrasena: password,
+      );
+      if (session != null) {
+        // Login directo: no hace falta código de verificación.
+        state = state.copyWith(status: LoginStatus.success);
+        ref.read(deviceRegistrarProvider).register();
+        onSuccess();
+      } else {
+        state = state.copyWith(status: LoginStatus.codeSent);
+      }
+    } catch (e) {
+      _fail(e);
     }
-    if (emailError != null || passwordError != null) return;
-
-    _state = LoginState.loading;
-    _errorMessage = null;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 1));
-
-    _state = LoginState.success;
-    notifyListeners();
-    onSuccess();
   }
 
-  void reset() {
-    _state = LoginState.idle;
-    _errorMessage = null;
-    emailError = null;
-    passwordError = null;
-    notifyListeners();
+  /// Paso 2: verifica el código y, si es correcto, deja la sesión lista.
+  Future<void> verifyCode({
+    required String code,
+    required VoidCallback onSuccess,
+  }) async {
+    final codeError = validateCode(code);
+    if (codeError != null) {
+      state = state.copyWith(codeError: codeError);
+      return;
+    }
+
+    state = state.copyWith(status: LoginStatus.loading, errorMessage: null);
+    try {
+      await ref.read(verifyTwoFactorUseCaseProvider)(
+        correo: _correo,
+        code: code,
+      );
+      state = state.copyWith(status: LoginStatus.success);
+      ref.read(deviceRegistrarProvider).register();
+      onSuccess();
+    } catch (e) {
+      _fail(e);
+    }
+  }
+
+  /// Login con Google. Lanza al callback [onNeedsRegister] si el back-end
+  /// responde 404 (usuario no registrado con Google).
+  Future<void> loginWithGoogle({
+    required String idToken,
+    required VoidCallback onSuccess,
+    required VoidCallback onNeedsRegister,
+  }) async {
+    state = state.copyWith(status: LoginStatus.loading, errorMessage: null);
+    try {
+      await ref.read(googleLoginUseCaseProvider)(idToken: idToken);
+      state = state.copyWith(status: LoginStatus.success);
+      ref.read(deviceRegistrarProvider).register();
+      onSuccess();
+    } on ApiException catch (e) {
+      if (e.isNotFound) {
+        state = state.copyWith(status: LoginStatus.idle);
+        onNeedsRegister();
+      } else {
+        _fail(e);
+      }
+    } catch (e) {
+      _fail(e);
+    }
+  }
+
+  void _fail(Object error) {
+    state = state.copyWith(
+      status: LoginStatus.error,
+      errorMessage:
+          error is ApiException ? error.message : 'Ocurrió un error inesperado',
+    );
   }
 }

@@ -1,25 +1,77 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../entities/user.dart';
+import '../entities/auth_session_entity.dart';
+import '../entities/perfil_entity.dart';
+import '../entities/register_result_entity.dart';
+import '../entities/role_entity.dart';
 
-/// Contrato del repositorio de autenticación — capa Domain.
-abstract interface class AuthRepository {
-  Future<Either<Failure, User>> login({
-    required String email,
-    required String password,
+/// Contrato de autenticación que consume la capa de dominio. La capa de datos
+/// (`AuthRepositoryImpl`) lo implementa. La presentación nunca conoce la
+/// implementación concreta → bajo acoplamiento, fácil de testear/mockear.
+abstract class AuthRepository {
+  /// Login con correo/contraseña. Si el back-end responde con `access_token`
+  /// (2FA desactivado), devuelve la sesión ya con el token persistido. Si en su
+  /// lugar envió un código 2FA al correo, devuelve `null` y falta verificarlo.
+  Future<AuthSessionEntity?> login({
+    required String correo,
+    required String contrasena,
   });
 
-  Future<Either<Failure, User>> register({
-    required String name,
-    required String email,
-    required String password,
+  /// Paso 2: verifica el código 2FA y devuelve la sesión (token ya persistido).
+  Future<AuthSessionEntity> verifyTwoFactor({
+    required String correo,
+    required String code,
   });
 
-  Future<Either<Failure, User>> loginWithBiometrics();
+  /// Lista los roles disponibles para la pantalla de registro.
+  Future<List<RoleEntity>> getRoles();
 
-  Future<Either<Failure, void>> logout();
+  /// Registro con correo/contraseña. Devuelve el resultado (usuario +
+  /// `twoFactorSent`); si se envió código 2FA, falta verificarlo.
+  Future<RegisterResultEntity> register({
+    required String nombre,
+    required String correo,
+    required String contrasena,
+    required String rol,
+    String? telefono,
+  });
 
-  Future<Either<Failure, bool>> enableBiometrics();
+  /// Login con Google. Lanza `ApiException(404)` si el usuario no existe
+  /// (→ la UI debe mandar a registro con Google).
+  Future<AuthSessionEntity> googleLogin({required String idToken});
 
-  Future<User?> getCurrentUser();
+  /// Registro con Google.
+  Future<AuthSessionEntity> googleRegister({
+    required String idToken,
+    required String rol,
+  });
+
+  /// Paso 1 de recuperar contraseña: envía un código al correo (si existe).
+  /// Responde igual exista o no el correo (anti-enumeración).
+  Future<void> forgotPassword({required String correo});
+
+  /// Paso 2: verifica el código de recuperación. Devuelve el `reset_token`
+  /// (JWT de un solo uso, 15 min) que autoriza el cambio de contraseña.
+  /// Lanza `ApiException` si el código es inválido o expiró.
+  Future<String> verifyResetCode({
+    required String correo,
+    required String code,
+  });
+
+  /// Paso 3: establece la nueva contraseña usando el `reset_token` obtenido en
+  /// [verifyResetCode]. El back-end responde con la sesión ya iniciada; si trae
+  /// `access_token`, devuelve la sesión con el token persistido (auto-login).
+  /// Lanza `ApiException` si el token es inválido o expiró.
+  Future<AuthSessionEntity?> resetPassword({
+    required String correo,
+    required String resetToken,
+    required String nuevaContrasena,
+  });
+
+  /// Perfil completo del usuario autenticado (`GET /api/v1/me/perfil`),
+  /// para la pantalla de "Perfil / Mi cuenta". Requiere token válido.
+  /// Se cachea en memoria: solo pega a la red la primera vez o si
+  /// [forceRefresh] es `true`.
+  Future<PerfilEntity> getPerfil({bool forceRefresh = false});
+
+  /// Cierra la sesión local (borra el token).
+  Future<void> logout();
 }

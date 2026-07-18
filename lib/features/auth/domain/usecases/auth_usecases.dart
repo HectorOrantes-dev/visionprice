@@ -1,44 +1,131 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-import '../../../../core/error/failures.dart';
-import '../entities/user.dart';
+
+import '../entities/auth_session_entity.dart';
+import '../entities/perfil_entity.dart';
+import '../entities/register_result_entity.dart';
+import '../entities/role_entity.dart';
 import '../repositories/auth_repository.dart';
 
-/// Caso de uso: Iniciar sesión con email y contraseña.
-@injectable
-final class LoginUseCase {
-  const LoginUseCase(this._repository);
+/// Cada caso de uso encapsula UNA acción del negocio y depende solo del
+/// contrato [AuthRepository]. Son `@injectable` (factory): instancias ligeras
+/// y sin estado, baratas de recrear. Injectable las inyecta automáticamente
+/// resolviendo el `AuthRepository` registrado.
 
-  final AuthRepository _repository;
+class LoginUseCase {
+  final AuthRepository _repo;
+  LoginUseCase(this._repo);
 
-  Future<Either<Failure, User>> call({
-    required String email,
-    required String password,
+  /// Devuelve la sesión si el login fue directo (sin 2FA), o `null` si el
+  /// back-end envió un código de verificación que hay que confirmar.
+  Future<AuthSessionEntity?> call({
+    required String correo,
+    required String contrasena,
   }) =>
-      _repository.login(email: email, password: password);
+      _repo.login(correo: correo, contrasena: contrasena);
 }
 
-/// Caso de uso: Registrar nuevo usuario.
-@injectable
-final class RegisterUseCase {
-  const RegisterUseCase(this._repository);
+class VerifyTwoFactorUseCase {
+  final AuthRepository _repo;
+  VerifyTwoFactorUseCase(this._repo);
 
-  final AuthRepository _repository;
-
-  Future<Either<Failure, User>> call({
-    required String name,
-    required String email,
-    required String password,
+  Future<AuthSessionEntity> call({
+    required String correo,
+    required String code,
   }) =>
-      _repository.register(name: name, email: email, password: password);
+      _repo.verifyTwoFactor(correo: correo, code: code);
 }
 
-/// Caso de uso: Cerrar sesión.
-@injectable
-final class LogoutUseCase {
-  const LogoutUseCase(this._repository);
+class GetRolesUseCase {
+  final AuthRepository _repo;
+  GetRolesUseCase(this._repo);
 
-  final AuthRepository _repository;
+  Future<List<RoleEntity>> call() => _repo.getRoles();
+}
 
-  Future<Either<Failure, void>> call() => _repository.logout();
+class RegisterUseCase {
+  final AuthRepository _repo;
+  RegisterUseCase(this._repo);
+
+  Future<RegisterResultEntity> call({
+    required String nombre,
+    required String correo,
+    required String contrasena,
+    required String rol,
+    String? telefono,
+  }) =>
+      _repo.register(
+        nombre: nombre,
+        correo: correo,
+        contrasena: contrasena,
+        rol: rol,
+        telefono: telefono,
+      );
+}
+
+class GoogleLoginUseCase {
+  final AuthRepository _repo;
+  GoogleLoginUseCase(this._repo);
+
+  Future<AuthSessionEntity> call({required String idToken}) =>
+      _repo.googleLogin(idToken: idToken);
+}
+
+class GoogleRegisterUseCase {
+  final AuthRepository _repo;
+  GoogleRegisterUseCase(this._repo);
+
+  Future<AuthSessionEntity> call({
+    required String idToken,
+    required String rol,
+  }) =>
+      _repo.googleRegister(idToken: idToken, rol: rol);
+}
+
+class ForgotPasswordUseCase {
+  final AuthRepository _repo;
+  ForgotPasswordUseCase(this._repo);
+
+  Future<void> call({required String correo}) =>
+      _repo.forgotPassword(correo: correo);
+}
+
+class VerifyResetCodeUseCase {
+  final AuthRepository _repo;
+  VerifyResetCodeUseCase(this._repo);
+
+  Future<String> call({
+    required String correo,
+    required String code,
+  }) =>
+      _repo.verifyResetCode(correo: correo, code: code);
+}
+
+class ResetPasswordUseCase {
+  final AuthRepository _repo;
+  ResetPasswordUseCase(this._repo);
+
+  Future<AuthSessionEntity?> call({
+    required String correo,
+    required String resetToken,
+    required String nuevaContrasena,
+  }) =>
+      _repo.resetPassword(
+        correo: correo,
+        resetToken: resetToken,
+        nuevaContrasena: nuevaContrasena,
+      );
+}
+
+class GetPerfilUseCase {
+  final AuthRepository _repo;
+  GetPerfilUseCase(this._repo);
+
+  Future<PerfilEntity> call({bool forceRefresh = false}) =>
+      _repo.getPerfil(forceRefresh: forceRefresh);
+}
+
+class LogoutUseCase {
+  final AuthRepository _repo;
+  LogoutUseCase(this._repo);
+
+  Future<void> call() => _repo.logout();
 }

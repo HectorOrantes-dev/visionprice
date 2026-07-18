@@ -1,0 +1,45 @@
+import 'package:flutter/material.dart';
+
+import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/app_text_styles.dart';
+
+/// Encabezado de la pantalla de grabación. Antes el privado `_RecordingAppBar`.
+class RecordingAppBar extends StatelessWidget {
+  const RecordingAppBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back_ios,
+                size: 18, color: context.colors.textPrimary),
+            onPressed: () => Navigator.pop(context),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Nueva grabación',
+                style: AppTextStyles.heading(
+                  size: 17,
+                  weight: FontWeight.w700,
+                  color: context.colors.textPrimary,
+                ),
+              ),
+              Text(
+                'Funciona sin internet',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

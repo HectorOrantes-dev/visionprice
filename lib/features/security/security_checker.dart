@@ -1,21 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart'
-    show kIsWeb, defaultTargetPlatform, TargetPlatform, debugPrint;
+    show defaultTargetPlatform, TargetPlatform, debugPrint;
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:screen_protector/screen_protector.dart';
 
-/// Posibles estados de seguridad del dispositivo respecto a la ubicación.
-enum SecurityStatus {
-  /// Dispositivo seguro, sin Fake GPS.
-  secure,
+import 'security_status.dart';
 
-  /// Se detectó ubicación simulada (Fake GPS).
-  fakeGpsDetected,
-
-  /// Permisos de ubicación denegados o servicio de ubicación apagado.
-  permissionDenied,
-}
+// El enum vive en su propio archivo (SRP); se re-exporta para no romper imports.
+export 'security_status.dart';
 
 /// Audita la seguridad del dispositivo respecto a la ubicación (Anti Fake-GPS).
 class SecurityChecker {
@@ -25,12 +19,9 @@ class SecurityChecker {
   /// 1. Permiso de ubicación.
   /// 2. Servicio de ubicación activo.
   /// 3. Pide una ubicación **fresca** (no cacheada) y revisa `isMocked`.
-  ///
-  /// Se solicita un fix nuevo a propósito: la última ubicación conocida queda
-  /// cacheada como simulada aunque el usuario ya haya apagado el Fake GPS.
   static Future<SecurityStatus> checkDeviceSecurity() async {
     // En web/escritorio la detección de Fake GPS no aplica: se considera seguro.
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+    if (defaultTargetPlatform != TargetPlatform.android) {
       return SecurityStatus.secure;
     }
     try {
@@ -56,7 +47,6 @@ class SecurityChecker {
       }
       return SecurityStatus.secure;
     } on TimeoutException catch (_) {
-      // Mala señal/interior: no bloqueamos al usuario.
       debugPrint('Fake GPS: tiempo de espera agotado al obtener ubicación.');
       return SecurityStatus.secure;
     } on LocationServiceDisabledException catch (_) {
@@ -64,9 +54,32 @@ class SecurityChecker {
     } on PermissionDeniedException catch (_) {
       return SecurityStatus.permissionDenied;
     } catch (e) {
-      // En entornos sin GPS (web/escritorio) evitamos falsos positivos fatales.
       debugPrint('Error en verificación de Fake GPS: $e');
       return SecurityStatus.secure;
+    }
+  }
+
+  /// Activa la protección global de pantalla (Anti-screenshot y Anti-grabación).
+  /// En Android pone la pantalla negra en capturas/recientes.
+  /// En iOS previene la captura y grabación.
+  static Future<void> enableScreenProtection() async {
+    try {
+      await ScreenProtector.preventScreenshotOn();
+      await ScreenProtector.protectDataLeakageOn();
+      debugPrint('Seguridad de pantalla: ACTIVADA');
+    } catch (e) {
+      debugPrint('Error al activar seguridad de pantalla: $e');
+    }
+  }
+
+  /// Desactiva la protección de pantalla.
+  static Future<void> disableScreenProtection() async {
+    try {
+      await ScreenProtector.preventScreenshotOff();
+      await ScreenProtector.protectDataLeakageOff();
+      debugPrint('Seguridad de pantalla: DESACTIVADA');
+    } catch (e) {
+      debugPrint('Error al desactivar seguridad de pantalla: $e');
     }
   }
 

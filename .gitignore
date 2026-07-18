@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+analisis_apk/
+devtools_options.yaml
+
+# Firebase (secreto, no versionar)
+google-services.json
+**/google-services.json

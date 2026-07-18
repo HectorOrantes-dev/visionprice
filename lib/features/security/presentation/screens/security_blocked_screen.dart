@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../security_checker.dart';
+import '../../rasp_checker.dart';
 
 /// Pantalla que bloquea el acceso a VisionPrice cuando se detecta Fake GPS
 /// o faltan permisos de ubicación. Diseño en tema claro, coherente con la app.
@@ -26,8 +27,18 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
     if (_isVerifying) return;
     setState(() => _isVerifying = true);
 
-    await Future.delayed(const Duration(milliseconds: 800));
-    final newStatus = await SecurityChecker.checkDeviceSecurity();
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // USB primero: es instantáneo (lectura nativa). Solo si está apagada
+    // corremos el chequeo de Fake GPS (lento). Así re-verificar la Depuración
+    // USB no tarda.
+    SecurityStatus newStatus;
+    final bool usbOn = await RaspChecker.isUsbDebuggingEnabled();
+    if (usbOn) {
+      newStatus = SecurityStatus.usbDebuggingDetected;
+    } else {
+      newStatus = await SecurityChecker.checkDeviceSecurity();
+    }
 
     if (!mounted) return;
     setState(() => _isVerifying = false);
@@ -35,16 +46,21 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
     if (newStatus == SecurityStatus.secure) {
       widget.onRetrySuccess();
     } else {
+      String errorMessage = 'Permisos insuficientes para validar el dispositivo.';
+      if (newStatus == SecurityStatus.fakeGpsDetected) {
+        errorMessage = 'Sigue detectándose Fake GPS activo.';
+      } else if (newStatus == SecurityStatus.usbDebuggingDetected) {
+        errorMessage = '⚠️ La Depuración USB sigue activa.';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: AppColors.error,
+          backgroundColor: context.colors.error,
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           content: Text(
-            newStatus == SecurityStatus.fakeGpsDetected
-                ? 'Sigue detectándose Fake GPS activo.'
-                : 'Permisos insuficientes para validar el dispositivo.',
+            errorMessage,
             style: const TextStyle(
                 color: Colors.white, fontWeight: FontWeight.w600),
           ),
@@ -56,10 +72,26 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isFakeGps = widget.status == SecurityStatus.fakeGpsDetected;
-    final Color accent = isFakeGps ? AppColors.error : AppColors.warning;
+    final bool isUsbDebugging = widget.status == SecurityStatus.usbDebuggingDetected;
+    
+    final Color accent = isFakeGps || isUsbDebugging ? context.colors.error : context.colors.warning;
+
+    String title = 'Acceso restringido';
+    String description = 'VisionPrice requiere permisos de ubicación precisos para validar la integridad del dispositivo.';
+    IconData icon = Icons.gpp_maybe_rounded;
+
+    if (isFakeGps) {
+      title = '¡Fake GPS detectado!';
+      description = 'Detectamos una app para simular tu ubicación. Por seguridad, no se permite el uso de Fake GPS en VisionPrice.';
+      icon = Icons.location_off_rounded;
+    } else if (isUsbDebugging) {
+      title = 'Depuración USB activa';
+      description = 'Por seguridad, VisionPrice no puede ejecutarse con la Depuración por USB activada.\n\nDesactívala en: Ajustes › Opciones de desarrollador › Depuración por USB.';
+      icon = Icons.gpp_bad_rounded;
+    }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.colors.background,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -67,9 +99,9 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
             child: Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: context.colors.border),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -89,31 +121,27 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      isFakeGps
-                          ? Icons.location_off_rounded
-                          : Icons.gpp_maybe_rounded,
+                      icon,
                       color: accent,
                       size: 40,
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    isFakeGps ? '¡Fake GPS detectado!' : 'Acceso restringido',
+                    title,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: context.colors.textPrimary,
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    isFakeGps
-                        ? 'Detectamos una app para simular tu ubicación. Por seguridad, no se permite el uso de Fake GPS en VisionPrice.'
-                        : 'VisionPrice requiere permisos de ubicación precisos para validar la integridad del dispositivo.',
+                    description,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: context.colors.textSecondary,
                       fontSize: 14,
                       height: 1.5,
                     ),
@@ -136,11 +164,18 @@ class _SecurityBlockedScreenState extends State<SecurityBlockedScreen> {
                           : const Text('Verificar de nuevo'),
                     ),
                   ),
-                  if (!isFakeGps) ...[
+                  if (!isFakeGps && !isUsbDebugging) ...[
                     const SizedBox(height: 10),
                     TextButton(
                       onPressed: () => openAppSettings(),
                       child: const Text('Abrir Ajustes del Sistema'),
+                    ),
+                  ],
+                  if (isUsbDebugging) ...[
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: () => RaspChecker.openDeveloperSettings(),
+                      child: const Text('Abrir Opciones de Desarrollador'),
                     ),
                   ],
                 ],
