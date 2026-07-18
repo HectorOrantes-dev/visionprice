@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Config de red SOLO para esta práctica de laboratorio.
+
+  Se confía también en las CAs instaladas por el usuario ("user") para que,
+  con el pinning DESACTIVADO, el proxy MitM (HTTP Toolkit / ZAP / Charles)
+  pueda interceptar el tráfico y así demostrar el ataque.
+
+  El pinning de la app NO depende de esto: aunque el sistema confíe en la CA
+  del proxy, el cliente `ApiClient.pinned()` compara el SHA-256 del certificado
+  y aborta igual. Es decir, este archivo hace el ataque MÁS fácil y aun así el
+  pinning lo bloquea.
+
+  En PRODUCCIÓN se eliminaría el <certificates src="user"/> para no confiar en
+  CAs añadidas por el usuario.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
