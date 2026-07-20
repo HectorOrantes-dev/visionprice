@@ -43,15 +43,28 @@ class ApiClient {
     return dio;
   }
 
-  /// Cliente HTTP **sin pinning**: confía en el almacén de CAs del sistema
-  /// (incluida la CA del proxy si el usuario la instaló). Con esto el proxy
-  /// puede leer el tráfico → demuestra el ataque MitM cuando NO hay pinning.
+  /// Cliente HTTP **sin pinning**: no valida el certificado del servidor.
+  ///
+  /// `dart:io` no lee el almacén de CAs de usuario de Android (solo el stack
+  /// nativo lo hace), así que aunque el usuario instale la CA del proxy MitM
+  /// en el sistema, Dio seguiría rechazándola por certificado no confiable.
+  /// Para representar fielmente "sin pinning = sin protección ante MitM", este
+  /// cliente acepta cualquier certificado explícitamente. SOLO para esta
+  /// práctica de laboratorio: en producción nunca se debe desactivar la
+  /// validación de certificados así.
   static Dio unpinned() {
-    return Dio(
+    final dio = Dio(
       BaseOptions(
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
       ),
     );
+
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () => HttpClient()
+        ..badCertificateCallback = (cert, host, port) => true,
+    );
+
+    return dio;
   }
 }
