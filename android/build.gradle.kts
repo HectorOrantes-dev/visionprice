@@ -33,6 +33,21 @@ subprojects {
     }
 }
 
+// Sube el Java source/target de TODOS los módulos (incluidos los plugins que
+// aún compilan en Java 8) a 11, para eliminar los warnings del build de Android:
+//   "warning: [options] source value 8 is obsolete...".
+// Se hace a nivel de tarea (no con `compileOptions`/afterEvaluate) para no
+// chocar con `evaluationDependsOn(":app")`. `-nowarn` silencia los avisos de
+// API deprecada que emiten los propios plugins (código que no controlamos).
+subprojects {
+    tasks.withType<JavaCompile>().configureEach {
+        sourceCompatibility = JavaVersion.VERSION_11.toString()
+        targetCompatibility = JavaVersion.VERSION_11.toString()
+        options.compilerArgs.add("-nowarn")
+        options.isDeprecation = false
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }

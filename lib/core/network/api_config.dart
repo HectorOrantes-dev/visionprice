@@ -1,14 +1,17 @@
 /// Configuración central del back-end.
 ///
-/// `baseUrl` apunta por defecto a `10.0.2.2`, que es como el emulador de
-/// Android alcanza el `localhost` de la máquina anfitriona. Cámbialo por la
-/// URL real (o pásalo por `--dart-define=API_BASE_URL=...`).
+/// `baseUrl` apunta al API Gateway (único punto de entrada; reenvía a la API
+/// principal y a Pagos/2FA/Proveedores/Extracciones según el prefijo — ver
+/// el repo api-gateway). Cámbialo por otra URL con
+/// `--dart-define=API_BASE_URL=...` si hace falta (ej. apuntar a la API
+/// principal directo para debug local, ya que el gateway todavía acepta
+/// tráfico sin pasar por él — modo dual-accept).
 class ApiConfig {
   ApiConfig._();
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://visionpricebackend-production.up.railway.app',
+    defaultValue: 'https://apigetwayvisionprice-production.up.railway.app',
   );
 
   static const String apiPrefix = '/api/v1';

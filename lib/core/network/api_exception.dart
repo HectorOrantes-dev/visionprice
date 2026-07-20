@@ -19,8 +19,8 @@ class ApiException implements Exception {
   /// esperar (backoff) antes de reintentar.
   bool get isTooManyRequests => statusCode == 429;
 
-  factory ApiException.network([String? detail]) =>
-      ApiException(0, detail ?? 'No tienes internet.');
+  factory ApiException.network([String? detail]) => ApiException(
+      0, detail ?? 'No se pudo conectar con el servidor. Revisa tu conexión.');
 
   @override
   String toString() => 'ApiException($statusCode): $message';

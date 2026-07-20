@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:http/http.dart' as http;
 
 import '../storage/token_storage.dart';
@@ -38,6 +40,9 @@ class ApiClient {
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      // Pide el cuerpo SIN comprimir: evita el `FormatException: Filter error,
+      // bad data` cuando el back-end/proxy manda un gzip inválido.
+      'Accept-Encoding': 'identity',
     };
     if (auth && _tokenStorage.hasToken) {
       headers['Authorization'] = 'Bearer ${_tokenStorage.token}';
@@ -182,21 +187,53 @@ class ApiClient {
       res = await request().timeout(timeout ?? _timeout);
     } on TimeoutException {
       throw ApiException.network('La solicitud tardó demasiado.');
-    } catch (_) {
+    } on SocketException {
+      // Sin conexión real (DNS/host inalcanzable): sí es "no tienes internet".
       throw ApiException.network();
+    } on http.ClientException {
+      // Fallo al conectar/leer la respuesta (conexión cortada, etc.).
+      throw ApiException.network();
+    } on HandshakeException {
+      // Fallo de TLS: no es falta de internet, es conexión insegura.
+      throw ApiException(495, 'No se pudo establecer una conexión segura.');
+    } catch (e, st) {
+      // Cualquier OTRO error (p. ej. al leer/validar el token) NO es falta de
+      // internet: se propaga tal cual si ya es ApiException, o con un mensaje
+      // honesto, para no enmascararlo como "No tienes internet".
+      if (e is ApiException) rethrow;
+      // Se loguea el error real ANTES de reemplazarlo por el mensaje
+      // genérico — si no, queda imposible de diagnosticar (el mensaje al
+      // usuario no dice qué pasó de verdad).
+      debugPrint('ApiClient._send: excepción no clasificada: $e\n$st');
+      throw ApiException(-1, 'No se pudo completar la solicitud.');
     }
 
-    final decoded = res.body.isNotEmpty ? await decodeJson(res.body) : null;
-
+    // Éxito: se decodifica el cuerpo normalmente.
     if (res.statusCode >= 200 && res.statusCode < 300) {
-      return decoded;
+      return res.body.isNotEmpty ? await decodeJson(res.body) : null;
     }
-    // Sesión expirada/ inválida: borra el token para que el próximo arranque
+
+    // Sesión expirada/inválida: borra el token para que el próximo arranque
     // pida login en vez de auto-entrar con un token muerto.
     if (res.statusCode == 401 || res.statusCode == 403) {
       unawaited(_tokenStorage.clear());
     }
-    throw ApiException(res.statusCode, _extractError(decoded));
+
+    // Error: se extrae un mensaje legible de forma TOLERANTE. Si el back-end
+    // respondió con un cuerpo NO-JSON (HTML de error, texto plano, vacío), no se
+    // rompe con una excepción sin clasificar: se usa el texto crudo o el status.
+    String message;
+    try {
+      final decoded = res.body.isNotEmpty ? await decodeJson(res.body) : null;
+      message =
+          decoded != null ? _extractError(decoded) : 'Error ${res.statusCode}';
+    } catch (_) {
+      final raw = res.body.trim();
+      message = raw.isNotEmpty && raw.length < 300
+          ? raw
+          : 'Error ${res.statusCode}';
+    }
+    throw ApiException(res.statusCode, message);
   }
 
   /// Extrae un mensaje legible de los distintos formatos de error del back-end:
