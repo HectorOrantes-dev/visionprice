@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/di/token_storage_provider.dart';
 import 'features/devices/data/providers/device_providers.dart';
+import 'features/security/security_checker.dart';
 import 'features/security/services/notification_service.dart';
 import 'app.dart';
 
 // main async para las operaciones de arranque (carga de token, push).
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Anti-screenshot / anti-grabación de pantalla en toda la app.
+  SecurityChecker.enableScreenProtection();
 
   // ProviderContainer de arranque: se reutiliza en la app vía
   // UncontrolledProviderScope, así los singletons (keepAlive) sobreviven.

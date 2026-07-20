@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../providers/home_provider.dart';
 
 /// Encabezado del dashboard: logo + saludo con el nombre del usuario y la
@@ -56,23 +57,29 @@ class DashboardAppBar extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Stack(
-            children: [
-              Icon(Icons.notifications_outlined,
-                  color: context.colors.textSecondary, size: 26),
-              Positioned(
-                right: 2,
-                top: 2,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: context.colors.error,
-                    shape: BoxShape.circle,
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+            ),
+            child: Stack(
+              children: [
+                Icon(Icons.notifications_outlined,
+                    color: context.colors.textSecondary, size: 26),
+                Positioned(
+                  right: 2,
+                  top: 2,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: context.colors.error,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
