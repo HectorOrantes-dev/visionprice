@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_palette.dart';
 
@@ -96,7 +95,7 @@ class AppTheme {
   static ThemeData _build(AppPalette p, ColorScheme scheme) => ThemeData(
         useMaterial3: true,
         brightness: scheme.brightness,
-        fontFamily: GoogleFonts.inter().fontFamily,
+        fontFamily: 'Inter',
         colorScheme: scheme,
         extensions: [p],
         scaffoldBackgroundColor: p.background,

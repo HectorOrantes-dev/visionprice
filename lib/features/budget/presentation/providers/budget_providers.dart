@@ -12,6 +12,7 @@ import '../../domain/usecases/crear_cotizacion_kit_use_case.dart';
 import '../../domain/usecases/descargar_pdf_bytes_use_case.dart';
 import '../../domain/usecases/listar_cotizaciones_pdf_locales_use_case.dart';
 import '../../domain/usecases/listar_cotizaciones_pdf_use_case.dart';
+import '../../domain/usecases/obtener_borrador_cotizacion_use_case.dart';
 import '../../domain/usecases/obtener_materiales_use_case.dart';
 
 part 'budget_providers.g.dart';
@@ -68,3 +69,7 @@ ListarCotizacionesPdfLocalesUseCase listarCotizacionesPdfLocalesUseCase(
 @riverpod
 DescargarPdfBytesUseCase descargarPdfBytesUseCase(Ref ref) =>
     DescargarPdfBytesUseCase(ref.watch(cotizacionRepositoryProvider));
+
+@riverpod
+ObtenerBorradorCotizacionUseCase obtenerBorradorCotizacionUseCase(Ref ref) =>
+    ObtenerBorradorCotizacionUseCase(ref.watch(cotizacionRepositoryProvider));

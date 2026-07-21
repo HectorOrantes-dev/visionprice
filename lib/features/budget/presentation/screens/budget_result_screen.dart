@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../audit/presentation/screens/auditoria_presupuesto_screen.dart';
+import '../../../auth/presentation/providers/perfil_provider.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../widgets/budget_section_label.dart';
 import '../widgets/linea_card.dart';
@@ -9,13 +12,16 @@ import '../widgets/result_app_bar.dart';
 import '../widgets/total_card.dart';
 import 'export_pdf_screen.dart';
 
-class BudgetResultScreen extends StatelessWidget {
+class BudgetResultScreen extends ConsumerWidget {
   final CotizacionEntity cotizacion;
   const BudgetResultScreen({super.key, required this.cotizacion});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final money = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
+    // Auditoría de precios: exclusiva Ingeniero Civil, igual gateo que en Perfil.
+    final esIngenieroCivil =
+        ref.watch(perfilProvider).asData?.value.rol == 'ingeniero_civil';
     return Scaffold(
       backgroundColor: context.colors.background,
       body: SafeArea(
@@ -50,19 +56,45 @@ class BudgetResultScreen extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ExportPdfScreen(cotizacion: cotizacion),
+              child: Row(
+                children: [
+                  if (esIngenieroCivil) ...[
+                    Expanded(
+                      child: SizedBox(
+                        height: 52,
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AuditoriaPresupuestoScreen(
+                                presupuestoId: cotizacion.id,
+                              ),
+                            ),
+                          ),
+                          icon: const Icon(Icons.fact_check_outlined, size: 18),
+                          label: const Text('Auditar precios'),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  Expanded(
+                    flex: esIngenieroCivil ? 1 : 2,
+                    child: SizedBox(
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ExportPdfScreen(cotizacion: cotizacion),
+                          ),
+                        ),
+                        icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                        label: const Text('Exportar PDF'),
+                      ),
                     ),
                   ),
-                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-                  label: const Text('Exportar PDF'),
-                ),
+                ],
               ),
             ),
           ],

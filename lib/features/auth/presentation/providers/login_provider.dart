@@ -125,6 +125,24 @@ class Login extends _$Login with ValidationMixin {
     }
   }
 
+  /// Registro con Google cuando `loginWithGoogle` avisó que el usuario no
+  /// existe aún (`onNeedsRegister`): ya con el rol elegido, crea la cuenta.
+  Future<void> registerWithGoogle({
+    required String idToken,
+    required String rol,
+    required VoidCallback onSuccess,
+  }) async {
+    state = state.copyWith(status: LoginStatus.loading, errorMessage: null);
+    try {
+      await ref.read(googleRegisterUseCaseProvider)(idToken: idToken, rol: rol);
+      state = state.copyWith(status: LoginStatus.success);
+      ref.read(deviceRegistrarProvider).register();
+      onSuccess();
+    } catch (e) {
+      _fail(e);
+    }
+  }
+
   void _fail(Object error) {
     state = state.copyWith(
       status: LoginStatus.error,

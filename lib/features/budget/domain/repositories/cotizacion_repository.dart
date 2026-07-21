@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../entities/borrador_cotizacion_entity.dart';
 import '../entities/cotizacion_entity.dart';
 import '../entities/cotizacion_pdf_entity.dart';
 import '../entities/item_cotizacion.dart';
@@ -51,4 +52,8 @@ abstract class CotizacionRepository {
 
   /// Bytes del PDF de una cotización, para descargar/compartir en el dispositivo.
   Future<Uint8List> pdfBytes(int cotizacionId);
+
+  /// Borrador auto-generado a partir de una grabación: superficies detectadas
+  /// con producto/proveedor ya elegido (el más barato cercano) por línea.
+  Future<BorradorCotizacionEntity> borrador(int grabacionId);
 }

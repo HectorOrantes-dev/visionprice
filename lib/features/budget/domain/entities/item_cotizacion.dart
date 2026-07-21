@@ -14,6 +14,24 @@ class ItemCotizacion {
     this.descripcion,
   });
 
+  /// Desde `cuerpo_confirmacion.simple.items[i]` (`POST /cotizaciones/borrador`),
+  /// ya en el mismo shape que espera `POST /cotizaciones`.
+  factory ItemCotizacion.fromJson(Map<String, dynamic> json) {
+    return ItemCotizacion(
+      productoId: (json['producto_id'] ?? '').toString(),
+      aplicarA: json['aplicar_a']?.toString(),
+      areaM2: (json['area_m2'] is num) ? (json['area_m2'] as num).toDouble() : null,
+      descripcion: json['descripcion']?.toString(),
+    );
+  }
+
+  ItemCotizacion copyWithProducto(String productoId) => ItemCotizacion(
+        productoId: productoId,
+        aplicarA: aplicarA,
+        areaM2: areaM2,
+        descripcion: descripcion,
+      );
+
   Map<String, dynamic> toJson() => {
         'producto_id': productoId, // string: "12345" o "uuid-xxx"
         if (aplicarA != null) 'aplicar_a': aplicarA,

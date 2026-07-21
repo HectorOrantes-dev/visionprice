@@ -1,6 +1,7 @@
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
+import '../../domain/entities/paypal_subscription_intento_entity.dart';
 import '../../domain/entities/subscription_entity.dart';
 import 'account_remote_datasource.dart';
 
@@ -33,5 +34,52 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         .whereType<Map<String, dynamic>>()
         .map(SubscriptionEntity.fromJson)
         .toList();
+  }
+
+  @override
+  Future<void> crearSuscripcionConekta({
+    required String planKey,
+    required String cardToken,
+  }) {
+    return _client.postJson(
+      ApiConfig.conektaSubscriptions,
+      {'plan_key': planKey, 'card_token': cardToken},
+      auth: true,
+    );
+  }
+
+  @override
+  Future<void> cancelarSuscripcionConekta() {
+    return _client.postJson(
+      ApiConfig.conektaSubscriptionsCancel,
+      const {},
+      auth: true,
+    );
+  }
+
+  @override
+  Future<void> eliminarMetodoPagoConekta() {
+    return _client.deleteJson(ApiConfig.conektaPaymentMethod, auth: true);
+  }
+
+  @override
+  Future<PaypalSubscriptionIntentoEntity> crearSuscripcionPaypal({
+    required String planKey,
+  }) async {
+    final data = await _client.postJson(
+      ApiConfig.paypalSubscriptions,
+      {'plan_key': planKey},
+      auth: true,
+    );
+    return PaypalSubscriptionIntentoEntity.fromJson(data);
+  }
+
+  @override
+  Future<void> cancelarSuscripcionPaypal({required String subscriptionId}) {
+    return _client.postJson(
+      ApiConfig.paypalSubscriptionCancel(subscriptionId),
+      const {},
+      auth: true,
+    );
   }
 }

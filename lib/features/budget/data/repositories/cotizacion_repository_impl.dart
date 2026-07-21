@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../domain/entities/borrador_cotizacion_entity.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../../domain/entities/cotizacion_pdf_entity.dart';
 import '../../domain/entities/item_cotizacion.dart';
@@ -87,4 +88,8 @@ class CotizacionRepositoryImpl implements CotizacionRepository {
   @override
   Future<Uint8List> pdfBytes(int cotizacionId) =>
       _remote.pdfBytes(cotizacionId);
+
+  @override
+  Future<BorradorCotizacionEntity> borrador(int grabacionId) =>
+      _remote.borrador(grabacionId);
 }

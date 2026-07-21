@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarjeta</title>
+<script src="https://cdn.conekta.io/js/latest/conekta.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 20px 16px 32px;
+    color: #0F172A;
+    background: #FFFFFF;
+  }
+  h1 { font-size: 17px; margin: 0 0 20px; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748B;
+    margin: 14px 0 6px;
+  }
+  input {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    background: #F8FAFC;
+  }
+  .row { display: flex; gap: 12px; }
+  .row > div { flex: 1; }
+  button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    background: #1E3A8A;
+    border: none;
+    border-radius: 10px;
+  }
+  button:disabled { opacity: 0.6; }
+  #error {
+    color: #DC2626;
+    font-size: 13px;
+    margin-top: 10px;
+    min-height: 16px;
+  }
+</style>
+</head>
+<body>
+  <h1>Datos de tu tarjeta</h1>
+  <form id="card-form" onsubmit="return false;">
+    <label>Número de tarjeta</label>
+    <input id="card_number" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="0000 0000 0000 0000">
+
+    <label>Nombre en la tarjeta</label>
+    <input id="card_name" autocomplete="cc-name" placeholder="Como aparece en la tarjeta">
+
+    <div class="row">
+      <div>
+        <label>Mes</label>
+        <input id="exp_month" inputmode="numeric" maxlength="2" placeholder="MM">
+      </div>
+      <div>
+        <label>Año</label>
+        <input id="exp_year" inputmode="numeric" maxlength="2" placeholder="AA">
+      </div>
+      <div>
+        <label>CVC</label>
+        <input id="cvc" inputmode="numeric" maxlength="4" placeholder="123">
+      </div>
+    </div>
+
+    <div id="error"></div>
+    <button id="submit-btn" onclick="tokenize()">Continuar</button>
+  </form>
+
+<script>
+  Conekta.setPublicKey("{{CONEKTA_PUBLIC_KEY}}");
+
+  function tokenize() {
+    var btn = document.getElementById('submit-btn');
+    var err = document.getElementById('error');
+    err.textContent = '';
+    btn.disabled = true;
+
+    Conekta.Token.create({
+      card: {
+        number: document.getElementById('card_number').value.replace(/\s/g, ''),
+        name: document.getElementById('card_name').value,
+        exp_year: document.getElementById('exp_year').value,
+        exp_month: document.getElementById('exp_month').value,
+        cvc: document.getElementById('cvc').value
+      }
+    }, tokenSuccess, tokenError);
+  }
+
+  function tokenSuccess(token) {
+    ConektaToken.postMessage(JSON.stringify({ ok: true, token: token.id }));
+  }
+
+  function tokenError(error) {
+    var btn = document.getElementById('submit-btn');
+    var err = document.getElementById('error');
+    var msg = (error && (error.message_to_purchaser || error.message)) || 'No se pudo procesar la tarjeta.';
+    err.textContent = msg;
+    btn.disabled = false;
+    ConektaToken.postMessage(JSON.stringify({ ok: false, message: msg }));
+  }
+</script>
+</body>
+</html>

@@ -24,3 +24,24 @@ AccountRepository accountRepository(Ref ref) =>
 ObtenerSuscripcionesUseCase obtenerSuscripcionesUseCase(
         Ref ref) =>
     ObtenerSuscripcionesUseCase(ref.watch(accountRepositoryProvider));
+
+@riverpod
+CrearSuscripcionConektaUseCase crearSuscripcionConektaUseCase(Ref ref) =>
+    CrearSuscripcionConektaUseCase(ref.watch(accountRepositoryProvider));
+
+@riverpod
+CancelarSuscripcionConektaUseCase cancelarSuscripcionConektaUseCase(
+        Ref ref) =>
+    CancelarSuscripcionConektaUseCase(ref.watch(accountRepositoryProvider));
+
+@riverpod
+EliminarMetodoPagoConektaUseCase eliminarMetodoPagoConektaUseCase(Ref ref) =>
+    EliminarMetodoPagoConektaUseCase(ref.watch(accountRepositoryProvider));
+
+@riverpod
+CrearSuscripcionPaypalUseCase crearSuscripcionPaypalUseCase(Ref ref) =>
+    CrearSuscripcionPaypalUseCase(ref.watch(accountRepositoryProvider));
+
+@riverpod
+CancelarSuscripcionPaypalUseCase cancelarSuscripcionPaypalUseCase(Ref ref) =>
+    CancelarSuscripcionPaypalUseCase(ref.watch(accountRepositoryProvider));

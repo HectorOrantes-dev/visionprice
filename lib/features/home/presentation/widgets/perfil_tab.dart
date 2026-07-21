@@ -5,6 +5,7 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../account/presentation/screens/subscriptions_screen.dart';
+import '../../../audit/presentation/screens/anomalias_zona_screen.dart';
 import '../../../auth/presentation/providers/perfil_provider.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../recommendations/presentation/screens/entrenar_modelos_screen.dart';
@@ -110,6 +111,15 @@ class PerfilTab extends ConsumerWidget {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const EntrenarModelosScreen()),
+              ),
+            ),
+            const SizedBox(height: 10),
+            ProfileItem(
+              icon: Icons.fact_check_outlined,
+              label: 'Auditoría de precios',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AnomaliasZonaScreen()),
               ),
             ),
           ],

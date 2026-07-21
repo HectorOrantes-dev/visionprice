@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../recording/domain/entities/superficie_entity.dart';
 import '../../../recording/presentation/providers/parameters_provider.dart';
+import '../screens/borrador_cotizacion_screen.dart';
 import '../screens/nearby_stores_screen.dart';
 import '../screens/superficies_detectadas_screen.dart';
 
@@ -44,6 +45,13 @@ class ConfirmButton extends ConsumerWidget {
     final hasNewFormat = superficiesCombinadas.isNotEmpty;
     final hasLegacyFormat = pisoM2 != null || paredesM2 != null;
     final enabled = proyectoId != null && (hasNewFormat || hasLegacyFormat);
+    // El borrador automático (`POST /cotizaciones/borrador`) solo conoce lo
+    // que el ML extrajo de ESA grabación: si el usuario además midió una
+    // pared a mano (`areaManualM2`), esa superficie extra se perdería, así
+    // que en ese caso se usa el flujo manual de siempre (que sí la combina).
+    final tieneAreaManual = areaManualM2 != null && areaManualM2! > 0;
+    final usarBorradorAutomatico =
+        grabacionId != null && (superficies?.isNotEmpty ?? false) && !tieneAreaManual;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: SizedBox(
@@ -59,24 +67,28 @@ class ConfirmButton extends ConsumerWidget {
                         .guardarEdicion(id);
                   }
                   if (context.mounted) {
-                    // Con superficies detectadas por el ML: flujo nuevo,
-                    // secuencial por superficie (simple o kit). Sin ellas
-                    // (formato legacy plano piso_m2/paredes_m2): se mantiene
-                    // el flujo anterior de ferreterías cercanas.
+                    // 1) Grabación con superficies del ML (sin mezcla manual):
+                    //    borrador automático (producto+proveedor ya elegidos).
+                    // 2) Con superficies pero mezcladas con área manual, o sin
+                    //    grabacionId: flujo manual de siempre, por superficie.
+                    // 3) Formato legacy plano piso_m2/paredes_m2: ferreterías
+                    //    cercanas.
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => hasNewFormat
-                            ? SuperficiesDetectadasScreen(
-                                proyectoId: proyectoId!,
-                                superficies: superficiesCombinadas,
-                              )
-                            : NearbyStoresScreen(
-                                proyectoId: proyectoId!,
-                                pisoM2: pisoM2,
-                                paredesM2: paredesM2,
-                                superficies: superficiesCombinadas,
-                              ),
+                        builder: (_) => usarBorradorAutomatico
+                            ? BorradorCotizacionScreen(grabacionId: id!)
+                            : hasNewFormat
+                                ? SuperficiesDetectadasScreen(
+                                    proyectoId: proyectoId!,
+                                    superficies: superficiesCombinadas,
+                                  )
+                                : NearbyStoresScreen(
+                                    proyectoId: proyectoId!,
+                                    pisoM2: pisoM2,
+                                    paredesM2: paredesM2,
+                                    superficies: superficiesCombinadas,
+                                  ),
                       ),
                     );
                   }

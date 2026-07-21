@@ -30,10 +30,7 @@ class SubscriptionsScreen extends ConsumerWidget {
           IconButton(
             tooltip: 'Método de pago',
             icon: Icon(Icons.credit_card, color: context.colors.primary),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const PaymentMethodScreen()),
-            ),
+            onPressed: () => _abrirPago(context, kPlanesDisponibles.first.planKey),
           ),
         ],
       ),
@@ -46,7 +43,10 @@ class SubscriptionsScreen extends ConsumerWidget {
               _sectionTitle(context, 'Planes disponibles'),
               const SizedBox(height: 10),
               for (final plan in kPlanesDisponibles) ...[
-                _planCard(context, plan),
+                GestureDetector(
+                  onTap: () => _abrirPago(context, plan.planKey),
+                  child: _planCard(context, plan),
+                ),
                 const SizedBox(height: 10),
               ],
               const SizedBox(height: 16),
@@ -150,6 +150,15 @@ class SubscriptionsScreen extends ConsumerWidget {
     );
   }
 
+  void _abrirPago(BuildContext context, String planKey) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PaymentMethodScreen(planKey: planKey),
+      ),
+    );
+  }
+
   Widget _paymentMethodRow(
     BuildContext context, {
     required IconData icon,
@@ -157,10 +166,7 @@ class SubscriptionsScreen extends ConsumerWidget {
     required String subtitle,
   }) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const PaymentMethodScreen()),
-      ),
+      onTap: () => _abrirPago(context, kPlanesDisponibles.first.planKey),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(

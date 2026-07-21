@@ -19,6 +19,37 @@ class SuperficieKitItem {
     this.boquillaProductoId,
   });
 
+  /// Desde `cuerpo_confirmacion.kit.superficies[i]` (`POST /cotizaciones/borrador`),
+  /// ya en el mismo shape que espera `POST /cotizaciones/kit`.
+  factory SuperficieKitItem.fromJson(Map<String, dynamic> json) {
+    return SuperficieKitItem(
+      areaM2: (json['area_m2'] is num) ? (json['area_m2'] as num).toDouble() : 0,
+      principalProductoId: (json['principal_producto_id'] ?? '').toString(),
+      descripcion: json['descripcion']?.toString(),
+      metodoCrucetas: (json['metodo_crucetas'] ?? 'tradicional').toString(),
+      adhesivoProductoId: json['adhesivo_producto_id']?.toString(),
+      cruecetaProductoId: json['cruceta_producto_id']?.toString(),
+      boquillaProductoId: json['boquilla_producto_id']?.toString(),
+    );
+  }
+
+  SuperficieKitItem copyWith({
+    String? principalProductoId,
+    String? adhesivoProductoId,
+    String? cruecetaProductoId,
+    String? boquillaProductoId,
+  }) {
+    return SuperficieKitItem(
+      areaM2: areaM2,
+      principalProductoId: principalProductoId ?? this.principalProductoId,
+      descripcion: descripcion,
+      metodoCrucetas: metodoCrucetas,
+      adhesivoProductoId: adhesivoProductoId ?? this.adhesivoProductoId,
+      cruecetaProductoId: cruecetaProductoId ?? this.cruecetaProductoId,
+      boquillaProductoId: boquillaProductoId ?? this.boquillaProductoId,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         'area_m2': areaM2,
         'principal_producto_id': principalProductoId,

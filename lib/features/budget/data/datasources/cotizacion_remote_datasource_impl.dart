@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
+import '../../domain/entities/borrador_cotizacion_entity.dart';
 import '../../domain/entities/cotizacion_entity.dart';
 import '../../domain/entities/cotizacion_pdf_entity.dart';
 import '../../domain/entities/material_regla_entity.dart';
@@ -86,5 +87,15 @@ class CotizacionRemoteDataSourceImpl implements CotizacionRemoteDataSource {
     // Se usa la ruta conocida + baseUrl de la app (no la URL absoluta del back)
     // para respetar el dominio configurado y adjuntar el Bearer token.
     return _client.getBytes(ApiConfig.cotizacionPdf(cotizacionId), auth: true);
+  }
+
+  @override
+  Future<BorradorCotizacionEntity> borrador(int grabacionId) async {
+    final data = await _client.postJson(
+      ApiConfig.cotizacionesBorrador,
+      {'grabacion_id': grabacionId},
+      auth: true,
+    );
+    return BorradorCotizacionEntity.fromJson(data);
   }
 }

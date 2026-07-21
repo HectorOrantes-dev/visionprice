@@ -60,6 +60,7 @@ class ApiConfig {
   static const String cotizacionesKit = '$apiPrefix/cotizaciones/kit';
   static String cotizacionPdf(int id) => '$apiPrefix/cotizaciones/$id/pdf';
   static const String cotizacionesPdfs = '$apiPrefix/cotizaciones/pdfs';
+  static const String cotizacionesBorrador = '$apiPrefix/cotizaciones/borrador';
 
   // --- Recomendaciones (modelo de kits) ---
   static const String recomendacionesEntrenar =
@@ -73,4 +74,42 @@ class ApiConfig {
 
   // --- Dispositivos (push FCM) ---
   static const String dispositivos = '$apiPrefix/dispositivos';
+
+  // --- Auditoría de precios (exclusiva Ingeniero Civil) ---
+  static String auditoriaPrecioPresupuesto(int presupuestoId) =>
+      '$apiPrefix/auditoria/precios/presupuestos/$presupuestoId';
+  static const String auditoriaPrecioAnomalias =
+      '$apiPrefix/auditoria/precios/anomalias';
+
+  // --- Pagos (Conekta / PayPal, vía micro Pagos detrás del gateway) ---
+  static const String conektaSubscriptions =
+      '$apiPrefix/pagos-ms/conekta/subscriptions';
+  static const String conektaSubscriptionsCancel =
+      '$apiPrefix/pagos-ms/conekta/subscriptions/cancel';
+  static const String conektaPaymentMethod =
+      '$apiPrefix/pagos-ms/conekta/payment-method';
+  static const String paypalSubscriptions =
+      '$apiPrefix/pagos-ms/paypal/subscriptions';
+  static String paypalSubscriptionCancel(String subscriptionId) =>
+      '$apiPrefix/paypal/subscriptions/$subscriptionId/cancel';
+
+  /// Public/Publishable Key de Conekta (segura para el cliente, a propósito:
+  /// solo puede tokenizar tarjetas, nunca cobrar ni consultar cuentas — por
+  /// eso SÍ está bien que viaje embebida en el binario que sube a Play
+  /// Store, igual que la `pk_` de Stripe). La Private Key, en cambio, jamás
+  /// debe tocar este repo: esa vive solo en el back-end (Pagos).
+  /// Se puede pisar con `--dart-define=CONEKTA_PUBLIC_KEY=...` para apuntar
+  /// a otra llave (ej. una de test) sin tocar código.
+  static const String conektaPublicKey = String.fromEnvironment(
+    'CONEKTA_PUBLIC_KEY',
+    defaultValue: 'key_JDVfvP3r18wnhkFik8Iyq3n',
+  );
+
+  // URLs de retorno de PayPal (configuradas también en el back-end de Pagos):
+  // el WebView de aprobación intercepta la navegación hacia estas rutas para
+  // saber que el usuario terminó el flujo, sin esperar a un deep link.
+  static const String paypalReturnUrl =
+      'https://app.visionprice.mx/pagos/paypal/return';
+  static const String paypalCancelUrl =
+      'https://app.visionprice.mx/pagos/paypal/cancel';
 }

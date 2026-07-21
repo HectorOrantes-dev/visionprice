@@ -8,22 +8,40 @@ part of 'payment_method_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Notifier de "Método de Pago". Carga la suscripción activa para el resumen
-/// (envuelta en `AsyncValue` con `guard`) y gestiona el método seleccionado.
+/// Notifier de "Método de Pago", uno por `planKey` (el plan que se está por
+/// contratar). Carga la suscripción activa para el resumen (envuelta en
+/// `AsyncValue` con `guard`), gestiona el método seleccionado y dispara la
+/// creación de la suscripción real contra Conekta/PayPal.
+///
+/// La navegación (abrir el WebView de tarjeta o el de aprobación de PayPal)
+/// vive en [PaymentMethodScreen], no aquí: un Notifier no tiene `BuildContext`
+/// para empujar pantallas.
 
 @ProviderFor(PaymentMethodNotifier)
-final paymentMethodProvider = PaymentMethodNotifierProvider._();
+final paymentMethodProvider = PaymentMethodNotifierFamily._();
 
-/// Notifier de "Método de Pago". Carga la suscripción activa para el resumen
-/// (envuelta en `AsyncValue` con `guard`) y gestiona el método seleccionado.
+/// Notifier de "Método de Pago", uno por `planKey` (el plan que se está por
+/// contratar). Carga la suscripción activa para el resumen (envuelta en
+/// `AsyncValue` con `guard`), gestiona el método seleccionado y dispara la
+/// creación de la suscripción real contra Conekta/PayPal.
+///
+/// La navegación (abrir el WebView de tarjeta o el de aprobación de PayPal)
+/// vive en [PaymentMethodScreen], no aquí: un Notifier no tiene `BuildContext`
+/// para empujar pantallas.
 final class PaymentMethodNotifierProvider
     extends $NotifierProvider<PaymentMethodNotifier, PaymentMethodState> {
-  /// Notifier de "Método de Pago". Carga la suscripción activa para el resumen
-  /// (envuelta en `AsyncValue` con `guard`) y gestiona el método seleccionado.
-  PaymentMethodNotifierProvider._()
+  /// Notifier de "Método de Pago", uno por `planKey` (el plan que se está por
+  /// contratar). Carga la suscripción activa para el resumen (envuelta en
+  /// `AsyncValue` con `guard`), gestiona el método seleccionado y dispara la
+  /// creación de la suscripción real contra Conekta/PayPal.
+  ///
+  /// La navegación (abrir el WebView de tarjeta o el de aprobación de PayPal)
+  /// vive en [PaymentMethodScreen], no aquí: un Notifier no tiene `BuildContext`
+  /// para empujar pantallas.
+  PaymentMethodNotifierProvider._(
+      {required PaymentMethodNotifierFamily super.from,
+      required String super.argument})
       : super(
-          from: null,
-          argument: null,
           retry: null,
           name: r'paymentMethodProvider',
           isAutoDispose: true,
@@ -33,6 +51,13 @@ final class PaymentMethodNotifierProvider
 
   @override
   String debugGetCreateSourceHash() => _$paymentMethodNotifierHash();
+
+  @override
+  String toString() {
+    return r'paymentMethodProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -45,16 +70,77 @@ final class PaymentMethodNotifierProvider
       providerOverride: $SyncValueProvider<PaymentMethodState>(value),
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PaymentMethodNotifierProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
 String _$paymentMethodNotifierHash() =>
-    r'57db002eee70589a73d7e73978e681c65d950806';
+    r'fa6b3d4d91879a0e294086a19b4008c8d2128f41';
 
-/// Notifier de "Método de Pago". Carga la suscripción activa para el resumen
-/// (envuelta en `AsyncValue` con `guard`) y gestiona el método seleccionado.
+/// Notifier de "Método de Pago", uno por `planKey` (el plan que se está por
+/// contratar). Carga la suscripción activa para el resumen (envuelta en
+/// `AsyncValue` con `guard`), gestiona el método seleccionado y dispara la
+/// creación de la suscripción real contra Conekta/PayPal.
+///
+/// La navegación (abrir el WebView de tarjeta o el de aprobación de PayPal)
+/// vive en [PaymentMethodScreen], no aquí: un Notifier no tiene `BuildContext`
+/// para empujar pantallas.
+
+final class PaymentMethodNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<PaymentMethodNotifier, PaymentMethodState,
+            PaymentMethodState, PaymentMethodState, String> {
+  PaymentMethodNotifierFamily._()
+      : super(
+          retry: null,
+          name: r'paymentMethodProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Notifier de "Método de Pago", uno por `planKey` (el plan que se está por
+  /// contratar). Carga la suscripción activa para el resumen (envuelta en
+  /// `AsyncValue` con `guard`), gestiona el método seleccionado y dispara la
+  /// creación de la suscripción real contra Conekta/PayPal.
+  ///
+  /// La navegación (abrir el WebView de tarjeta o el de aprobación de PayPal)
+  /// vive en [PaymentMethodScreen], no aquí: un Notifier no tiene `BuildContext`
+  /// para empujar pantallas.
+
+  PaymentMethodNotifierProvider call(
+    String planKey,
+  ) =>
+      PaymentMethodNotifierProvider._(argument: planKey, from: this);
+
+  @override
+  String toString() => r'paymentMethodProvider';
+}
+
+/// Notifier de "Método de Pago", uno por `planKey` (el plan que se está por
+/// contratar). Carga la suscripción activa para el resumen (envuelta en
+/// `AsyncValue` con `guard`), gestiona el método seleccionado y dispara la
+/// creación de la suscripción real contra Conekta/PayPal.
+///
+/// La navegación (abrir el WebView de tarjeta o el de aprobación de PayPal)
+/// vive en [PaymentMethodScreen], no aquí: un Notifier no tiene `BuildContext`
+/// para empujar pantallas.
 
 abstract class _$PaymentMethodNotifier extends $Notifier<PaymentMethodState> {
-  PaymentMethodState build();
+  late final _$args = ref.$arg as String;
+  String get planKey => _$args;
+
+  PaymentMethodState build(
+    String planKey,
+  );
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
@@ -64,6 +150,10 @@ abstract class _$PaymentMethodNotifier extends $Notifier<PaymentMethodState> {
         PaymentMethodState,
         Object?,
         Object?>;
-    return element.handleCreate(ref, build);
+    return element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }
