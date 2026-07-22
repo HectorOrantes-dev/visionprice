@@ -90,4 +90,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final data = await _client.getJson(ApiConfig.mePerfil, auth: true);
     return PerfilEntity.fromJson(data);
   }
+
+  @override
+  Future<PerfilEntity> actualizarPerfil({String? nombre, String? telefono}) async {
+    final data = await _client.patchJson(
+      ApiConfig.mePerfil,
+      {
+        if (nombre != null) 'nombre': nombre,
+        if (telefono != null) 'telefono': telefono,
+      },
+      auth: true,
+    );
+    return PerfilEntity.fromJson(data);
+  }
 }

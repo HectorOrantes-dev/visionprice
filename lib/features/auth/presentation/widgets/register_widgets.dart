@@ -4,6 +4,7 @@
 export 'register_button.dart';
 export 'register_error_banner.dart';
 export 'register_form.dart';
+export 'register_google_button.dart';
 export 'register_header.dart';
 export 'register_login_row.dart';
 export 'register_two_factor_section.dart';

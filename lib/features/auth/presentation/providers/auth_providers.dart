@@ -69,5 +69,9 @@ GetPerfilUseCase getPerfilUseCase(Ref ref) =>
     GetPerfilUseCase(ref.watch(authRepositoryProvider));
 
 @riverpod
+ActualizarPerfilUseCase actualizarPerfilUseCase(Ref ref) =>
+    ActualizarPerfilUseCase(ref.watch(authRepositoryProvider));
+
+@riverpod
 LogoutUseCase logoutUseCase(Ref ref) =>
     LogoutUseCase(ref.watch(authRepositoryProvider));

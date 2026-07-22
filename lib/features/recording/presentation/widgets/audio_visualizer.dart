@@ -19,7 +19,7 @@ class AudioVisualizer extends StatefulWidget {
 }
 
 class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProviderStateMixin {
-  final List<double> _amplitudes = List.filled(30, 0.0);
+  final List<double> _amplitudes = List.filled(30, 0.0, growable: true);
   late AnimationController _controller;
 
   @override

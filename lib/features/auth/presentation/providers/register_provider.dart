@@ -45,11 +45,6 @@ class Register extends _$Register with ValidationMixin {
   void selectRole(RoleEntity? role) =>
       state = state.copyWith(selectedRole: role, roleError: null);
 
-  void onNameChanged(String value) {
-    state = state.copyWith(
-        nombreError: value.isEmpty ? null : validateName(value));
-  }
-
   void onEmailChanged(String value) {
     state = state.copyWith(
         emailError: value.isEmpty ? null : validateEmail(value));
@@ -60,24 +55,20 @@ class Register extends _$Register with ValidationMixin {
         passwordError: value.isEmpty ? null : validatePassword(value));
   }
 
-  /// Valida el formulario y registra. Si el back-end envió el código 2FA,
-  /// pasa a [RegisterStatus.codeSent].
+  /// Valida el formulario y registra. Solo pide correo+contraseña+rol —
+  /// nombre/teléfono reales se completan después (ver `CompletarPerfilScreen`,
+  /// disparada al intentar grabar un audio si faltan). Mientras tanto se manda
+  /// un nombre provisional derivado del correo, porque el back-end lo exige
+  /// como campo obligatorio (no-nulo) del usuario.
   Future<void> register({
-    required String nombre,
     required String correo,
     required String contrasena,
-    required String telefono,
   }) async {
-    final nombreError = validateName(nombre);
     final emailError = validateEmail(correo);
     final passwordError = validatePassword(contrasena);
     final roleError = state.selectedRole == null ? 'Selecciona un rol' : null;
-    if (nombreError != null ||
-        emailError != null ||
-        passwordError != null ||
-        roleError != null) {
+    if (emailError != null || passwordError != null || roleError != null) {
       state = state.copyWith(
-        nombreError: nombreError,
         emailError: emailError,
         passwordError: passwordError,
         roleError: roleError,
@@ -89,11 +80,11 @@ class Register extends _$Register with ValidationMixin {
     state = state.copyWith(status: RegisterStatus.loading, errorMessage: null);
     try {
       final result = await ref.read(registerUseCaseProvider)(
-        nombre: nombre,
+        nombre: _nombreProvisionalDe(correo),
         correo: correo,
         contrasena: contrasena,
         rol: state.selectedRole!.value,
-        telefono: telefono,
+        telefono: '',
       );
       state = state.copyWith(
         status: RegisterStatus.codeSent,
@@ -124,6 +115,15 @@ class Register extends _$Register with ValidationMixin {
     } catch (e) {
       _fail(e);
     }
+  }
+
+  /// Nombre provisional a partir del correo (ej. `juan.perez@x.com` →
+  /// `Juan.perez`) — el back-end exige `nombre` con mínimo 2 caracteres.
+  /// Se reemplaza por el nombre real en `CompletarPerfilScreen`.
+  String _nombreProvisionalDe(String correo) {
+    final local = correo.split('@').first;
+    if (local.length < 2) return 'Usuario';
+    return local[0].toUpperCase() + local.substring(1);
   }
 
   void _fail(Object error) {

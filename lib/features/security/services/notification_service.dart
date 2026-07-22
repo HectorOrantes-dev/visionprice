@@ -4,8 +4,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../presentation/screens/sensitive_data_screen.dart';
-
 /// Canal Android de alta importancia (Android 8+) para mostrar la notificación
 /// como popup en la barra.
 const AndroidNotificationChannel kHighImportanceChannel =
@@ -123,12 +121,10 @@ class NotificationService {
     });
   }
 
-  /// Borra los datos sensibles locales (SharedPreferences) y refresca la
-  /// pantalla de datos sensibles si está abierta.
+  /// Borra los datos sensibles locales (SharedPreferences).
   static Future<void> wipeSensitiveData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     debugPrint('✅ Datos sensibles borrados.');
-    SensitiveDataScreen.onWipe?.call();
   }
 }

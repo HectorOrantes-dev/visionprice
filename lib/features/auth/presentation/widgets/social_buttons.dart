@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../services/google_sign_in_service.dart';
 import '../providers/login_provider.dart';
-import '../screens/google_role_screen.dart';
+import '../screens/register_screen.dart';
 import 'social_button.dart';
 
 class SocialButtons extends ConsumerStatefulWidget {
@@ -39,11 +39,15 @@ class _SocialButtonsState extends ConsumerState<SocialButtons> {
             },
             onNeedsRegister: () {
               if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                      'No tienes cuenta con ese correo de Google — regístrate.'),
+                ),
+              );
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => GoogleRoleScreen(idToken: idToken),
-                ),
+                MaterialPageRoute(builder: (_) => const RegisterScreen()),
               );
             },
           );

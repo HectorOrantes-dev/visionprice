@@ -50,7 +50,7 @@ final class RegisterProvider
   }
 }
 
-String _$registerHash() => r'59429ac5ec093d798923a67579da5b5f27342ded';
+String _$registerHash() => r'6313075c9df38cc1f624a38ed341d25f1af40782';
 
 /// Notifier del registro (Riverpod moderno). Reemplaza al `RegisterViewModel`
 /// (ChangeNotifier). Carga los roles al construirse y reutiliza el use case de

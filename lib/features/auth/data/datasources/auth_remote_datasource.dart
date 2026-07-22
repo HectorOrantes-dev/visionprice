@@ -15,4 +15,5 @@ abstract class AuthRemoteDataSource {
   Future<AuthSessionEntity?> resetPassword(
       String correo, String resetToken, String nuevaContrasena);
   Future<PerfilEntity> getPerfil();
+  Future<PerfilEntity> actualizarPerfil({String? nombre, String? telefono});
 }

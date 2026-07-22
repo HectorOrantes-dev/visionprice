@@ -531,6 +531,50 @@ final class GetPerfilUseCaseProvider extends $FunctionalProvider<
 
 String _$getPerfilUseCaseHash() => r'9f6156642c3e2827bf9daf950c0ac813d04594ab';
 
+@ProviderFor(actualizarPerfilUseCase)
+final actualizarPerfilUseCaseProvider = ActualizarPerfilUseCaseProvider._();
+
+final class ActualizarPerfilUseCaseProvider extends $FunctionalProvider<
+    ActualizarPerfilUseCase,
+    ActualizarPerfilUseCase,
+    ActualizarPerfilUseCase> with $Provider<ActualizarPerfilUseCase> {
+  ActualizarPerfilUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'actualizarPerfilUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$actualizarPerfilUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ActualizarPerfilUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ActualizarPerfilUseCase create(Ref ref) {
+    return actualizarPerfilUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ActualizarPerfilUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ActualizarPerfilUseCase>(value),
+    );
+  }
+}
+
+String _$actualizarPerfilUseCaseHash() =>
+    r'b7e561f1045a9e9692f5f0cc23cefa4b5cd7bda0';
+
 @ProviderFor(logoutUseCase)
 final logoutUseCaseProvider = LogoutUseCaseProvider._();
 

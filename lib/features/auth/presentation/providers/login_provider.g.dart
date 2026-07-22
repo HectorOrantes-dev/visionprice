@@ -55,7 +55,7 @@ final class LoginProvider extends $NotifierProvider<Login, LoginState> {
   }
 }
 
-String _$loginHash() => r'b7988ee10a6b8e8dfb597e5befd774aa5d62ec97';
+String _$loginHash() => r'cc6fdd4ac9a8d47e61ad29887e7b728d27ad8190';
 
 /// Notifier del login (enfoque moderno de Riverpod). Reemplaza al antiguo
 /// `LoginViewModel` (ChangeNotifier). El estado vive en [LoginState] inmutable;

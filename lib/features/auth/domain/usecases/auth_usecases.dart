@@ -123,6 +123,14 @@ class GetPerfilUseCase {
       _repo.getPerfil(forceRefresh: forceRefresh);
 }
 
+class ActualizarPerfilUseCase {
+  final AuthRepository _repo;
+  ActualizarPerfilUseCase(this._repo);
+
+  Future<PerfilEntity> call({String? nombre, String? telefono}) =>
+      _repo.actualizarPerfil(nombre: nombre, telefono: telefono);
+}
+
 class LogoutUseCase {
   final AuthRepository _repo;
   LogoutUseCase(this._repo);

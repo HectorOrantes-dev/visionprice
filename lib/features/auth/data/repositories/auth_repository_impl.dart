@@ -138,6 +138,14 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<PerfilEntity> actualizarPerfil({String? nombre, String? telefono}) async {
+    final perfil = await _remote.actualizarPerfil(nombre: nombre, telefono: telefono);
+    _perfilCache = perfil;
+    _guardarPerfilLocal(perfil);
+    return perfil;
+  }
+
   /// Persiste el perfil en SQLite sin bloquear ni fallar el flujo principal.
   /// SQLite solo acepta num/String/blob → el bool `activo` va como 1/0.
   Future<void> _guardarPerfilLocal(PerfilEntity perfil) async {

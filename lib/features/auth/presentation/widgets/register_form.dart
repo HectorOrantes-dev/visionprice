@@ -6,19 +6,17 @@ import '../../../../shared/widgets/field_label.dart';
 import '../providers/register_provider.dart';
 import 'role_dropdown.dart';
 
-/// Formulario de datos del registro (nombre, correo, contraseña, teléfono, rol).
+/// Formulario de datos del registro: solo correo, contraseña y rol. El
+/// nombre real y el teléfono se completan después (ver
+/// `CompletarPerfilScreen`), para que el alta sea lo más rápida posible.
 class RegisterForm extends ConsumerWidget {
-  final TextEditingController nameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
-  final TextEditingController phoneController;
 
   const RegisterForm({
     super.key,
-    required this.nameController,
     required this.emailController,
     required this.passwordController,
-    required this.phoneController,
   });
 
   @override
@@ -28,23 +26,6 @@ class RegisterForm extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const FieldLabel('NOMBRE'),
-        const SizedBox(height: 8),
-        TextField(
-          controller: nameController,
-          textCapitalization: TextCapitalization.words,
-          onChanged: notifier.onNameChanged,
-          decoration: InputDecoration(
-            hintText: 'Tu nombre completo',
-            prefixIcon: Icon(
-              Icons.badge_outlined,
-              color: context.colors.textSecondary,
-              size: 20,
-            ),
-            errorText: state.nombreError,
-          ),
-        ),
-        const SizedBox(height: 20),
         const FieldLabel('CORREO'),
         const SizedBox(height: 8),
         TextField(
@@ -87,21 +68,6 @@ class RegisterForm extends ConsumerWidget {
               ),
             ),
             errorText: state.passwordError,
-          ),
-        ),
-        const SizedBox(height: 20),
-        const FieldLabel('TELÉFONO (OPCIONAL)'),
-        const SizedBox(height: 8),
-        TextField(
-          controller: phoneController,
-          keyboardType: TextInputType.phone,
-          decoration: InputDecoration(
-            hintText: '+52 55 1234 5678',
-            prefixIcon: Icon(
-              Icons.phone_outlined,
-              color: context.colors.textSecondary,
-              size: 20,
-            ),
           ),
         ),
         const SizedBox(height: 20),

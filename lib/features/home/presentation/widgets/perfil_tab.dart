@@ -7,15 +7,14 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../account/presentation/screens/subscriptions_screen.dart';
 import '../../../audit/presentation/screens/anomalias_zona_screen.dart';
 import '../../../auth/presentation/providers/perfil_provider.dart';
-import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../recommendations/presentation/screens/entrenar_modelos_screen.dart';
-import '../../../security/presentation/screens/sensitive_data_screen.dart';
 import 'perfil_error.dart';
 import 'perfil_info_card.dart';
 import 'profile_item.dart';
 
 /// Pestaña "Perfil": datos de la cuenta (`AsyncValue<PerfilEntity>`) + accesos a
-/// suscripciones, notificaciones, datos sensibles y cerrar sesión.
+/// suscripciones (y, para Ingeniero Civil, entrenar modelos/auditoría) y
+/// cerrar sesión.
 class PerfilTab extends ConsumerWidget {
   final VoidCallback onLogout;
 
@@ -81,24 +80,6 @@ class PerfilTab extends ConsumerWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const SubscriptionsScreen()),
-            ),
-          ),
-          const SizedBox(height: 10),
-          ProfileItem(
-            icon: Icons.notifications_none,
-            label: 'Notificaciones',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-            ),
-          ),
-          const SizedBox(height: 10),
-          ProfileItem(
-            icon: Icons.shield_outlined,
-            label: 'Datos sensibles',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SensitiveDataScreen()),
             ),
           ),
           // Entrenar los modelos de recomendación: el back-end solo lo permite

@@ -12,9 +12,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// el [ApiClient] al construir el header `Authorization`.
 class TokenStorage extends ChangeNotifier {
   static const _kKey = 'access_token';
-  static const _storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
+  // Desde flutter_secure_storage v10, el cifrado en Android migra solo a un
+  // cifrador propio (Jetpack Security/EncryptedSharedPreferences quedó
+  // deprecado por Google) — ya no hace falta pedirlo explícitamente.
+  static const _storage = FlutterSecureStorage();
 
   String? _token;
 

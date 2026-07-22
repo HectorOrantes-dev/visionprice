@@ -72,6 +72,10 @@ abstract class AuthRepository {
   /// [forceRefresh] es `true`.
   Future<PerfilEntity> getPerfil({bool forceRefresh = false});
 
+  /// Completa/actualiza nombre y/o teléfono (`PATCH /api/v1/me/perfil`).
+  /// Solo se manda lo que venga no-nulo; el back-end conserva el resto.
+  Future<PerfilEntity> actualizarPerfil({String? nombre, String? telefono});
+
   /// Cierra la sesión local (borra el token).
   Future<void> logout();
 }

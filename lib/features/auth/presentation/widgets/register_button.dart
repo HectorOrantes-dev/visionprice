@@ -6,17 +6,13 @@ import '../providers/register_provider.dart';
 
 /// Botón "Crear cuenta" del registro (se oculta durante el paso 2FA).
 class RegisterButton extends ConsumerWidget {
-  final TextEditingController nameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
-  final TextEditingController phoneController;
 
   const RegisterButton({
     super.key,
-    required this.nameController,
     required this.emailController,
     required this.passwordController,
-    required this.phoneController,
   });
 
   @override
@@ -27,10 +23,8 @@ class RegisterButton extends ConsumerWidget {
       onPressed: state.isLoading
           ? null
           : () => ref.read(registerProvider.notifier).register(
-                nombre: nameController.text,
                 correo: emailController.text,
                 contrasena: passwordController.text,
-                telefono: phoneController.text,
               ),
       child: state.isLoading
           ? const SizedBox(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../providers/recomendacion_superficie_provider.dart';
+import 'buscando_recomendacion_card.dart';
 import 'recomendacion_aviso.dart';
 import 'recomendacion_linea.dart';
 
@@ -37,7 +38,7 @@ class RecomendacionKitCard extends ConsumerWidget {
         .pedir(categoria: categoria, areaM2: areaM2);
 
     return estado.when(
-      loading: () => _boton(context, onPressed: null, cargando: true),
+      loading: () => const BuscandoRecomendacionCard(),
       error: (e, _) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -47,13 +48,13 @@ class RecomendacionKitCard extends ConsumerWidget {
                 : 'No se pudo obtener la recomendación.',
           ),
           const SizedBox(height: 8),
-          _boton(context, onPressed: pedir, cargando: false, reintento: true),
+          _boton(context, onPressed: pedir, reintento: true),
         ],
       ),
       data: (r) {
         // Aún no se pidió: solo el botón.
         if (r == null) {
-          return _boton(context, onPressed: pedir, cargando: false);
+          return _boton(context, onPressed: pedir);
         }
         return Container(
           padding: const EdgeInsets.all(14),
@@ -118,23 +119,14 @@ class RecomendacionKitCard extends ConsumerWidget {
   Widget _boton(
     BuildContext context, {
     required VoidCallback? onPressed,
-    required bool cargando,
     bool reintento = false,
   }) {
     return SizedBox(
       height: 46,
       child: OutlinedButton.icon(
         onPressed: onPressed,
-        icon: cargando
-            ? const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.auto_awesome, size: 18),
-        label: Text(cargando
-            ? 'Buscando obras similares…'
-            : (reintento ? 'Reintentar recomendación' : 'Usar recomendados')),
+        icon: const Icon(Icons.auto_awesome, size: 18),
+        label: Text(reintento ? 'Reintentar recomendación' : 'Usar recomendados'),
       ),
     );
   }
