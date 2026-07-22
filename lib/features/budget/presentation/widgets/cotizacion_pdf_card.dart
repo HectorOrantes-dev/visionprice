@@ -122,7 +122,7 @@ class _CotizacionPdfCardState extends ConsumerState<CotizacionPdfCard> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text('Cotización #${widget.pdf.id} · $_fecha',
+                    Text('Cotización #${widget.pdf.numero} · $_fecha',
                         style: TextStyle(fontSize: 12, color: c.textSecondary)),
                   ],
                 ),

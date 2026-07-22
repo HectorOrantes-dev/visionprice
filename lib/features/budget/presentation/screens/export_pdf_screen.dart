@@ -86,7 +86,7 @@ class ExportPdfScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Cotización #${cotizacion.id}',
+                      'Cotización #${cotizacion.numero}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,

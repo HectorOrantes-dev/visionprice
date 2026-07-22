@@ -111,11 +111,8 @@ class _MedidaManualCardState extends ConsumerState<MedidaManualCard> {
         children: [
           Row(
             children: [
-              Icon(Icons.square_outlined,
-                  size: 18, color: context.colors.primary),
-              const SizedBox(width: 8),
               Expanded(
-                child: Text('Pared (medida a mano)',
+                child: Text('Medida a mano',
                     style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,

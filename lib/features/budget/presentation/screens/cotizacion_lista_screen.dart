@@ -208,7 +208,7 @@ class CotizacionListaScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             for (final cot in cotizaciones)
               ListTile(
-                title: Text('Cotización #${cot.id}'),
+                title: Text('Cotización #${cot.numero}'),
                 subtitle: Text('${cot.lineas.length} materiales · \$${cot.total.toStringAsFixed(2)}'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {

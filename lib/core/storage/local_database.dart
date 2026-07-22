@@ -21,7 +21,9 @@ class LocalDatabase {
       // sqflite solo ejecuta la PRIMERA sentencia → solo se creaba sync_queue).
       // v4: agrega `cotizaciones_pdf` (caché offline de la pestaña Mis Cotizaciones).
       // v5: agrega `latitud`/`longitud` a `proyectos` (ubicación de la obra).
-      version: 5,
+      // v6: agrega `numero` a `cotizaciones_pdf` (número de cotización para
+      // mostrar al usuario; `id` se sigue usando solo para la URL del PDF).
+      version: 6,
       onCreate: (db, version) => _createAllTables(db),
       onUpgrade: (db, oldVersion, newVersion) async {
         await _createAllTables(db);
@@ -29,6 +31,7 @@ class LocalDatabase {
         // tablas ya existentes: hay que hacer ALTER TABLE.
         await _addColumnIfMissing(db, 'proyectos', 'latitud', 'REAL');
         await _addColumnIfMissing(db, 'proyectos', 'longitud', 'REAL');
+        await _addColumnIfMissing(db, 'cotizaciones_pdf', 'numero', 'INTEGER');
       },
     );
   }
@@ -97,6 +100,7 @@ class LocalDatabase {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS cotizaciones_pdf (
         id INTEGER PRIMARY KEY,
+        numero INTEGER,
         proyecto_id INTEGER NOT NULL,
         proyecto_nombre TEXT NOT NULL,
         estado TEXT NOT NULL,

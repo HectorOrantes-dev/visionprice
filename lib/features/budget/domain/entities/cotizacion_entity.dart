@@ -35,7 +35,14 @@ class LineaCotizacionEntity {
 
 /// Resultado de crear una cotización (`POST /api/v1/cotizaciones`).
 class CotizacionEntity {
+  /// Identificador interno: solo sirve para armar la URL de descarga del PDF
+  /// (`GET /cotizaciones/{id}/pdf`). NUNCA se muestra al usuario — para eso
+  /// está [numero].
   final int id;
+
+  /// Número de cotización "amigable" para mostrar al usuario
+  /// (`Cotización #$numero`). Viene del back-end junto con [id].
+  final int numero;
   final int proyectoId;
   final String estado;
   final double total;
@@ -49,6 +56,7 @@ class CotizacionEntity {
 
   const CotizacionEntity({
     required this.id,
+    required this.numero,
     required this.proyectoId,
     required this.estado,
     required this.total,
@@ -82,8 +90,13 @@ class CotizacionEntity {
       }
     }
 
+    final id = json['id'] is int ? json['id'] : int.tryParse('${json['id']}') ?? 0;
     return CotizacionEntity(
-      id: json['id'] is int ? json['id'] : int.tryParse('${json['id']}') ?? 0,
+      id: id,
+      // Respuestas viejas (sin `numero` todavía) caen de vuelta al `id`.
+      numero: json['numero'] is int
+          ? json['numero']
+          : int.tryParse('${json['numero']}') ?? id,
       proyectoId: json['proyecto_id'] is int
           ? json['proyecto_id']
           : int.tryParse('${json['proyecto_id']}') ?? 0,

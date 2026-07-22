@@ -64,7 +64,7 @@ Future<Uint8List> buildCotizacionPdf(CotizacionEntity cot,
         margin: const pw.EdgeInsets.all(32),
         header: (context) => context.pageNumber == 1
             ? _header(
-                title: 'Cotización #${cot.id}',
+                title: 'Cotización #${cot.numero}',
                 fechaLabel: 'Fecha de emisión',
                 fecha: cot.fecha.isNotEmpty ? _formatFecha(cot.fecha) : '—',
               )
