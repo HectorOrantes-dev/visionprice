@@ -35,12 +35,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await Permission.location.request();
   }
 
-  final List<Widget> _pages = const [
-    DashboardTab(),
-    MisCotizacionesTab(),
-    SyncQueueScreen(),
-    SizedBox.shrink(), // index 3 (Perfil) se construye con onLogout en build()
-  ];
+  /// Construye la pestaña activa. Inicio y Perfil reciben callbacks (cambiar de
+  /// pestaña / cerrar sesión), así que no pueden vivir en una lista `const`.
+  Widget _body() {
+    switch (_currentIndex) {
+      case 0:
+        return DashboardTab(
+          // "Ver todo" de Actividad reciente -> pestaña Mis Cotizaciones.
+          onVerCotizaciones: () => setState(() => _currentIndex = 1),
+        );
+      case 1:
+        return const MisCotizacionesTab();
+      case 2:
+        return const SyncQueueScreen();
+      default:
+        return PerfilTab(onLogout: () => _logout());
+    }
+  }
 
   /// Cierra la sesión y regresa al login limpiando la pila de navegación.
   void _logout({String? reason}) {
@@ -69,9 +80,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       onTimeout: () => _logout(reason: 'Sesión cerrada por inactividad.'),
       child: Scaffold(
         backgroundColor: context.colors.background,
-        body: _currentIndex == 3
-            ? PerfilTab(onLogout: () => _logout())
-            : _pages[_currentIndex],
+        body: _body(),
         bottomNavigationBar: BottomNav(
           currentIndex: _currentIndex,
           onTap: (i) => setState(() => _currentIndex = i),
