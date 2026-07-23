@@ -9,12 +9,16 @@ import 'join_project_button.dart';
 import 'new_budget_button.dart';
 import 'offline_banner.dart';
 import 'projects_sliver.dart';
+import 'recent_activity_section.dart';
 import 'section_title.dart';
 
-/// Contenido del dashboard: encabezado, CTAs y la lista de proyectos, con
-/// pull-to-refresh sobre `homeProvider`.
+/// Contenido del dashboard: encabezado, CTAs, la lista de proyectos y la
+/// actividad reciente, con pull-to-refresh sobre `homeProvider`.
 class DashboardView extends ConsumerWidget {
-  const DashboardView({super.key});
+  /// Lleva a la pestaña "Mis Cotizaciones" (enlace "Ver todo" de la actividad).
+  final VoidCallback? onVerCotizaciones;
+
+  const DashboardView({super.key, this.onVerCotizaciones});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,6 +54,8 @@ class DashboardView extends ConsumerWidget {
                   CreateProjectButton(notifier: notifier),
                   const SizedBox(height: 12),
                   const JoinProjectButton(),
+                  const SizedBox(height: 28),
+                  RecentActivitySection(onVerTodo: onVerCotizaciones),
                   const SizedBox(height: 24),
                 ],
               ),
