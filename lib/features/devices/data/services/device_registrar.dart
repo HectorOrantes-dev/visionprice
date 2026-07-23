@@ -1,6 +1,5 @@
 import 'dart:io' show Platform;
 
-
 import '../../../security/services/notification_service.dart';
 import '../../domain/usecases/dispositivo_usecases.dart';
 

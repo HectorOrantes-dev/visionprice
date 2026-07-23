@@ -34,8 +34,8 @@ class PerfilTab extends ConsumerWidget {
             child: CircleAvatar(
               radius: 36,
               backgroundColor: context.colors.primaryLight,
-              child: Icon(Icons.person,
-                  size: 40, color: context.colors.primary),
+              child:
+                  Icon(Icons.person, size: 40, color: context.colors.primary),
             ),
           ),
           const SizedBox(height: 12),
@@ -66,9 +66,8 @@ class PerfilTab extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator()),
             ),
             error: (e, _) => PerfilError(
-              message: e is ApiException
-                  ? e.message
-                  : 'No se pudo cargar el perfil',
+              message:
+                  e is ApiException ? e.message : 'No se pudo cargar el perfil',
               onRetry: () => ref.invalidate(perfilProvider),
             ),
             data: (p) => PerfilInfoCard(perfil: p),
@@ -91,7 +90,8 @@ class PerfilTab extends ConsumerWidget {
               label: 'Entrenar modelos',
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const EntrenarModelosScreen()),
+                MaterialPageRoute(
+                    builder: (_) => const EntrenarModelosScreen()),
               ),
             ),
             const SizedBox(height: 10),

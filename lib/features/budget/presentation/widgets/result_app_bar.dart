@@ -42,7 +42,8 @@ class ResultAppBar extends StatelessWidget {
               ),
               Text(
                 'Materiales y precios',
-                style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
+                style: TextStyle(
+                    fontSize: 12, color: context.colors.textSecondary),
               ),
             ],
           ),

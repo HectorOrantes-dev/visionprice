@@ -17,7 +17,8 @@ class AudioRecorderService {
   /// Inicia la grabación a un archivo temporal `.m4a` (AAC).
   Future<void> start() async {
     final dir = await getTemporaryDirectory();
-    _path = '${dir.path}/grabacion_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    _path =
+        '${dir.path}/grabacion_${DateTime.now().millisecondsSinceEpoch}.m4a';
     await _recorder.start(
       const RecordConfig(encoder: AudioEncoder.aacLc),
       path: _path!,
@@ -39,7 +40,7 @@ class AudioRecorderService {
   Future<bool> isRecording() => _recorder.isRecording();
 
   /// Stream para el visualizador de audio (ondas).
-  Stream<Amplitude> get onAmplitudeChanged => 
+  Stream<Amplitude> get onAmplitudeChanged =>
       _recorder.onAmplitudeChanged(const Duration(milliseconds: 100));
 
   Future<void> dispose() => _recorder.dispose();

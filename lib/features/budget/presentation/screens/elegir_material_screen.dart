@@ -13,9 +13,11 @@ import '../widgets/producto_picker.dart';
 class ElegirMaterialScreen extends ConsumerWidget {
   final int proyectoId;
   final int index;
-  const ElegirMaterialScreen({super.key, required this.proyectoId, required this.index});
+  const ElegirMaterialScreen(
+      {super.key, required this.proyectoId, required this.index});
 
-  static String _fmtArea(double a) => a.truncateToDouble() == a ? a.toStringAsFixed(0) : a.toStringAsFixed(1);
+  static String _fmtArea(double a) =>
+      a.truncateToDouble() == a ? a.toStringAsFixed(0) : a.toStringAsFixed(1);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

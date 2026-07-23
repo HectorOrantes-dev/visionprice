@@ -15,7 +15,8 @@ class LoginKeepSessionRow extends ConsumerWidget {
       children: [
         Checkbox(
           value: keepSession,
-          onChanged: (_) => ref.read(loginProvider.notifier).toggleKeepSession(),
+          onChanged: (_) =>
+              ref.read(loginProvider.notifier).toggleKeepSession(),
         ),
         const SizedBox(width: 4),
         Text(

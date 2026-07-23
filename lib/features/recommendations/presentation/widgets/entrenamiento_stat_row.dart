@@ -25,8 +25,7 @@ class EntrenamientoStatRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: TextStyle(fontSize: 13, color: c.textSecondary)),
+          Text(label, style: TextStyle(fontSize: 13, color: c.textSecondary)),
           Text(
             value,
             style: TextStyle(

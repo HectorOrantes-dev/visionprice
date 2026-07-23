@@ -1,4 +1,3 @@
-
 import '../repositories/dispositivo_repository.dart';
 
 class RegistrarDispositivoUseCase {

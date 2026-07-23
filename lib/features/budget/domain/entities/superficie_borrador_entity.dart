@@ -27,7 +27,8 @@ class SuperficieBorradorEntity {
     return SuperficieBorradorEntity(
       categoria: (json['categoria'] ?? '').toString(),
       descripcion: (json['descripcion'] ?? '').toString(),
-      areaM2: (json['area_m2'] is num) ? (json['area_m2'] as num).toDouble() : 0,
+      areaM2:
+          (json['area_m2'] is num) ? (json['area_m2'] as num).toDouble() : 0,
       metodo: (json['metodo'] ?? '').toString(),
       lineas: lineasJson is List
           ? lineasJson

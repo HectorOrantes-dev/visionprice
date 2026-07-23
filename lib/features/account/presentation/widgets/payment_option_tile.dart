@@ -11,6 +11,10 @@ class PaymentOptionTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
+  /// Marca personalizada para la caja del logo (ej. el mark de Conekta con su
+  /// color de marca). Si no se da, se usa [logo] con el color primario.
+  final Widget? logoWidget;
+
   const PaymentOptionTile({
     super.key,
     required this.logo,
@@ -18,6 +22,7 @@ class PaymentOptionTile extends StatelessWidget {
     required this.subtitle,
     required this.selected,
     required this.onTap,
+    this.logoWidget,
   });
 
   @override
@@ -27,7 +32,8 @@ class PaymentOptionTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selected ? context.colors.primaryLight : context.colors.surface,
+          color:
+              selected ? context.colors.primaryLight : context.colors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected ? context.colors.primary : context.colors.border,
@@ -43,7 +49,8 @@ class PaymentOptionTile extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected ? context.colors.primary : context.colors.border,
+                  color:
+                      selected ? context.colors.primary : context.colors.border,
                   width: 2,
                 ),
               ),
@@ -70,7 +77,8 @@ class PaymentOptionTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: context.colors.border),
               ),
-              child: Icon(logo, size: 24, color: context.colors.primary),
+              child: logoWidget ??
+                  Icon(logo, size: 24, color: context.colors.primary),
             ),
             const SizedBox(width: 14),
             Expanded(

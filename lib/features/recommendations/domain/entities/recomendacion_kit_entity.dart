@@ -66,9 +66,8 @@ class RecomendacionKitEntity {
       confianzaTipoKit: json['confianza_tipo_kit'] is num
           ? (json['confianza_tipo_kit'] as num).toDouble()
           : 0,
-      complementosRecomendados: comps is List
-          ? comps.map((e) => e.toString()).toList()
-          : const [],
+      complementosRecomendados:
+          comps is List ? comps.map((e) => e.toString()).toList() : const [],
       metodoCrucetasRecomendado:
           (json['metodo_crucetas_recomendado'] ?? '').toString(),
       zonaReferencia: (json['zona_referencia'] ?? '').toString(),

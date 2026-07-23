@@ -15,8 +15,7 @@ class ConektaCardTokenScreen extends StatefulWidget {
   const ConektaCardTokenScreen({super.key});
 
   @override
-  State<ConektaCardTokenScreen> createState() =>
-      _ConektaCardTokenScreenState();
+  State<ConektaCardTokenScreen> createState() => _ConektaCardTokenScreenState();
 }
 
 class _ConektaCardTokenScreenState extends State<ConektaCardTokenScreen> {
@@ -69,8 +68,7 @@ class _ConektaCardTokenScreenState extends State<ConektaCardTokenScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text(data['message']?.toString() ?? 'Tarjeta rechazada.')),
+            content: Text(data['message']?.toString() ?? 'Tarjeta rechazada.')),
       );
     }
   }

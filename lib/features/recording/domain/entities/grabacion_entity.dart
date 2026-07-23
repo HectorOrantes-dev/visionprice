@@ -6,7 +6,8 @@ import 'superficie_entity.dart';
 class GrabacionEntity {
   final int id;
   final int? proyectoId;
-  final String estado; // estado_sincronizacion: procesando | sincronizado | error
+  final String
+      estado; // estado_sincronizacion: procesando | sincronizado | error
   final int? duracionSegundos;
   final String? transcripcion;
   final double? confianza;
@@ -40,7 +41,8 @@ class GrabacionEntity {
     final items = extraccion!['items'];
     if (items is! List) return [];
     return items
-        .map((e) => e is Map<String, dynamic> ? SuperficieEntity.fromJson(e) : null)
+        .map((e) =>
+            e is Map<String, dynamic> ? SuperficieEntity.fromJson(e) : null)
         .whereType<SuperficieEntity>()
         .toList();
   }
@@ -55,7 +57,8 @@ class GrabacionEntity {
       proyectoId: json['proyecto_id'] is int
           ? json['proyecto_id'] as int
           : int.tryParse('${json['proyecto_id']}'),
-      estado: (json['estado_sincronizacion'] ?? json['estado'] ?? '').toString(),
+      estado:
+          (json['estado_sincronizacion'] ?? json['estado'] ?? '').toString(),
       duracionSegundos: json['duracion_segundos'] is int
           ? json['duracion_segundos'] as int
           : int.tryParse('${json['duracion_segundos']}'),

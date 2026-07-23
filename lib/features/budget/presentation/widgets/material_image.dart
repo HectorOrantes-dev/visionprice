@@ -35,7 +35,8 @@ class MaterialImage extends StatelessWidget {
     if (u == null || u.trim().isEmpty) {
       return _box(
         context,
-        child: Icon(fallbackIcon, color: context.colors.primary, size: size * 0.42),
+        child: Icon(fallbackIcon,
+            color: context.colors.primary, size: size * 0.42),
         color: context.colors.primaryLight,
         borderRadius: borderRadius,
       );

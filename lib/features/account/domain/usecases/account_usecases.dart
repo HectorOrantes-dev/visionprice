@@ -1,4 +1,4 @@
-
+import '../entities/conekta_checkout_entity.dart';
 import '../entities/paypal_subscription_intento_entity.dart';
 import '../entities/subscription_entity.dart';
 import '../repositories/account_repository.dart';
@@ -32,6 +32,23 @@ class EliminarMetodoPagoConektaUseCase {
   EliminarMetodoPagoConektaUseCase(this._repo);
 
   Future<void> call() => _repo.eliminarMetodoPagoConekta();
+}
+
+/// Crea un checkout hospedado de Conekta (efectivo/OXXO o transferencia/SPEI):
+/// no cobra en el request, devuelve la URL del checkout para abrir en un
+/// WebView. El pago se confirma después, vía webhook.
+class CrearCheckoutConektaUseCase {
+  final AccountRepository _repo;
+  CrearCheckoutConektaUseCase(this._repo);
+
+  Future<ConektaCheckoutEntity> call({
+    required String planKey,
+    required List<String> allowedPaymentMethods,
+  }) =>
+      _repo.crearCheckoutConekta(
+        planKey: planKey,
+        allowedPaymentMethods: allowedPaymentMethods,
+      );
 }
 
 /// Crea el intento de suscripción de PayPal: todavía sin cobrar, devuelve la

@@ -80,8 +80,8 @@ class EntrenamientoResultCard extends StatelessWidget {
                     'Ninguna obra real entró al entrenamiento: para que cuenten, '
                     'las obras necesitan ubicación. Agrégala desde Inicio en las '
                     'obras que digan "Sin ubicación".',
-                    style: TextStyle(
-                        fontSize: 12, color: c.warning, height: 1.4),
+                    style:
+                        TextStyle(fontSize: 12, color: c.warning, height: 1.4),
                   ),
                 ),
               ],

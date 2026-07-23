@@ -1,4 +1,4 @@
-
+import '../../domain/entities/conekta_checkout_entity.dart';
 import '../../domain/entities/paypal_subscription_intento_entity.dart';
 import '../../domain/entities/subscription_entity.dart';
 import '../../domain/repositories/account_repository.dart';
@@ -25,6 +25,16 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<void> eliminarMetodoPagoConekta() =>
       _remote.eliminarMetodoPagoConekta();
+
+  @override
+  Future<ConektaCheckoutEntity> crearCheckoutConekta({
+    required String planKey,
+    required List<String> allowedPaymentMethods,
+  }) =>
+      _remote.crearCheckoutConekta(
+        planKey: planKey,
+        allowedPaymentMethods: allowedPaymentMethods,
+      );
 
   @override
   Future<PaypalSubscriptionIntentoEntity> crearSuscripcionPaypal({

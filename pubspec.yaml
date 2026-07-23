@@ -1,7 +1,7 @@
 name: visionprice
 description: VisionPrice - Presupuestos de construcción inteligentes
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0+6
 
 environment:
   sdk: '>=3.3.0 <4.0.0'

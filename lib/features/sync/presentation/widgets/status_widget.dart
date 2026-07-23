@@ -35,7 +35,8 @@ class StatusWidget extends StatelessWidget {
               SizedBox(
                 width: 12,
                 height: 12,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue),
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.blue),
               ),
               SizedBox(width: 6),
               Text(

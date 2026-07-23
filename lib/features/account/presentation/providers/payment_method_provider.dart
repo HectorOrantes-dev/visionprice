@@ -7,20 +7,27 @@ import 'account_providers.dart';
 
 part 'payment_method_provider.g.dart';
 
+const _conektaMetodoAllowedMethods = {
+  ConektaMetodo.efectivo: ['cash'],
+  ConektaMetodo.transferencia: ['bank_transfer'],
+};
+
 /// Estado de la pantalla "Método de Pago". Mezcla datos async (la suscripción
-/// del resumen, como `AsyncValue`) con estado interactivo (el método
-/// seleccionado y el mensaje de confirmación), por eso se mantiene como
-/// `Notifier` y no como `AsyncNotifier`.
+/// del resumen, como `AsyncValue`) con estado interactivo (el sub-método de
+/// Conekta y el mensaje de confirmación), por eso se mantiene como
+/// `Notifier` y no como `AsyncNotifier`. El método (Conekta/PayPal) en sí ya
+/// no vive aquí: lo decide la pantalla que abre esta (ver
+/// [PaymentMethodScreen.metodo]).
 class PaymentMethodState {
   final AsyncValue<SubscriptionEntity?> subscription;
-  final PaymentMethod selected;
+  final ConektaMetodo conektaMetodo;
   final String? confirmMessage;
   final bool procesando;
   final bool exitoso;
 
   const PaymentMethodState({
     this.subscription = const AsyncLoading(),
-    this.selected = PaymentMethod.conekta,
+    this.conektaMetodo = ConektaMetodo.tarjeta,
     this.confirmMessage,
     this.procesando = false,
     this.exitoso = false,
@@ -30,14 +37,14 @@ class PaymentMethodState {
 
   PaymentMethodState copyWith({
     AsyncValue<SubscriptionEntity?>? subscription,
-    PaymentMethod? selected,
+    ConektaMetodo? conektaMetodo,
     Object? confirmMessage = _keep,
     bool? procesando,
     bool? exitoso,
   }) {
     return PaymentMethodState(
       subscription: subscription ?? this.subscription,
-      selected: selected ?? this.selected,
+      conektaMetodo: conektaMetodo ?? this.conektaMetodo,
       confirmMessage: confirmMessage == _keep
           ? this.confirmMessage
           : confirmMessage as String?,
@@ -75,9 +82,9 @@ class PaymentMethodNotifier extends _$PaymentMethodNotifier {
     state = state.copyWith(subscription: resultado);
   }
 
-  void seleccionar(PaymentMethod method) {
-    if (state.selected == method) return;
-    state = state.copyWith(selected: method, confirmMessage: null);
+  void seleccionarConektaMetodo(ConektaMetodo metodo) {
+    if (state.conektaMetodo == metodo) return;
+    state = state.copyWith(conektaMetodo: metodo, confirmMessage: null);
   }
 
   /// Conekta: el `card_token` ya viene tokenizado (desde el WebView de
@@ -101,6 +108,29 @@ class PaymentMethodNotifier extends _$PaymentMethodNotifier {
         confirmMessage:
             e is ApiException ? e.message : 'No se pudo procesar el pago.',
       );
+    }
+  }
+
+  /// Conekta checkout (efectivo/transferencia): crea la orden hospedada y
+  /// devuelve la `checkout_url` para abrirla en un WebView. A diferencia de
+  /// tarjeta, NO confirma el pago en este request (llega por webhook).
+  Future<String?> iniciarConektaCheckout() async {
+    state = state.copyWith(procesando: true, confirmMessage: null);
+    try {
+      final checkout = await ref.read(crearCheckoutConektaUseCaseProvider)(
+        planKey: planKey,
+        allowedPaymentMethods:
+            _conektaMetodoAllowedMethods[state.conektaMetodo]!,
+      );
+      state = state.copyWith(procesando: false);
+      return checkout.checkoutUrl;
+    } catch (e) {
+      state = state.copyWith(
+        procesando: false,
+        confirmMessage:
+            e is ApiException ? e.message : 'No se pudo iniciar el pago.',
+      );
+      return null;
     }
   }
 

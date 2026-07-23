@@ -25,7 +25,8 @@ class SyncService extends ChangeNotifier {
   List<SyncItemEntity> _items = [];
   List<SyncItemEntity> get items => _items;
 
-  SyncService(this._localDS, this._apiClient, this._tokenStorage, this._localDatabase)
+  SyncService(
+      this._localDS, this._apiClient, this._tokenStorage, this._localDatabase)
       : _dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl)) {
     _init();
   }
@@ -44,7 +45,7 @@ class SyncService extends ChangeNotifier {
     });
 
     await _refreshItems();
-    
+
     // Polling timer for items in 'processing' state
     _pollingTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       if (_isOnline) _pollProcessingItems();
@@ -75,7 +76,7 @@ class SyncService extends ChangeNotifier {
     );
     await _localDS.insertItem(item);
     await _refreshItems();
-    
+
     if (_isOnline) {
       _startUploads();
     }
@@ -105,25 +106,27 @@ class SyncService extends ChangeNotifier {
 
   Future<void> _syncPendingProjects() async {
     final db = await _localDatabase.database;
-    final pendingProjects = await db.query('proyectos', where: 'is_synced = ?', whereArgs: [0]);
-    
+    final pendingProjects =
+        await db.query('proyectos', where: 'is_synced = ?', whereArgs: [0]);
+
     for (var p in pendingProjects) {
       try {
         final int oldId = p['id'] as int;
         final String nombre = p['nombre'] as String;
         final String? direccion = p['direccion'] as String?;
-        
+
         final data = await _apiClient.postJson(
           ApiConfig.proyectos,
           {
             'nombre': nombre,
-            if (direccion != null && direccion.isNotEmpty) 'direccion': direccion,
+            if (direccion != null && direccion.isNotEmpty)
+              'direccion': direccion,
           },
           auth: true,
         );
-        
+
         final int newId = data['id'] as int;
-        
+
         // Actualizar proyecto en local con su ID real y marcar como sincronizado
         await db.update(
           'proyectos',
@@ -131,7 +134,7 @@ class SyncService extends ChangeNotifier {
           where: 'id = ?',
           whereArgs: [oldId],
         );
-        
+
         // Actualizar cualquier audio pendiente en sync_queue que apuntara a este proyecto offline
         await db.update(
           'sync_queue',
@@ -177,15 +180,19 @@ class SyncService extends ChangeNotifier {
         },
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 202) {
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 202) {
         final data = response.data;
         final apiId = data['id'];
-        final syncState = data['estado_sincronizacion']; 
-        
+        final syncState = data['estado_sincronizacion'];
+
         if (syncState == 'listo' || syncState == 'sincronizado') {
-          currentItem = currentItem.copyWith(estado: 'ready', apiId: apiId, progreso: 1.0);
+          currentItem = currentItem.copyWith(
+              estado: 'ready', apiId: apiId, progreso: 1.0);
         } else {
-          currentItem = currentItem.copyWith(estado: 'processing', apiId: apiId, progreso: 1.0);
+          currentItem = currentItem.copyWith(
+              estado: 'processing', apiId: apiId, progreso: 1.0);
         }
       } else {
         currentItem = currentItem.copyWith(estado: 'error');
@@ -204,7 +211,8 @@ class SyncService extends ChangeNotifier {
     for (var item in processing) {
       if (item.apiId == null) continue;
       try {
-        final data = await _apiClient.getJson(ApiConfig.grabacion(item.apiId!), auth: true);
+        final data = await _apiClient.getJson(ApiConfig.grabacion(item.apiId!),
+            auth: true);
         final syncState = data['estado_sincronizacion'];
         if (syncState == 'listo' || syncState == 'sincronizado') {
           final updated = item.copyWith(estado: 'ready');

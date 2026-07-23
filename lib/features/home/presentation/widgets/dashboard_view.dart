@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../budget/presentation/widgets/uso_cotizaciones_banner.dart';
 import '../providers/home_provider.dart';
 import 'create_project_button.dart';
 import 'dashboard_app_bar.dart';
@@ -31,6 +32,7 @@ class DashboardView extends ConsumerWidget {
                   const DashboardAppBar(),
                   // Banner de conectividad REAL: solo aparece si estás offline.
                   if (vm.isOffline) const OfflineBanner(),
+                  const UsoCotizacionesBanner(),
                   const SizedBox(height: 16),
                   const SectionTitle('MIS PROYECTOS'),
                   const SizedBox(height: 12),

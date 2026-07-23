@@ -29,7 +29,8 @@ class MisPdfsEmpty extends StatelessWidget {
             Text(
               'Cuando generes presupuestos en tus obras, sus PDFs aparecerán aquí.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: c.textSecondary, height: 1.4),
+              style:
+                  TextStyle(fontSize: 13, color: c.textSecondary, height: 1.4),
             ),
           ],
         ),

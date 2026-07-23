@@ -25,7 +25,8 @@ class ProyectoEntity {
   bool get tieneUbicacion => latitud != null && longitud != null;
 
   factory ProyectoEntity.fromJson(Map<String, dynamic> json) {
-    double? d(dynamic v) => v is num ? v.toDouble() : double.tryParse('${v ?? ''}');
+    double? d(dynamic v) =>
+        v is num ? v.toDouble() : double.tryParse('${v ?? ''}');
     return ProyectoEntity(
       id: json['id'] is int
           ? json['id'] as int

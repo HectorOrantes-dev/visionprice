@@ -95,13 +95,13 @@ class ProductCard extends StatelessWidget {
                     .map((sup) {
                     final isSel =
                         state.isNuevaSelected(producto.productoId, sup);
-                    final label = sup.descripcion.isNotEmpty
-                        ? sup.descripcion
-                        : sup.tipo;
+                    final label =
+                        sup.descripcion.isNotEmpty ? sup.descripcion : sup.tipo;
                     return SurfaceChip(
                       label: label,
                       selected: isSel,
-                      onTap: () => notifier.toggleNueva(producto.productoId, sup),
+                      onTap: () =>
+                          notifier.toggleNueva(producto.productoId, sup),
                     );
                   }).toList()
                 : [

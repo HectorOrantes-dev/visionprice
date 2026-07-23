@@ -26,13 +26,13 @@ class ForgotPassword extends _$ForgotPassword with ValidationMixin {
       state = state.copyWith(obscurePassword: !state.obscurePassword);
 
   void onEmailChanged(String value) {
-    state = state.copyWith(
-        emailError: value.isEmpty ? null : validateEmail(value));
+    state =
+        state.copyWith(emailError: value.isEmpty ? null : validateEmail(value));
   }
 
   void onCodeChanged(String value) {
-    state = state.copyWith(
-        codeError: value.isEmpty ? null : validateCode(value));
+    state =
+        state.copyWith(codeError: value.isEmpty ? null : validateCode(value));
   }
 
   /// Vuelve al paso anterior sin perder los datos ya capturados.
@@ -73,8 +73,8 @@ class ForgotPassword extends _$ForgotPassword with ValidationMixin {
     }
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      _resetToken =
-          await ref.read(verifyResetCodeUseCaseProvider)(correo: _correo, code: code);
+      _resetToken = await ref.read(verifyResetCodeUseCaseProvider)(
+          correo: _correo, code: code);
       state = state.copyWith(isLoading: false, step: ForgotStep.password);
     } catch (e) {
       _fail(e);

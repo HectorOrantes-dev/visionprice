@@ -86,10 +86,12 @@ class BudgetResultScreen extends ConsumerWidget {
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => ExportPdfScreen(cotizacion: cotizacion),
+                            builder: (_) =>
+                                ExportPdfScreen(cotizacion: cotizacion),
                           ),
                         ),
-                        icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                        icon:
+                            const Icon(Icons.picture_as_pdf_outlined, size: 18),
                         label: const Text('Exportar PDF'),
                       ),
                     ),

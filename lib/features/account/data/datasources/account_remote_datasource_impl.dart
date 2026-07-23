@@ -1,6 +1,6 @@
-
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
+import '../../domain/entities/conekta_checkout_entity.dart';
 import '../../domain/entities/paypal_subscription_intento_entity.dart';
 import '../../domain/entities/subscription_entity.dart';
 import 'account_remote_datasource.dart';
@@ -12,7 +12,13 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   @override
   Future<List<SubscriptionEntity>> subscriptions() async {
     // La respuesta puede ser una lista o un objeto (anyOf en el OpenAPI).
-    final data = await _client.getRaw(ApiConfig.meSubscriptions);
+    // Timeout corto (a diferencia de los 20s por default): es una consulta
+    // secundaria (resumen/historial), no vale la pena dejar la UI colgada
+    // tanto tiempo si Pagos está lento/dormido en Railway.
+    final data = await _client.getRaw(
+      ApiConfig.meSubscriptions,
+      timeout: const Duration(seconds: 10),
+    );
     final List raw;
     if (data is List) {
       raw = data;
@@ -60,6 +66,22 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   @override
   Future<void> eliminarMetodoPagoConekta() {
     return _client.deleteJson(ApiConfig.conektaPaymentMethod, auth: true);
+  }
+
+  @override
+  Future<ConektaCheckoutEntity> crearCheckoutConekta({
+    required String planKey,
+    required List<String> allowedPaymentMethods,
+  }) async {
+    final data = await _client.postJson(
+      ApiConfig.conektaCheckout,
+      {
+        'plan_key': planKey,
+        'allowed_payment_methods': allowedPaymentMethods,
+      },
+      auth: true,
+    );
+    return ConektaCheckoutEntity.fromJson(data);
   }
 
   @override

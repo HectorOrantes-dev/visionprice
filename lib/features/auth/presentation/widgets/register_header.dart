@@ -14,7 +14,8 @@ class RegisterHeader extends StatelessWidget {
       children: [
         Text(
           'Crear cuenta',
-          style: AppTextStyles.heading(size: 28, color: context.colors.textPrimary),
+          style: AppTextStyles.heading(
+              size: 28, color: context.colors.textPrimary),
         ),
         const SizedBox(height: 8),
         Text(

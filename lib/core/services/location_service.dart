@@ -49,8 +49,10 @@ class LocationService {
   /// Calcula la distancia en metros entre dos coordenadas.
   double distanceBetween(LatLng start, LatLng end) {
     return Geolocator.distanceBetween(
-      start.lat, start.lng,
-      end.lat, end.lng,
+      start.lat,
+      start.lng,
+      end.lat,
+      end.lng,
     );
   }
 }

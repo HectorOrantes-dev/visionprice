@@ -50,7 +50,7 @@ final class RecordingProvider
   }
 }
 
-String _$recordingHash() => r'e230ecf22e137d1394b8b0a56e37a8177afddd1c';
+String _$recordingHash() => r'9b4b25a9ca815c95ba2c83d4ee53acb50a2c39b8';
 
 /// Notifier de la grabación (Riverpod moderno). Reemplaza al `RecordingViewModel`
 /// (ChangeNotifier): captura audio real y lo sube como multipart, o lo encola

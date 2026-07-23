@@ -1,4 +1,3 @@
-
 import '../repositories/dispositivo_repository.dart';
 
 /// Registra el device token (FCM) para push.

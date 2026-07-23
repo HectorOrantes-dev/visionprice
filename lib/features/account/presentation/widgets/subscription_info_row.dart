@@ -19,8 +19,8 @@ class SubscriptionInfoRow extends StatelessWidget {
       child: Row(
         children: [
           Text(label,
-              style: TextStyle(
-                  fontSize: 13, color: context.colors.textSecondary)),
+              style:
+                  TextStyle(fontSize: 13, color: context.colors.textSecondary)),
           const Spacer(),
           Text(value,
               style: TextStyle(

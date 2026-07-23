@@ -55,7 +55,8 @@ class AnomaliasZonaScreen extends ConsumerWidget {
                           child: Text(
                             'No se detectaron precios anómalos cerca de ti.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: context.colors.textSecondary),
+                            style:
+                                TextStyle(color: context.colors.textSecondary),
                           ),
                         ),
                       ),

@@ -61,15 +61,13 @@ class ParametersState {
           errorMessage == _keep ? this.errorMessage : errorMessage as String?,
       requiereAltura: requiereAltura ?? this.requiereAltura,
       requiereParedManual: requiereParedManual ?? this.requiereParedManual,
-      areaManualM2: areaManualM2 == _keep
-          ? this.areaManualM2
-          : areaManualM2 as double?,
+      areaManualM2:
+          areaManualM2 == _keep ? this.areaManualM2 : areaManualM2 as double?,
       grabacion:
           grabacion == _keep ? this.grabacion : grabacion as GrabacionEntity?,
       calculo: calculo == _keep ? this.calculo : calculo as CalculoEntity?,
-      textoEditado: textoEditado == _keep
-          ? this.textoEditado
-          : textoEditado as String?,
+      textoEditado:
+          textoEditado == _keep ? this.textoEditado : textoEditado as String?,
     );
   }
 }

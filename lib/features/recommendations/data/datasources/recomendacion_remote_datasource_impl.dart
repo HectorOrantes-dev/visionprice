@@ -4,7 +4,8 @@ import '../../domain/entities/entrenamiento_entity.dart';
 import '../../domain/entities/recomendacion_kit_entity.dart';
 import 'recomendacion_remote_datasource.dart';
 
-class RecomendacionRemoteDataSourceImpl implements RecomendacionRemoteDataSource {
+class RecomendacionRemoteDataSourceImpl
+    implements RecomendacionRemoteDataSource {
   final ApiClient _client;
   RecomendacionRemoteDataSourceImpl(this._client);
 

@@ -11,7 +11,8 @@ class SubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = sub.activa ? context.colors.success : context.colors.textSecondary;
+    final color =
+        sub.activa ? context.colors.success : context.colors.textSecondary;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

@@ -96,15 +96,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         // limpiando la pila de auth.
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const HomeScreen()),
+                          MaterialPageRoute(builder: (_) => const HomeScreen()),
                           (route) => false,
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text(
-                                'Contraseña actualizada. Inicia sesión.'),
+                            content:
+                                Text('Contraseña actualizada. Inicia sesión.'),
                           ),
                         );
                         Navigator.pop(context);
@@ -123,8 +122,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       Expanded(
                         child: Text(
                           state.errorMessage!,
-                          style: const TextStyle(
-                              color: Colors.red, fontSize: 13),
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 13),
                         ),
                       ),
                     ],

@@ -44,8 +44,7 @@ class MisPdfsView extends ConsumerWidget {
               return RefreshIndicator(
                 // Refresco explícito contra el back-end (el `build()` es
                 // cache-first, así que `refresh` sobre él devolvería la caché).
-                onRefresh: () =>
-                    ref.read(misPdfsProvider.notifier).refrescar(),
+                onRefresh: () => ref.read(misPdfsProvider.notifier).refrescar(),
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                   itemCount: pdfs.length,

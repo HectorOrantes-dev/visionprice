@@ -25,13 +25,16 @@ class ManoObraField extends StatelessWidget {
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
       ],
-      style: TextStyle(color: context.colors.textPrimary, fontWeight: FontWeight.w600),
+      style: TextStyle(
+          color: context.colors.textPrimary, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         labelText: label,
         prefixText: '\$ ',
         suffixText: '/m²',
         prefixStyle: TextStyle(
-            color: context.colors.primary, fontWeight: FontWeight.w800, fontSize: 15),
+            color: context.colors.primary,
+            fontWeight: FontWeight.w800,
+            fontSize: 15),
         suffixStyle: TextStyle(
             color: context.colors.textSecondary, fontWeight: FontWeight.w600),
         filled: true,

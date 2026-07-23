@@ -49,8 +49,8 @@ class ExportPdf extends _$ExportPdf {
   Future<Uint8List?> generarPdfLocal(CotizacionEntity cot) async {
     state = state.copyWith(loading: true, errorMessage: null);
     try {
-      final bytes =
-          await buildCotizacionPdf(cot, proyectoNombre: await _nombreProyecto(cot.proyectoId));
+      final bytes = await buildCotizacionPdf(cot,
+          proyectoNombre: await _nombreProyecto(cot.proyectoId));
       state = state.copyWith(loading: false);
       return bytes;
     } catch (_) {

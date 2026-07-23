@@ -77,7 +77,9 @@ class _ProductoPickerState extends ConsumerState<ProductoPicker> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(_error!, textAlign: TextAlign.center, style: TextStyle(color: context.colors.textSecondary)),
+          child: Text(_error!,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.colors.textSecondary)),
         ),
       );
     }
@@ -106,7 +108,9 @@ class _ProductoPickerState extends ConsumerState<ProductoPicker> {
                     color: context.colors.surface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: selected ? context.colors.primary : context.colors.border,
+                      color: selected
+                          ? context.colors.primary
+                          : context.colors.border,
                       width: selected ? 1.5 : 1,
                     ),
                   ),
@@ -122,19 +126,26 @@ class _ProductoPickerState extends ConsumerState<ProductoPicker> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTextStyles.heading(
-                                    size: 14, weight: FontWeight.w700, color: context.colors.textPrimary)),
+                                    size: 14,
+                                    weight: FontWeight.w700,
+                                    color: context.colors.textPrimary)),
                             const SizedBox(height: 3),
                             Text.rich(
                               TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: '\$${p.precioUnitario.toStringAsFixed(0)} ',
+                                    text:
+                                        '\$${p.precioUnitario.toStringAsFixed(0)} ',
                                     style: AppTextStyles.heading(
-                                        size: 16, weight: FontWeight.w800, color: context.colors.primary),
+                                        size: 16,
+                                        weight: FontWeight.w800,
+                                        color: context.colors.primary),
                                   ),
                                   TextSpan(
                                     text: '/ ${p.unidad}',
-                                    style: TextStyle(fontSize: 12, color: context.colors.textHint),
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: context.colors.textHint),
                                   ),
                                 ],
                               ),
@@ -142,18 +153,25 @@ class _ProductoPickerState extends ConsumerState<ProductoPicker> {
                             const SizedBox(height: 2),
                             Text(
                               [
-                                if (p.proveedorNombre != null) p.proveedorNombre!,
-                                if (p.distanciaKm != null) '${p.distanciaKm!.toStringAsFixed(1)} km',
+                                if (p.proveedorNombre != null)
+                                  p.proveedorNombre!,
+                                if (p.distanciaKm != null)
+                                  '${p.distanciaKm!.toStringAsFixed(1)} km',
                               ].join(' · '),
-                              style: TextStyle(fontSize: 12, color: context.colors.textHint),
+                              style: TextStyle(
+                                  fontSize: 12, color: context.colors.textHint),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
                       Icon(
-                        selected ? Icons.radio_button_checked : Icons.radio_button_off,
-                        color: selected ? context.colors.primary : context.colors.border,
+                        selected
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
+                        color: selected
+                            ? context.colors.primary
+                            : context.colors.border,
                       ),
                     ],
                   ),
@@ -166,7 +184,8 @@ class _ProductoPickerState extends ConsumerState<ProductoPicker> {
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: GradientButton(
             height: 52,
-            onPressed: _elegido == null ? null : () => widget.onConfirm(_elegido!),
+            onPressed:
+                _elegido == null ? null : () => widget.onConfirm(_elegido!),
             child: const Text('Confirmar material'),
           ),
         ),

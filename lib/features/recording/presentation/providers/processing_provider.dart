@@ -62,7 +62,8 @@ class Processing extends _$Processing {
         if (g.isSincronizado || g.isError) return; // estado terminal → fin
       } on ApiException catch (e) {
         if (_disposed) return;
-        debugPrint('POLL grabacion id=$id ApiException: ${e.message} (429=${e.isTooManyRequests})');
+        debugPrint(
+            'POLL grabacion id=$id ApiException: ${e.message} (429=${e.isTooManyRequests})');
         if (e.isTooManyRequests) wait = _backoff429; // 429 → espera más
       } catch (e) {
         if (_disposed) return;

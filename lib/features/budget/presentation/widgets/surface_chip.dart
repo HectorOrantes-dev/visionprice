@@ -22,7 +22,8 @@ class SurfaceChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? context.colors.primary : context.colors.surfaceVariant,
+          color:
+              selected ? context.colors.primary : context.colors.surfaceVariant,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected ? context.colors.primary : context.colors.border,

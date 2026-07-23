@@ -12,21 +12,17 @@ part 'notificacion_providers.g.dart';
 /// Cadena de dependencias de notificaciones como providers de Riverpod.
 
 @Riverpod(keepAlive: true)
-NotificacionRemoteDataSource notificacionRemoteDataSource(
-        Ref ref) =>
+NotificacionRemoteDataSource notificacionRemoteDataSource(Ref ref) =>
     NotificacionRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)
-NotificacionRepository notificacionRepository(
-        Ref ref) =>
+NotificacionRepository notificacionRepository(Ref ref) =>
     NotificacionRepositoryImpl(ref.watch(notificacionRemoteDataSourceProvider));
 
 @riverpod
-ObtenerNotificacionesUseCase obtenerNotificacionesUseCase(
-        Ref ref) =>
+ObtenerNotificacionesUseCase obtenerNotificacionesUseCase(Ref ref) =>
     ObtenerNotificacionesUseCase(ref.watch(notificacionRepositoryProvider));
 
 @riverpod
-MarcarNotificacionLeidaUseCase marcarNotificacionLeidaUseCase(
-        Ref ref) =>
+MarcarNotificacionLeidaUseCase marcarNotificacionLeidaUseCase(Ref ref) =>
     MarcarNotificacionLeidaUseCase(ref.watch(notificacionRepositoryProvider));

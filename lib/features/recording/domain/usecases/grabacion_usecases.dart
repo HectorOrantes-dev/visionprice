@@ -1,4 +1,3 @@
-
 import '../entities/calculo_entity.dart';
 import '../entities/grabacion_entity.dart';
 import '../repositories/grabacion_repository.dart';
@@ -43,7 +42,10 @@ class CalcularMetrosUseCase {
   CalcularMetrosUseCase(this._repo);
 
   Future<CalculoEntity> call(
-          {int? grabacionId, String? texto, double? altura, double? paredesM2}) =>
+          {int? grabacionId,
+          String? texto,
+          double? altura,
+          double? paredesM2}) =>
       _repo.calcular(
           grabacionId: grabacionId,
           texto: texto,

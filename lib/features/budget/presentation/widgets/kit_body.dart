@@ -86,7 +86,8 @@ class KitBody extends ConsumerWidget {
                       child: MetodoChip(
                         label: label,
                         selected: (kit?.metodo ?? 'tradicional') == valor,
-                        onTap: () => notifier.seleccionarKitMetodo(index, valor),
+                        onTap: () =>
+                            notifier.seleccionarKitMetodo(index, valor),
                       ),
                     ),
                     if (valor != _metodos.last.$1) const SizedBox(width: 8),
@@ -94,7 +95,8 @@ class KitBody extends ConsumerWidget {
                 ],
               ),
               for (final comp in regla.complementos) ...[
-                if (_complementoInfo[comp] case (final label, final categoria)) ...[
+                if (_complementoInfo[comp]
+                    case (final label, final categoria)) ...[
                   const SizedBox(height: 18),
                   KitSection(
                     titulo: label,
@@ -114,9 +116,11 @@ class KitBody extends ConsumerWidget {
                         _ => null,
                       },
                       onConfirm: (p) => switch (categoria) {
-                        'pegazulejo' => notifier.seleccionarKitAdhesivo(index, p),
+                        'pegazulejo' =>
+                          notifier.seleccionarKitAdhesivo(index, p),
                         'cruceta' => notifier.seleccionarKitCruceta(index, p),
-                        'emboquillado' => notifier.seleccionarKitBoquilla(index, p),
+                        'emboquillado' =>
+                          notifier.seleccionarKitBoquilla(index, p),
                         _ => null,
                       },
                     ),
@@ -130,8 +134,11 @@ class KitBody extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: GradientButton(
             height: 52,
-            onPressed: wizard.superficieCompleta(index) ? () => Navigator.pop(context) : null,
-            child: Text('Confirmar kit (${_camposListos(kit, regla)} de ${1 + regla.complementos.length})'),
+            onPressed: wizard.superficieCompleta(index)
+                ? () => Navigator.pop(context)
+                : null,
+            child: Text(
+                'Confirmar kit (${_camposListos(kit, regla)} de ${1 + regla.complementos.length})'),
           ),
         ),
       ],

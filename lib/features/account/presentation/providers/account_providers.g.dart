@@ -285,6 +285,51 @@ final class EliminarMetodoPagoConektaUseCaseProvider
 String _$eliminarMetodoPagoConektaUseCaseHash() =>
     r'4705f7ae48f29031ab92fb2eabfaf6a584de9851';
 
+@ProviderFor(crearCheckoutConektaUseCase)
+final crearCheckoutConektaUseCaseProvider =
+    CrearCheckoutConektaUseCaseProvider._();
+
+final class CrearCheckoutConektaUseCaseProvider extends $FunctionalProvider<
+    CrearCheckoutConektaUseCase,
+    CrearCheckoutConektaUseCase,
+    CrearCheckoutConektaUseCase> with $Provider<CrearCheckoutConektaUseCase> {
+  CrearCheckoutConektaUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'crearCheckoutConektaUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$crearCheckoutConektaUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<CrearCheckoutConektaUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CrearCheckoutConektaUseCase create(Ref ref) {
+    return crearCheckoutConektaUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CrearCheckoutConektaUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CrearCheckoutConektaUseCase>(value),
+    );
+  }
+}
+
+String _$crearCheckoutConektaUseCaseHash() =>
+    r'd715e5ceafbb5bb737e0bae6f85b9889f598aeab';
+
 @ProviderFor(crearSuscripcionPaypalUseCase)
 final crearSuscripcionPaypalUseCaseProvider =
     CrearSuscripcionPaypalUseCaseProvider._();

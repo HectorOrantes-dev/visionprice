@@ -66,7 +66,8 @@ class RecomendacionSuperficie extends _$RecomendacionSuperficie {
     if (cruceta != null) wizard.seleccionarKitCruceta(index, cruceta);
 
     final emboquillado = _producto(r, 'emboquillado');
-    if (emboquillado != null) wizard.seleccionarKitBoquilla(index, emboquillado);
+    if (emboquillado != null)
+      wizard.seleccionarKitBoquilla(index, emboquillado);
 
     if (r.metodoCrucetasRecomendado.isNotEmpty) {
       wizard.seleccionarKitMetodo(index, r.metodoCrucetasRecomendado);

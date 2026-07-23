@@ -30,7 +30,8 @@ class RecomendacionKitCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final estado = ref.watch(recomendacionSuperficieProvider(proyectoId, index));
+    final estado =
+        ref.watch(recomendacionSuperficieProvider(proyectoId, index));
     final c = context.colors;
 
     void pedir() => ref
@@ -126,7 +127,8 @@ class RecomendacionKitCard extends ConsumerWidget {
       child: OutlinedButton.icon(
         onPressed: onPressed,
         icon: const Icon(Icons.auto_awesome, size: 18),
-        label: Text(reintento ? 'Reintentar recomendación' : 'Usar recomendados'),
+        label:
+            Text(reintento ? 'Reintentar recomendación' : 'Usar recomendados'),
       ),
     );
   }

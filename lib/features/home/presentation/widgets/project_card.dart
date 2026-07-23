@@ -18,7 +18,8 @@ class ProjectCard extends StatelessWidget {
       // Enganche de preview (colaboración): abre los miembros del proyecto.
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => ProjectMembersScreen(proyectoId: proyecto.id)),
+        MaterialPageRoute(
+            builder: (_) => ProjectMembersScreen(proyectoId: proyecto.id)),
       ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),

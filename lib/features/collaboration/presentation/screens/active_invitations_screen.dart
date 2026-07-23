@@ -26,7 +26,9 @@ class ActiveInvitationsScreen extends ConsumerWidget {
         leading: BackButton(color: c.textPrimary),
         title: Text('Códigos activos',
             style: TextStyle(
-                color: c.textPrimary, fontSize: 17, fontWeight: FontWeight.w700)),
+                color: c.textPrimary,
+                fontSize: 17,
+                fontWeight: FontWeight.w700)),
       ),
       body: SafeArea(
         child: async.when(
@@ -35,22 +37,25 @@ class ActiveInvitationsScreen extends ConsumerWidget {
             texto: e is ApiException
                 ? e.message
                 : 'No se pudieron cargar los códigos.',
-            onReintentar: () => ref.invalidate(invitacionesProvider(proyectoId)),
+            onReintentar: () =>
+                ref.invalidate(invitacionesProvider(proyectoId)),
           ),
           data: (invitaciones) {
             if (invitaciones.isEmpty) {
               return const _Mensaje(texto: 'No hay códigos activos.');
             }
             return RefreshIndicator(
-              onRefresh: () =>
-                  ref.read(invitacionesProvider(proyectoId).notifier).recargar(),
+              onRefresh: () => ref
+                  .read(invitacionesProvider(proyectoId).notifier)
+                  .recargar(),
               child: ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: invitaciones.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, i) => _InvitacionTile(
                   inv: invitaciones[i],
-                  onRevocar: () => _confirmarRevocar(context, ref, invitaciones[i]),
+                  onRevocar: () =>
+                      _confirmarRevocar(context, ref, invitaciones[i]),
                 ),
               ),
             );
@@ -66,15 +71,15 @@ class ActiveInvitationsScreen extends ConsumerWidget {
       context: context,
       builder: (d) => AlertDialog(
         title: const Text('Revocar código'),
-        content: Text('El código ${inv.codigo} dejará de funcionar. ¿Revocarlo?'),
+        content:
+            Text('El código ${inv.codigo} dejará de funcionar. ¿Revocarlo?'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(d, false),
               child: const Text('Cancelar')),
           TextButton(
             onPressed: () => Navigator.pop(d, true),
-            style:
-                TextButton.styleFrom(foregroundColor: context.colors.error),
+            style: TextButton.styleFrom(foregroundColor: context.colors.error),
             child: const Text('Revocar'),
           ),
         ],
@@ -196,7 +201,9 @@ class _Chip extends StatelessWidget {
       ),
       child: Text(text,
           style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w700, color: c.textSecondary)),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: c.textSecondary)),
     );
   }
 }

@@ -90,7 +90,8 @@ class CotizacionEntity {
       }
     }
 
-    final id = json['id'] is int ? json['id'] : int.tryParse('${json['id']}') ?? 0;
+    final id =
+        json['id'] is int ? json['id'] : int.tryParse('${json['id']}') ?? 0;
     return CotizacionEntity(
       id: id,
       // Respuestas viejas (sin `numero` todavía) caen de vuelta al `id`.

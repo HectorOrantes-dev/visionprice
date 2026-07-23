@@ -25,7 +25,8 @@ CollaborationRemoteDataSource collaborationRemoteDataSource(Ref ref) {
 
 @Riverpod(keepAlive: true)
 CollaborationRepository collaborationRepository(Ref ref) {
-  return CollaborationRepositoryImpl(ref.watch(collaborationRemoteDataSourceProvider));
+  return CollaborationRepositoryImpl(
+      ref.watch(collaborationRemoteDataSourceProvider));
 }
 
 // --- Use Cases ---

@@ -7,6 +7,7 @@ import '../../domain/entities/item_cotizacion.dart';
 import '../../domain/entities/material_regla_entity.dart';
 import '../../domain/entities/producto_entity.dart';
 import '../../domain/entities/superficie_kit_item.dart';
+import '../../domain/entities/uso_cotizaciones_entity.dart';
 import '../../domain/repositories/cotizacion_repository.dart';
 import '../datasources/cotizacion_pdf_local_datasource.dart';
 import '../datasources/cotizacion_remote_datasource.dart';
@@ -35,7 +36,7 @@ class CotizacionRepositoryImpl implements CotizacionRepository {
   }) {
     return _remote.crear({
       'proyecto_id': proyectoId,
-      'piso_m2': pisoM2,       // siempre presente (null si no aplica)
+      'piso_m2': pisoM2, // siempre presente (null si no aplica)
       'paredes_m2': paredesM2, // siempre presente (null si no aplica)
       if (manoObra != null) 'mano_obra': manoObra,
       'items': items.map((e) => e.toJson()).toList(),
@@ -92,4 +93,7 @@ class CotizacionRepositoryImpl implements CotizacionRepository {
   @override
   Future<BorradorCotizacionEntity> borrador(int grabacionId) =>
       _remote.borrador(grabacionId);
+
+  @override
+  Future<UsoCotizacionesEntity> uso() => _remote.uso();
 }

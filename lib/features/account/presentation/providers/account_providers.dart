@@ -12,8 +12,7 @@ part 'account_providers.g.dart';
 /// Cadena de dependencias de cuenta/suscripciones como providers de Riverpod.
 
 @Riverpod(keepAlive: true)
-AccountRemoteDataSource accountRemoteDataSource(
-        Ref ref) =>
+AccountRemoteDataSource accountRemoteDataSource(Ref ref) =>
     AccountRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)
@@ -21,8 +20,7 @@ AccountRepository accountRepository(Ref ref) =>
     AccountRepositoryImpl(ref.watch(accountRemoteDataSourceProvider));
 
 @riverpod
-ObtenerSuscripcionesUseCase obtenerSuscripcionesUseCase(
-        Ref ref) =>
+ObtenerSuscripcionesUseCase obtenerSuscripcionesUseCase(Ref ref) =>
     ObtenerSuscripcionesUseCase(ref.watch(accountRepositoryProvider));
 
 @riverpod
@@ -30,13 +28,16 @@ CrearSuscripcionConektaUseCase crearSuscripcionConektaUseCase(Ref ref) =>
     CrearSuscripcionConektaUseCase(ref.watch(accountRepositoryProvider));
 
 @riverpod
-CancelarSuscripcionConektaUseCase cancelarSuscripcionConektaUseCase(
-        Ref ref) =>
+CancelarSuscripcionConektaUseCase cancelarSuscripcionConektaUseCase(Ref ref) =>
     CancelarSuscripcionConektaUseCase(ref.watch(accountRepositoryProvider));
 
 @riverpod
 EliminarMetodoPagoConektaUseCase eliminarMetodoPagoConektaUseCase(Ref ref) =>
     EliminarMetodoPagoConektaUseCase(ref.watch(accountRepositoryProvider));
+
+@riverpod
+CrearCheckoutConektaUseCase crearCheckoutConektaUseCase(Ref ref) =>
+    CrearCheckoutConektaUseCase(ref.watch(accountRepositoryProvider));
 
 @riverpod
 CrearSuscripcionPaypalUseCase crearSuscripcionPaypalUseCase(Ref ref) =>

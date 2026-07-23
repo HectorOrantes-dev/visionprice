@@ -55,6 +55,11 @@ class CotizacionWizardState {
   final bool loading;
   final bool creando;
   final String? errorMessage;
+
+  /// `error.code` del back-end cuando `crearCotizaciones` falló (p. ej.
+  /// `"plan_limit_reached"`) — permite mostrar el paywall en vez del texto
+  /// de error genérico.
+  final String? errorCode;
   final List<CotizacionEntity> cotizacionesCreadas;
 
   const CotizacionWizardState({
@@ -68,15 +73,20 @@ class CotizacionWizardState {
     this.loading = false,
     this.creando = false,
     this.errorMessage,
+    this.errorCode,
     this.cotizacionesCreadas = const [],
   });
+
+  bool get esPagoRequerido =>
+      errorCode == 'plan_limit_reached' || errorCode == 'plan_required';
 
   /// Regla de la superficie en el índice [i] (asume "simple" si no se
   /// encontró la categoría en `GET /cotizaciones/materiales`).
   MaterialReglaEntity reglaDe(int i) {
     final cat = superficies[i].categoria.toLowerCase().trim();
     return reglas[cat] ??
-        MaterialReglaEntity(categoria: cat, metodoCalculo: 'rendimiento', requiereKit: false);
+        MaterialReglaEntity(
+            categoria: cat, metodoCalculo: 'rendimiento', requiereKit: false);
   }
 
   bool superficieCompleta(int i) {
@@ -102,8 +112,9 @@ class CotizacionWizardState {
       superficies.isNotEmpty &&
       List.generate(superficies.length, (i) => i).every(superficieCompleta);
 
-  int get completadas =>
-      List.generate(superficies.length, (i) => i).where(superficieCompleta).length;
+  int get completadas => List.generate(superficies.length, (i) => i)
+      .where(superficieCompleta)
+      .length;
 
   CotizacionWizardState copyWith({
     List<SuperficieEntity>? superficies,
@@ -116,6 +127,7 @@ class CotizacionWizardState {
     bool? loading,
     bool? creando,
     String? errorMessage,
+    String? errorCode,
     bool clearError = false,
     List<CotizacionEntity>? cotizacionesCreadas,
   }) =>
@@ -133,6 +145,7 @@ class CotizacionWizardState {
         loading: loading ?? this.loading,
         creando: creando ?? this.creando,
         errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+        errorCode: clearError ? null : (errorCode ?? this.errorCode),
         cotizacionesCreadas: cotizacionesCreadas ?? this.cotizacionesCreadas,
       );
 

@@ -22,7 +22,8 @@ class SuperficiesHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back_ios, size: 18, color: context.colors.primary),
+            icon: Icon(Icons.arrow_back_ios,
+                size: 18, color: context.colors.primary),
             onPressed: () => Navigator.pop(context),
           ),
           Padding(
@@ -32,12 +33,16 @@ class SuperficiesHeader extends StatelessWidget {
               children: [
                 Text(
                   'Superficies detectadas',
-                  style: AppTextStyles.heading(size: 22, color: context.colors.textPrimary),
+                  style: AppTextStyles.heading(
+                      size: 22, color: context.colors.textPrimary),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Revisa lo que identificamos en tu grabación.',
-                  style: TextStyle(fontSize: 13, color: context.colors.textSecondary, height: 1.4),
+                  style: TextStyle(
+                      fontSize: 13,
+                      color: context.colors.textSecondary,
+                      height: 1.4),
                 ),
               ],
             ),

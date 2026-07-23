@@ -29,10 +29,9 @@ class NearbyStoresState {
     this.seleccionNueva = const {},
   });
 
-  int get seleccionados =>
-      (superficies != null && superficies!.isNotEmpty)
-          ? seleccionNueva.length
-          : seleccionLegacy.length;
+  int get seleccionados => (superficies != null && superficies!.isNotEmpty)
+      ? seleccionNueva.length
+      : seleccionLegacy.length;
 
   bool isLegacySelected(String productoId, String aplicarA) =>
       seleccionLegacy[productoId] == aplicarA;

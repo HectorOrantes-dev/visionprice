@@ -36,14 +36,12 @@ class _CotizacionPdfCardState extends ConsumerState<CotizacionPdfCard> {
 
   Future<Uint8List?> _bytes() async {
     try {
-      return await ref
-          .read(descargarPdfBytesUseCaseProvider)(widget.pdf.id);
+      return await ref.read(descargarPdfBytesUseCaseProvider)(widget.pdf.id);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e is ApiException
-              ? e.message
-              : 'No se pudo obtener el PDF.'),
+          content: Text(
+              e is ApiException ? e.message : 'No se pudo obtener el PDF.'),
         ));
       }
       return null;
@@ -54,7 +52,8 @@ class _CotizacionPdfCardState extends ConsumerState<CotizacionPdfCard> {
     setState(() => _descargando = true);
     final bytes = await _bytes();
     if (bytes != null) {
-      final res = await savePdfToDevice(bytes, 'cotizacion_${widget.pdf.id}.pdf');
+      final res =
+          await savePdfToDevice(bytes, 'cotizacion_${widget.pdf.id}.pdf');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(res.ok
@@ -128,8 +127,7 @@ class _CotizacionPdfCardState extends ConsumerState<CotizacionPdfCard> {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: confirmado ? c.successLight : c.surfaceVariant,
                   borderRadius: BorderRadius.circular(999),

@@ -25,8 +25,18 @@ class _PdfPalette {
 }
 
 const _mesesEs = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
 ];
 
 /// Formatea una fecha (idealmente ISO `yyyy-MM-dd`) como "20 de julio, 2026".
@@ -51,9 +61,10 @@ Future<Uint8List> buildCotizacionPdf(CotizacionEntity cot,
   // La entidad es inmutable/sendable: se captura sin problemas en el isolate.
   return runHeavy(() {
     String money(double v) => '\$${v.toStringAsFixed(2)}';
-    final proyecto = (proyectoNombre != null && proyectoNombre.trim().isNotEmpty)
-        ? proyectoNombre.trim()
-        : 'Proyecto #${cot.proyectoId}';
+    final proyecto =
+        (proyectoNombre != null && proyectoNombre.trim().isNotEmpty)
+            ? proyectoNombre.trim()
+            : 'Proyecto #${cot.proyectoId}';
     final subtotalMateriales =
         cot.lineas.fold<double>(0, (acc, l) => acc + l.subtotal);
 
@@ -91,14 +102,16 @@ Future<Uint8List> buildCotizacionPdf(CotizacionEntity cot,
 /// Genera un PDF con las líneas de VARIAS cotizaciones juntas (ej. una
 /// simple + una kit del mismo proyecto) y un total general combinado.
 /// Mismo mecanismo en isolate que [buildCotizacionPdf].
-Future<Uint8List> buildResumenCotizacionesPdf(List<CotizacionEntity> cotizaciones,
+Future<Uint8List> buildResumenCotizacionesPdf(
+    List<CotizacionEntity> cotizaciones,
     {String? proyectoNombre}) {
   return runHeavy(() {
     String money(double v) => '\$${v.toStringAsFixed(2)}';
     final total = cotizaciones.fold<double>(0, (acc, c) => acc + c.total);
-    final manoObraTotal = cotizaciones.fold<double>(
-        0, (acc, c) => acc + (c.manoObra ?? 0));
-    final proyecto = (proyectoNombre != null && proyectoNombre.trim().isNotEmpty)
+    final manoObraTotal =
+        cotizaciones.fold<double>(0, (acc, c) => acc + (c.manoObra ?? 0));
+    final proyecto = (proyectoNombre != null &&
+            proyectoNombre.trim().isNotEmpty)
         ? proyectoNombre.trim()
         : 'Proyecto #${cotizaciones.isNotEmpty ? cotizaciones.first.proyectoId : 0}';
     final lineas = [for (final cot in cotizaciones) ...cot.lineas];
@@ -172,7 +185,8 @@ pw.Widget _header({
           children: [
             pw.Text(
               fechaLabel,
-              style: pw.TextStyle(color: _PdfPalette.primaryLight, fontSize: 10),
+              style:
+                  pw.TextStyle(color: _PdfPalette.primaryLight, fontSize: 10),
             ),
             pw.SizedBox(height: 3),
             pw.Text(
@@ -197,7 +211,8 @@ pw.Widget _infoRow({required String proyecto, required String? estado}) {
   return pw.Container(
     padding: const pw.EdgeInsets.only(bottom: 14),
     decoration: pw.BoxDecoration(
-      border: pw.Border(bottom: pw.BorderSide(color: _PdfPalette.border, width: 1.5)),
+      border: pw.Border(
+          bottom: pw.BorderSide(color: _PdfPalette.border, width: 1.5)),
     ),
     child: pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -254,7 +269,10 @@ pw.Widget _estadoBadge(String estado) {
     child: pw.Text(
       estado.toUpperCase(),
       style: pw.TextStyle(
-          fontSize: 9, fontWeight: pw.FontWeight.bold, color: fg, letterSpacing: 0.5),
+          fontSize: 9,
+          fontWeight: pw.FontWeight.bold,
+          color: fg,
+          letterSpacing: 0.5),
     ),
   );
 }
@@ -306,7 +324,9 @@ pw.Widget _th(String text, {bool alignRight = false}) => pw.Padding(
         text.toUpperCase(),
         textAlign: alignRight ? pw.TextAlign.right : pw.TextAlign.left,
         style: pw.TextStyle(
-            fontSize: 8, fontWeight: pw.FontWeight.bold, color: _PdfPalette.textSecondary),
+            fontSize: 8,
+            fontWeight: pw.FontWeight.bold,
+            color: _PdfPalette.textSecondary),
       ),
     );
 
@@ -338,7 +358,8 @@ pw.Widget _tdItem(String descripcion) {
         if (detail != null) ...[
           pw.SizedBox(height: 2),
           pw.Text(detail,
-              style: pw.TextStyle(fontSize: 8, color: _PdfPalette.textSecondary)),
+              style:
+                  pw.TextStyle(fontSize: 8, color: _PdfPalette.textSecondary)),
         ],
       ],
     ),
@@ -368,7 +389,8 @@ pw.Widget _totales({
             margin: const pw.EdgeInsets.only(top: 6),
             padding: const pw.EdgeInsets.only(top: 8),
             decoration: pw.BoxDecoration(
-              border: pw.Border(top: pw.BorderSide(color: _PdfPalette.border, width: 1.5)),
+              border: pw.Border(
+                  top: pw.BorderSide(color: _PdfPalette.border, width: 1.5)),
             ),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -397,7 +419,9 @@ pw.Widget _totalRow(String label, String value) => pw.Padding(
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(label, style: pw.TextStyle(fontSize: 10, color: _PdfPalette.textSecondary)),
+          pw.Text(label,
+              style:
+                  pw.TextStyle(fontSize: 10, color: _PdfPalette.textSecondary)),
           pw.Text(value,
               style: pw.TextStyle(
                   fontSize: 11,

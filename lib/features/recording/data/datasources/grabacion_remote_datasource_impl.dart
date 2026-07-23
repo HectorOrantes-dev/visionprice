@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../domain/entities/calculo_entity.dart';
 import '../../domain/entities/grabacion_entity.dart';
@@ -25,7 +26,7 @@ class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
   }) async {
     final localId = const Uuid().v4();
     final fecha = DateTime.now().toUtc().toIso8601String();
-    
+
     final token = _tokenStorage.token;
     if (token == null) throw Exception('No auth token');
 
@@ -37,24 +38,50 @@ class GrabacionRemoteDataSourceImpl implements GrabacionRemoteDataSource {
       'audio': await MultipartFile.fromFile(audioPath),
     });
 
-    final response = await _dio.post(
-      ApiConfig.grabaciones,
-      data: formData,
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
-      onSendProgress: (sent, total) {
-        if (total > 0 && onProgress != null) {
-          onProgress(sent / total);
+    Response response;
+    try {
+      response = await _dio.post(
+        ApiConfig.grabaciones,
+        data: formData,
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+        onSendProgress: (sent, total) {
+          if (total > 0 && onProgress != null) {
+            onProgress(sent / total);
+          }
+        },
+      );
+    } on DioException catch (e) {
+      // Dio lanza por defecto en 4xx/5xx: se traduce a `ApiException` (mismo
+      // formato `{error:{code,message}}` del back-end) para que el resto de
+      // la app (paywall en 402, mensajes de error) lo trate igual que
+      // cualquier otro endpoint que sí pasa por `ApiClient`.
+      final res = e.response;
+      if (res == null) {
+        throw ApiException.network();
+      }
+      final body = res.data;
+      String message = 'No se pudo subir la grabación.';
+      String? code;
+      if (body is Map) {
+        final error = body['error'];
+        if (error is Map) {
+          message = (error['message'] ?? message).toString();
+          code = error['code']?.toString();
         }
-      },
-    );
+      }
+      throw ApiException(res.statusCode ?? -1, message, code: code);
+    }
 
-    if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 202) {
+    if (response.statusCode == 200 ||
+        response.statusCode == 201 ||
+        response.statusCode == 202) {
       final data = response.data;
       return GrabacionEntity.fromJson(data);
     } else {
-      throw Exception('Error al subir la grabación');
+      throw ApiException(
+          response.statusCode ?? -1, 'Error al subir la grabación.');
     }
   }
 

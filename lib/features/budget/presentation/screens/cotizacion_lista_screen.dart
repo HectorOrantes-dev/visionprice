@@ -43,23 +43,29 @@ class CotizacionListaScreen extends ConsumerWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [context.colors.success, context.colors.success.withValues(alpha: 0.8)],
+                          colors: [
+                            context.colors.success,
+                            context.colors.success.withValues(alpha: 0.8)
+                          ],
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: context.colors.success.withValues(alpha: 0.3),
+                            color:
+                                context.colors.success.withValues(alpha: 0.3),
                             blurRadius: 28,
                             offset: const Offset(0, 14),
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.check, color: Colors.white, size: 32),
+                      child: const Icon(Icons.check,
+                          color: Colors.white, size: 32),
                     ),
                   ),
                   const SizedBox(height: 16),
                   Center(
                     child: Text('¡Cotización lista!',
-                        style: AppTextStyles.heading(size: 24, color: context.colors.textPrimary)),
+                        style: AppTextStyles.heading(
+                            size: 24, color: context.colors.textPrimary)),
                   ),
                   const SizedBox(height: 22),
                   Container(
@@ -69,12 +75,16 @@ class CotizacionListaScreen extends ConsumerWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [context.colors.gradientStart, context.colors.gradientEnd],
+                        colors: [
+                          context.colors.gradientStart,
+                          context.colors.gradientEnd
+                        ],
                       ),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: context.colors.gradientStart.withValues(alpha: 0.3),
+                          color: context.colors.gradientStart
+                              .withValues(alpha: 0.3),
                           blurRadius: 32,
                           offset: const Offset(0, 16),
                         ),
@@ -90,7 +100,8 @@ class CotizacionListaScreen extends ConsumerWidget {
                                 color: Colors.white.withValues(alpha: 0.75))),
                         const SizedBox(height: 8),
                         Text('\$${_total.toStringAsFixed(2)}',
-                            style: AppTextStyles.heading(size: 34, color: Colors.white)),
+                            style: AppTextStyles.heading(
+                                size: 34, color: Colors.white)),
                       ],
                     ),
                   ),
@@ -115,12 +126,15 @@ class CotizacionListaScreen extends ConsumerWidget {
                         for (final cot in cotizaciones)
                           for (var i = 0; i < cot.lineas.length; i++)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 13),
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom: (cot == cotizaciones.last && i == cot.lineas.length - 1)
+                                  bottom: (cot == cotizaciones.last &&
+                                          i == cot.lineas.length - 1)
                                       ? BorderSide.none
-                                      : BorderSide(color: context.colors.divider),
+                                      : BorderSide(
+                                          color: context.colors.divider),
                                 ),
                               ),
                               child: Row(
@@ -131,11 +145,16 @@ class CotizacionListaScreen extends ConsumerWidget {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                          fontSize: 13, fontWeight: FontWeight.w600, color: context.colors.textPrimary),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: context.colors.textPrimary),
                                     ),
                                   ),
-                                  Text('\$${cot.lineas[i].subtotal.toStringAsFixed(2)}',
-                                      style: TextStyle(fontSize: 13, color: context.colors.textSecondary)),
+                                  Text(
+                                      '\$${cot.lineas[i].subtotal.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: context.colors.textSecondary)),
                                 ],
                               ),
                             ),
@@ -187,14 +206,16 @@ class CotizacionListaScreen extends ConsumerWidget {
     if (cotizaciones.length == 1) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => BudgetResultScreen(cotizacion: cotizaciones.first)),
+        MaterialPageRoute(
+            builder: (_) => BudgetResultScreen(cotizacion: cotizaciones.first)),
       );
       return;
     }
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: context.colors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -203,19 +224,22 @@ class CotizacionListaScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text('Elige una cotización',
-                  style: AppTextStyles.heading(size: 16, color: context.colors.textPrimary)),
+                  style: AppTextStyles.heading(
+                      size: 16, color: context.colors.textPrimary)),
             ),
             const SizedBox(height: 8),
             for (final cot in cotizaciones)
               ListTile(
                 title: Text('Cotización #${cot.numero}'),
-                subtitle: Text('${cot.lineas.length} materiales · \$${cot.total.toStringAsFixed(2)}'),
+                subtitle: Text(
+                    '${cot.lineas.length} materiales · \$${cot.total.toStringAsFixed(2)}'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => BudgetResultScreen(cotizacion: cot)),
+                    MaterialPageRoute(
+                        builder: (_) => BudgetResultScreen(cotizacion: cot)),
                   );
                 },
               ),
@@ -235,7 +259,8 @@ class CotizacionListaScreen extends ConsumerWidget {
       cotizaciones,
       proyectoNombre: id == null ? null : await _nombreProyecto(ref, id),
     );
-    final res = await savePdfToDevice(bytes, 'presupuesto_proyecto_${id ?? ''}.pdf');
+    final res =
+        await savePdfToDevice(bytes, 'presupuesto_proyecto_${id ?? ''}.pdf');
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

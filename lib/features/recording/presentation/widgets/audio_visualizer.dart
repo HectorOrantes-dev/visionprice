@@ -18,7 +18,8 @@ class AudioVisualizer extends StatefulWidget {
   State<AudioVisualizer> createState() => _AudioVisualizerState();
 }
 
-class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProviderStateMixin {
+class _AudioVisualizerState extends State<AudioVisualizer>
+    with SingleTickerProviderStateMixin {
   final List<double> _amplitudes = List.filled(30, 0.0, growable: true);
   late AnimationController _controller;
 
@@ -33,14 +34,14 @@ class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProv
     widget.amplitudeStream?.listen((Amplitude amp) {
       if (!mounted) return;
       if (!widget.isRecording) return;
-      
-      // Amplitude is typically between -160 and 0. 
+
+      // Amplitude is typically between -160 and 0.
       // We normalize it between 0 and 1.
       double normalized = (amp.current + 160) / 160;
       normalized = math.max(0.0, math.min(1.0, normalized));
-      
+
       // Make variations more visible
-      normalized = math.pow(normalized, 3).toDouble(); 
+      normalized = math.pow(normalized, 3).toDouble();
 
       setState(() {
         _amplitudes.removeAt(0);
@@ -58,7 +59,11 @@ class _AudioVisualizerState extends State<AudioVisualizer> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     if (!widget.isRecording) {
-      return SizedBox(height: 50, child: Center(child: Text('Presiona el micrófono para hablar', style: TextStyle(color: context.colors.textSecondary))));
+      return SizedBox(
+          height: 50,
+          child: Center(
+              child: Text('Presiona el micrófono para hablar',
+                  style: TextStyle(color: context.colors.textSecondary))));
     }
 
     return SizedBox(

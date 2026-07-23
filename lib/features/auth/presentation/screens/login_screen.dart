@@ -38,61 +38,61 @@ class _LoginScreenState extends State<LoginScreen> {
     // El estado del login vive en `loginProvider` (Riverpod, autoDispose): se
     // crea al observarlo desde los widgets hijos y se limpia al salir.
     return Scaffold(
-        backgroundColor: context.colors.background,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                const LoginLogo(),
-                const SizedBox(height: 28),
-                const LoginHeader(),
-                const SizedBox(height: 24),
-                LoginForm(
-                  emailController: _emailController,
-                  passwordController: _passwordController,
+      backgroundColor: context.colors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              const LoginLogo(),
+              const SizedBox(height: 28),
+              const LoginHeader(),
+              const SizedBox(height: 24),
+              LoginForm(
+                emailController: _emailController,
+                passwordController: _passwordController,
+              ),
+              const SizedBox(height: 24),
+              LoginKeepSessionRow(
+                onForgot: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const ForgotPasswordScreen()),
                 ),
-                const SizedBox(height: 24),
-                LoginKeepSessionRow(
-                  onForgot: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const ForgotPasswordScreen()),
-                  ),
+              ),
+              const SizedBox(height: 24),
+              LoginContinueButton(
+                emailController: _emailController,
+                passwordController: _passwordController,
+              ),
+              TwoFactorSection(codeController: _codeController),
+              const LoginErrorBanner(),
+              const SizedBox(height: 24),
+              const OrDivider(),
+              const SizedBox(height: 16),
+              const SocialButtons(),
+              const SizedBox(height: 20),
+              LoginRegisterRow(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
                 ),
-                const SizedBox(height: 24),
-                LoginContinueButton(
-                  emailController: _emailController,
-                  passwordController: _passwordController,
+              ),
+              const SizedBox(height: 12),
+              LoginPrivacyNotice(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const PrivacyNoticeScreen()),
                 ),
-                TwoFactorSection(codeController: _codeController),
-                const LoginErrorBanner(),
-                const SizedBox(height: 24),
-                const OrDivider(),
-                const SizedBox(height: 16),
-                const SocialButtons(),
-                const SizedBox(height: 20),
-                LoginRegisterRow(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                LoginPrivacyNotice(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const PrivacyNoticeScreen()),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         ),
+      ),
     );
   }
 }

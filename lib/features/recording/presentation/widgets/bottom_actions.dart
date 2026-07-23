@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
+import '../../../account/presentation/screens/plan_paywall_screen.dart';
 import '../../../sync/presentation/screens/processing_screen.dart';
 import '../providers/recording_provider.dart';
 import 'project_sheet.dart';
 
 /// Botonera inferior de la grabación: detener, subir/procesar y reintentar.
 /// Antes el privado `_BottomActions`.
-class BottomActions extends StatelessWidget {
+class BottomActions extends ConsumerWidget {
   final RecordingState state;
   final Recording notifier;
   const BottomActions({super.key, required this.state, required this.notifier});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -44,12 +46,12 @@ class BottomActions extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: state.isUploading
                     ? null
-                    : () {
+                    : () async {
                         if (state.selectedProyecto == null) {
                           ProjectSheet.show(context);
                           return;
                         }
-                        notifier.upload(
+                        await notifier.upload(
                           onUploaded: (id) {
                             if (id == -1) {
                               Navigator.pop(context);
@@ -71,6 +73,21 @@ class BottomActions extends StatelessWidget {
                             }
                           },
                         );
+                        // Audio no tiene cuota gratis: 402 (`plan_required`)
+                        // significa que hace falta suscripción activa.
+                        if (!context.mounted) return;
+                        final fresco = ref.read(recordingProvider);
+                        if (fresco.esPagoRequerido) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PlanPaywallScreen(
+                                code: fresco.errorCode,
+                                message: fresco.errorMessage ?? '',
+                              ),
+                            ),
+                          );
+                        }
                       },
                 child: state.isUploading
                     ? Row(

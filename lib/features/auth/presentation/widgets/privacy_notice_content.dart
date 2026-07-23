@@ -14,7 +14,6 @@ const List<PrivacyBlock> privacyNoticeBlocks = [
     '"Ley"), su Reglamento y los Lineamientos del Aviso de Privacidad, se '
     'pone a su disposición el presente Aviso de Privacidad.',
   ),
-
   PrivacySection('I. IDENTIDAD Y DOMICILIO DEL RESPONSABLE'),
   PrivacyParagraph(
     'Hector Roman Robles Orantes (en adelante, el "Responsable"), con '
@@ -22,7 +21,6 @@ const List<PrivacyBlock> privacyNoticeBlocks = [
     'Chiapas, es el responsable del uso y protección de sus datos personales, '
     'y al respecto le informa lo siguiente:',
   ),
-
   PrivacySection('II. DATOS PERSONALES QUE RECABAMOS'),
   PrivacyParagraph(
     'Para llevar a cabo las finalidades descritas en el presente aviso de '
@@ -41,7 +39,6 @@ const List<PrivacyBlock> privacyNoticeBlocks = [
   PrivacyBullet('Cámara.'),
   PrivacyBullet('Galería de fotos.'),
   PrivacyBullet('Micrófono.'),
-
   PrivacySection('III. DATOS PERSONALES SENSIBLES'),
   PrivacyParagraph(
     'Además de los datos personales mencionados anteriormente, le informamos '
@@ -60,14 +57,14 @@ const List<PrivacyBlock> privacyNoticeBlocks = [
     'presente aviso de privacidad dentro de la aplicación antes de recopilar '
     'dicha información.',
   ),
-
   PrivacySection('IV. FINALIDADES DEL TRATAMIENTO'),
   PrivacyParagraph(
     'Los datos personales que recabamos de usted, los utilizaremos para las '
     'siguientes finalidades principales que son estrictamente necesarias para '
     'el servicio que solicita:',
   ),
-  PrivacyBullet('Crear y administrar su cuenta de usuario dentro de la aplicación.'),
+  PrivacyBullet(
+      'Crear y administrar su cuenta de usuario dentro de la aplicación.'),
   PrivacyBullet(
     'Procesar cobros y pagos derivados de los servicios o productos ofrecidos '
     'dentro de la app.',
@@ -81,7 +78,6 @@ const List<PrivacyBlock> privacyNoticeBlocks = [
     'secundarias o accesorias, tales como envío de publicidad o mercadotecnia, '
     'por lo que su información se limita a la provisión del servicio).',
   ),
-
   PrivacySection('V. TRANSFERENCIA DE DATOS PERSONALES'),
   PrivacyParagraph(
     'Le informamos que sus datos personales (incluyendo los financieros) son '
@@ -106,7 +102,6 @@ const List<PrivacyBlock> privacyNoticeBlocks = [
     'oposición, entenderemos que nos ha otorgado su consentimiento para estas '
     'transferencias, indispensables para usar la app.',
   ),
-
   PrivacySection('VI. DERECHOS ARCO Y REVOCACIÓN DEL CONSENTIMIENTO'),
   PrivacyParagraph(
     'Usted tiene derecho a conocer qué datos personales tenemos de usted, para '
@@ -148,7 +143,6 @@ const List<PrivacyBlock> privacyNoticeBlocks = [
     'contados a partir de la recepción, a través del mismo medio (correo '
     'electrónico).',
   ),
-
   PrivacySection('VII. USO DE TECNOLOGÍAS DE RASTREO'),
   PrivacyParagraph(
     'Le informamos que en nuestra aplicación móvil no utilizamos cookies, web '
@@ -157,7 +151,6 @@ const List<PrivacyBlock> privacyNoticeBlocks = [
     'publicidad de terceros para recabar datos de comportamiento sobre sus '
     'hábitos de navegación.',
   ),
-
   PrivacySection('VIII. CAMBIOS AL AVISO DE PRIVACIDAD'),
   PrivacyParagraph(
     'El presente aviso de privacidad puede sufrir modificaciones, cambios o '

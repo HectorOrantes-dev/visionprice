@@ -68,73 +68,76 @@ class _CreateProjectSheetState extends State<CreateProjectSheet>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colors.border,
-                borderRadius: BorderRadius.circular(2),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.colors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Nuevo proyecto',
-            style: AppTextStyles.heading(
-              size: 20,
-              weight: FontWeight.w800,
-              color: context.colors.textPrimary,
+            const SizedBox(height: 16),
+            Text(
+              'Nuevo proyecto',
+              style: AppTextStyles.heading(
+                size: 20,
+                weight: FontWeight.w800,
+                color: context.colors.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _nombreController,
-            textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(
-              labelText: 'Nombre',
-              hintText: 'Ej. Casa Polanco',
-              prefixIcon: Icon(Icons.create_new_folder_outlined,
-                  size: 20, color: context.colors.textSecondary),
-              errorText: _error,
+            const SizedBox(height: 12),
+            TextField(
+              controller: _nombreController,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                labelText: 'Nombre',
+                hintText: 'Ej. Casa Polanco',
+                prefixIcon: Icon(Icons.create_new_folder_outlined,
+                    size: 20, color: context.colors.textSecondary),
+                errorText: _error,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _direccionController,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: InputDecoration(
-              labelText: 'Dirección (opcional)',
-              hintText: 'Ej. Col. Del Valle',
-              prefixIcon: Icon(Icons.location_on_outlined,
-                  size: 20, color: context.colors.textSecondary),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _direccionController,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(
+                labelText: 'Dirección (opcional)',
+                hintText: 'Ej. Col. Del Valle',
+                prefixIcon: Icon(Icons.location_on_outlined,
+                    size: 20, color: context.colors.textSecondary),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          GradientButton(
-            height: 48,
-            onPressed: _creating ? null : _crear,
-            child: _creating
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white),
-                  )
-                : const Text('Crear proyecto'),
-          ),
-        ],
+            const SizedBox(height: 16),
+            GradientButton(
+              height: 48,
+              onPressed: _creating ? null : _crear,
+              child: _creating
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Crear proyecto'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -13,20 +13,17 @@ part 'project_providers.g.dart';
 /// Cadena de dependencias de proyectos como providers de Riverpod.
 
 @Riverpod(keepAlive: true)
-ProyectoRemoteDataSource proyectoRemoteDataSource(
-        Ref ref) =>
+ProyectoRemoteDataSource proyectoRemoteDataSource(Ref ref) =>
     ProyectoRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)
-ProyectoRepository proyectoRepository(Ref ref) =>
-    ProyectoRepositoryImpl(
+ProyectoRepository proyectoRepository(Ref ref) => ProyectoRepositoryImpl(
       ref.watch(proyectoRemoteDataSourceProvider),
       ref.watch(localDatabaseProvider),
     );
 
 @riverpod
-ObtenerProyectosUseCase obtenerProyectosUseCase(
-        Ref ref) =>
+ObtenerProyectosUseCase obtenerProyectosUseCase(Ref ref) =>
     ObtenerProyectosUseCase(ref.watch(proyectoRepositoryProvider));
 
 @riverpod

@@ -19,8 +19,7 @@ class SuperficieEntity {
   factory SuperficieEntity.fromJson(Map<String, dynamic> json) {
     // El ML manda "tipo_superficie" y puede mandar "ubicacion" como descripción.
     // Soporta también el formato plano legacy que usaba "tipo" y "descripcion".
-    final tipo =
-        json['tipo_superficie']?.toString() ??
+    final tipo = json['tipo_superficie']?.toString() ??
         json['tipo']?.toString() ??
         'desconocido';
 

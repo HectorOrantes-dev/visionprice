@@ -62,7 +62,9 @@ class _GenerateInvitationScreenState
         leading: BackButton(color: c.textPrimary),
         title: Text('Invitar al proyecto',
             style: TextStyle(
-                color: c.textPrimary, fontSize: 17, fontWeight: FontWeight.w700)),
+                color: c.textPrimary,
+                fontSize: 17,
+                fontWeight: FontWeight.w700)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

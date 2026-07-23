@@ -31,14 +31,18 @@ class SyncQueueScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SyncAppBar(),
-                if (isOnline) const ConnectedBanner() else const OfflineBanner(),
+                if (isOnline)
+                  const ConnectedBanner()
+                else
+                  const OfflineBanner(),
                 const SizedBox(height: 16),
                 Expanded(
                   child: items.isEmpty
                       ? Center(
                           child: Text(
                             'No hay audios en cola',
-                            style: TextStyle(color: context.colors.textSecondary),
+                            style:
+                                TextStyle(color: context.colors.textSecondary),
                           ),
                         )
                       : Padding(
@@ -48,42 +52,63 @@ class SyncQueueScreen extends ConsumerWidget {
                               Expanded(
                                 child: ListView.separated(
                                   itemCount: items.length,
-                                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 8),
                                   itemBuilder: (context, index) {
                                     final item = items[index];
-                                    final date = DateTime.parse(item.fechaGrabacion).toLocal();
-                                    final dateStr = DateFormat('d MMM').format(date);
-                                    final timeStr = DateFormat('HH:mm').format(date);
+                                    final date =
+                                        DateTime.parse(item.fechaGrabacion)
+                                            .toLocal();
+                                    final dateStr =
+                                        DateFormat('d MMM').format(date);
+                                    final timeStr =
+                                        DateFormat('HH:mm').format(date);
 
                                     final dur = item.duracionSegundos ?? 0;
-                                    final m = (dur ~/ 60).toString().padLeft(2, '0');
-                                    final s = (dur % 60).toString().padLeft(2, '0');
+                                    final m =
+                                        (dur ~/ 60).toString().padLeft(2, '0');
+                                    final s =
+                                        (dur % 60).toString().padLeft(2, '0');
                                     final durationStr = '$m:$s';
 
                                     // Map to SyncStatus UI enum
                                     SyncStatus status;
                                     switch (item.estado) {
-                                      case 'pending': status = SyncStatus.pending; break;
-                                      case 'uploading': status = SyncStatus.uploading; break;
-                                      case 'processing': status = SyncStatus.processing; break;
-                                      case 'ready': status = SyncStatus.ready; break;
-                                      case 'error': status = SyncStatus.error; break;
-                                      default: status = SyncStatus.pending;
+                                      case 'pending':
+                                        status = SyncStatus.pending;
+                                        break;
+                                      case 'uploading':
+                                        status = SyncStatus.uploading;
+                                        break;
+                                      case 'processing':
+                                        status = SyncStatus.processing;
+                                        break;
+                                      case 'ready':
+                                        status = SyncStatus.ready;
+                                        break;
+                                      case 'error':
+                                        status = SyncStatus.error;
+                                        break;
+                                      default:
+                                        status = SyncStatus.pending;
                                     }
 
                                     return SyncItem(
-                                      name: 'Grabación para ${item.proyectoNombre ?? 'Proyecto Desconocido'}',
+                                      name:
+                                          'Grabación para ${item.proyectoNombre ?? 'Proyecto Desconocido'}',
                                       duration: durationStr,
                                       date: dateStr,
                                       time: timeStr,
                                       status: status,
                                       progress: item.progreso,
-                                      onTap: status == SyncStatus.ready && item.apiId != null
+                                      onTap: status == SyncStatus.ready &&
+                                              item.apiId != null
                                           ? () {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                  builder: (_) => ParametersReviewScreen(
+                                                  builder: (_) =>
+                                                      ParametersReviewScreen(
                                                     grabacionId: item.apiId!,
                                                   ),
                                                 ),
@@ -95,7 +120,8 @@ class SyncQueueScreen extends ConsumerWidget {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 16, top: 8),
+                                padding:
+                                    const EdgeInsets.only(bottom: 16, top: 8),
                                 child: Text(
                                   'Sincronización automática al conectarse · sin acción manual',
                                   textAlign: TextAlign.center,

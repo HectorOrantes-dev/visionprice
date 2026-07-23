@@ -139,8 +139,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<PerfilEntity> actualizarPerfil({String? nombre, String? telefono}) async {
-    final perfil = await _remote.actualizarPerfil(nombre: nombre, telefono: telefono);
+  Future<PerfilEntity> actualizarPerfil(
+      {String? nombre, String? telefono}) async {
+    final perfil =
+        await _remote.actualizarPerfil(nombre: nombre, telefono: telefono);
     _perfilCache = perfil;
     _guardarPerfilLocal(perfil);
     return perfil;

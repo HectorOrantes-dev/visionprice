@@ -20,7 +20,8 @@ class ItemCotizacion {
     return ItemCotizacion(
       productoId: (json['producto_id'] ?? '').toString(),
       aplicarA: json['aplicar_a']?.toString(),
-      areaM2: (json['area_m2'] is num) ? (json['area_m2'] as num).toDouble() : null,
+      areaM2:
+          (json['area_m2'] is num) ? (json['area_m2'] as num).toDouble() : null,
       descripcion: json['descripcion']?.toString(),
     );
   }

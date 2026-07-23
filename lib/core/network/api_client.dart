@@ -127,9 +127,11 @@ class ApiClient {
 
   /// GET que devuelve el JSON crudo decodificado (`Map` o `List`), para
   /// endpoints cuyo esquema es variable (p. ej. `/me/subscriptions`).
-  Future<dynamic> getRaw(String path, {bool auth = true}) {
+  Future<dynamic> getRaw(String path, {bool auth = true, Duration? timeout}) {
     return _send(
-        () => _client.get(_uri(path), headers: _headers(auth: auth)));
+      () => _client.get(_uri(path), headers: _headers(auth: auth)),
+      timeout: timeout,
+    );
   }
 
   /// Para endpoints que devuelven un arreglo JSON (p. ej. `GET /roles`).
@@ -153,8 +155,8 @@ class ApiClient {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         return res.bodyBytes;
       }
-      throw ApiException(
-          res.statusCode, 'No se pudo descargar el archivo (${res.statusCode}).');
+      throw ApiException(res.statusCode,
+          'No se pudo descargar el archivo (${res.statusCode}).');
     } on ApiException {
       rethrow;
     } catch (_) {
@@ -223,17 +225,18 @@ class ApiClient {
     // respondió con un cuerpo NO-JSON (HTML de error, texto plano, vacío), no se
     // rompe con una excepción sin clasificar: se usa el texto crudo o el status.
     String message;
+    String? code;
     try {
       final decoded = res.body.isNotEmpty ? await decodeJson(res.body) : null;
       message =
           decoded != null ? _extractError(decoded) : 'Error ${res.statusCode}';
+      code = decoded != null ? _extractErrorCode(decoded) : null;
     } catch (_) {
       final raw = res.body.trim();
-      message = raw.isNotEmpty && raw.length < 300
-          ? raw
-          : 'Error ${res.statusCode}';
+      message =
+          raw.isNotEmpty && raw.length < 300 ? raw : 'Error ${res.statusCode}';
     }
-    throw ApiException(res.statusCode, message);
+    throw ApiException(res.statusCode, message, code: code);
   }
 
   /// Extrae un mensaje legible de los distintos formatos de error del back-end:
@@ -259,5 +262,17 @@ class ApiClient {
           .toString();
     }
     return 'Error inesperado';
+  }
+
+  /// Extrae `error.code` (p. ej. `"plan_limit_reached"`) del formato propio
+  /// `{ "error": { "code": ..., "message": ... } }`, si viene.
+  String? _extractErrorCode(dynamic data) {
+    if (data is Map) {
+      final error = data['error'];
+      if (error is Map && error['code'] != null) {
+        return error['code'].toString();
+      }
+    }
+    return null;
   }
 }

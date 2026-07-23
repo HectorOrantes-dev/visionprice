@@ -48,7 +48,8 @@ class SuperficieCard extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ElegirMaterialScreen(proyectoId: proyectoId, index: index),
+          builder: (_) =>
+              ElegirMaterialScreen(proyectoId: proyectoId, index: index),
         ),
       ),
       child: Container(
@@ -82,12 +83,15 @@ class SuperficieCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.heading(
-                              size: 15, weight: FontWeight.w700, color: context.colors.textPrimary),
+                              size: 15,
+                              weight: FontWeight.w700,
+                              color: context.colors.textPrimary),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: regla.requiereKit
                               ? context.colors.primaryLight
@@ -95,7 +99,9 @@ class SuperficieCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
-                          regla.requiereKit ? 'Kit de instalación' : 'Material simple',
+                          regla.requiereKit
+                              ? 'Kit de instalación'
+                              : 'Material simple',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -111,7 +117,8 @@ class SuperficieCard extends StatelessWidget {
                   if (completa && nombreElegido != null)
                     Row(
                       children: [
-                        Icon(Icons.check_circle, size: 14, color: context.colors.success),
+                        Icon(Icons.check_circle,
+                            size: 14, color: context.colors.success),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -119,21 +126,27 @@ class SuperficieCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.w600, color: context.colors.success),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: context.colors.success),
                           ),
                         ),
                       ],
                     )
                   else
                     Text('Sin material elegido',
-                        style: TextStyle(fontSize: 12, color: context.colors.textHint)),
+                        style: TextStyle(
+                            fontSize: 12, color: context.colors.textHint)),
                 ],
               ),
             ),
             const SizedBox(width: 8),
             Text(
               '${sup.areaM2.toStringAsFixed(sup.areaM2.truncateToDouble() == sup.areaM2 ? 0 : 1)} m²',
-              style: AppTextStyles.heading(size: 14, weight: FontWeight.w800, color: context.colors.primary),
+              style: AppTextStyles.heading(
+                  size: 14,
+                  weight: FontWeight.w800,
+                  color: context.colors.primary),
             ),
             Icon(Icons.chevron_right, color: context.colors.textHint),
           ],

@@ -104,8 +104,9 @@ class Home extends _$Home {
       debugPrint('PROYECTOS ERROR (Home.cargarProyectos): $e');
       state = state.copyWith(
         loading: false,
-        error:
-            e is ApiException ? e.message : 'No se pudieron cargar los proyectos',
+        error: e is ApiException
+            ? e.message
+            : 'No se pudieron cargar los proyectos',
       );
     }
   }
@@ -144,7 +145,8 @@ class Home extends _$Home {
   Future<bool> completarUbicacion(int proyectoId) async {
     final ubic = await ref.read(locationServiceProvider).current();
     if (ubic == null) return false;
-    final actualizado = await ref.read(actualizarUbicacionProyectoUseCaseProvider)(
+    final actualizado =
+        await ref.read(actualizarUbicacionProyectoUseCaseProvider)(
       id: proyectoId,
       latitud: ubic.lat,
       longitud: ubic.lng,

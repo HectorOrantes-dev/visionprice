@@ -7,6 +7,7 @@ import '../entities/item_cotizacion.dart';
 import '../entities/material_regla_entity.dart';
 import '../entities/producto_entity.dart';
 import '../entities/superficie_kit_item.dart';
+import '../entities/uso_cotizaciones_entity.dart';
 
 abstract class CotizacionRepository {
   /// Productos/ferreterías cercanas a una ubicación.
@@ -56,4 +57,7 @@ abstract class CotizacionRepository {
   /// Borrador auto-generado a partir de una grabación: superficies detectadas
   /// con producto/proveedor ya elegido (el más barato cercano) por línea.
   Future<BorradorCotizacionEntity> borrador(int grabacionId);
+
+  /// Cuota gratis de cotizaciones: cuántas lleva, cuántas le quedan.
+  Future<UsoCotizacionesEntity> uso();
 }

@@ -18,8 +18,7 @@ part 'recording_providers.g.dart';
 /// (composición declarativa). Reemplaza el registro get_it de esta feature.
 
 @Riverpod(keepAlive: true)
-GrabacionRemoteDataSource grabacionRemoteDataSource(
-        Ref ref) =>
+GrabacionRemoteDataSource grabacionRemoteDataSource(Ref ref) =>
     GrabacionRemoteDataSourceImpl(
       ref.watch(apiClientProvider),
       ref.watch(tokenStorageProvider),
@@ -30,8 +29,7 @@ GrabacionRepository grabacionRepository(Ref ref) =>
     GrabacionRepositoryImpl(ref.watch(grabacionRemoteDataSourceProvider));
 
 @riverpod
-ObtenerGrabacionUseCase obtenerGrabacionUseCase(
-        Ref ref) =>
+ObtenerGrabacionUseCase obtenerGrabacionUseCase(Ref ref) =>
     ObtenerGrabacionUseCase(ref.watch(grabacionRepositoryProvider));
 
 @riverpod
@@ -39,8 +37,7 @@ CalcularMetrosUseCase calcularMetrosUseCase(Ref ref) =>
     CalcularMetrosUseCase(ref.watch(grabacionRepositoryProvider));
 
 @riverpod
-ActualizarTranscripcionUseCase actualizarTranscripcionUseCase(
-        Ref ref) =>
+ActualizarTranscripcionUseCase actualizarTranscripcionUseCase(Ref ref) =>
     ActualizarTranscripcionUseCase(ref.watch(grabacionRepositoryProvider));
 
 @riverpod
@@ -50,8 +47,7 @@ SubirGrabacionUseCase subirGrabacionUseCase(Ref ref) =>
 // --- Servicios de grabación / sincronización (construidos nativamente) ---
 
 @Riverpod(keepAlive: true)
-AudioRecorderService audioRecorderService(Ref ref) =>
-    AudioRecorderService();
+AudioRecorderService audioRecorderService(Ref ref) => AudioRecorderService();
 
 @Riverpod(keepAlive: true)
 SyncLocalDataSource syncLocalDataSource(Ref ref) =>

@@ -549,3 +549,96 @@ final class ObtenerBorradorCotizacionUseCaseProvider
 
 String _$obtenerBorradorCotizacionUseCaseHash() =>
     r'7e3fb6575cd6725d4f3158864f7eb57876b9d3ee';
+
+@ProviderFor(obtenerUsoCotizacionesUseCase)
+final obtenerUsoCotizacionesUseCaseProvider =
+    ObtenerUsoCotizacionesUseCaseProvider._();
+
+final class ObtenerUsoCotizacionesUseCaseProvider extends $FunctionalProvider<
+        ObtenerUsoCotizacionesUseCase,
+        ObtenerUsoCotizacionesUseCase,
+        ObtenerUsoCotizacionesUseCase>
+    with $Provider<ObtenerUsoCotizacionesUseCase> {
+  ObtenerUsoCotizacionesUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'obtenerUsoCotizacionesUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$obtenerUsoCotizacionesUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<ObtenerUsoCotizacionesUseCase> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ObtenerUsoCotizacionesUseCase create(Ref ref) {
+    return obtenerUsoCotizacionesUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ObtenerUsoCotizacionesUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<ObtenerUsoCotizacionesUseCase>(value),
+    );
+  }
+}
+
+String _$obtenerUsoCotizacionesUseCaseHash() =>
+    r'f766e952d4de348f6dd0403c8cf4263911115013';
+
+/// Cuota gratis de cotizaciones (para el banner "N/20 usadas" y para
+/// refrescar tras crear una cotización nueva).
+
+@ProviderFor(usoCotizaciones)
+final usoCotizacionesProvider = UsoCotizacionesProvider._();
+
+/// Cuota gratis de cotizaciones (para el banner "N/20 usadas" y para
+/// refrescar tras crear una cotización nueva).
+
+final class UsoCotizacionesProvider extends $FunctionalProvider<
+        AsyncValue<UsoCotizacionesEntity>,
+        UsoCotizacionesEntity,
+        FutureOr<UsoCotizacionesEntity>>
+    with
+        $FutureModifier<UsoCotizacionesEntity>,
+        $FutureProvider<UsoCotizacionesEntity> {
+  /// Cuota gratis de cotizaciones (para el banner "N/20 usadas" y para
+  /// refrescar tras crear una cotización nueva).
+  UsoCotizacionesProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'usoCotizacionesProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$usoCotizacionesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<UsoCotizacionesEntity> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<UsoCotizacionesEntity> create(Ref ref) {
+    return usoCotizaciones(ref);
+  }
+}
+
+String _$usoCotizacionesHash() => r'4d6847b5d5195d9d8d05a952233d3826aae351ed';

@@ -34,7 +34,10 @@ class ApiConfig {
   static const String roles = '$apiPrefix/roles';
   static const String me = '$apiPrefix/me';
   static const String mePerfil = '$apiPrefix/me/perfil';
-  static const String meSubscriptions = '$apiPrefix/me/subscriptions';
+  // Va directo a Pagos vía el gateway (prefijo `pagos-ms`), no al proxy de
+  // la API principal (`/me/subscriptions`): un salto menos, un punto de
+  // falla menos.
+  static const String meSubscriptions = '$apiPrefix/pagos-ms/subscriptions';
 
   // --- Proyectos ---
   static const String proyectos = '$apiPrefix/proyectos';
@@ -42,25 +45,32 @@ class ApiConfig {
 
   // --- Collaboration (Miembros e Invitaciones) ---
   static String proyectoMiembros(int id) => '$apiPrefix/proyectos/$id/miembros';
-  static String proyectoMiembro(int id, int uid) => '$apiPrefix/proyectos/$id/miembros/$uid';
-  static String proyectoInvitaciones(int id) => '$apiPrefix/proyectos/$id/invitaciones';
-  static String proyectoInvitacionRevocar(int id, int invId) => '$apiPrefix/proyectos/$id/invitaciones/$invId';
+  static String proyectoMiembro(int id, int uid) =>
+      '$apiPrefix/proyectos/$id/miembros/$uid';
+  static String proyectoInvitaciones(int id) =>
+      '$apiPrefix/proyectos/$id/invitaciones';
+  static String proyectoInvitacionRevocar(int id, int invId) =>
+      '$apiPrefix/proyectos/$id/invitaciones/$invId/revocar';
   static const String proyectosUnirse = '$apiPrefix/proyectos/unirse';
 
   // --- Grabaciones (flujo de audio del maestro de obra) ---
   static const String grabaciones = '$apiPrefix/grabaciones';
   static String grabacion(int id) => '$apiPrefix/grabaciones/$id';
-  static String grabacionTranscripcion(int id) => '$apiPrefix/grabaciones/$id/transcripcion';
+  static String grabacionTranscripcion(int id) =>
+      '$apiPrefix/grabaciones/$id/transcripcion';
 
   // --- Cotizaciones ---
   static const String cotizacionesCalculo = '$apiPrefix/cotizaciones/calculo';
   static const String cotizaciones = '$apiPrefix/cotizaciones';
-  static const String cotizacionesProductos = '$apiPrefix/cotizaciones/productos';
-  static const String cotizacionesMateriales = '$apiPrefix/cotizaciones/materiales';
+  static const String cotizacionesProductos =
+      '$apiPrefix/cotizaciones/productos';
+  static const String cotizacionesMateriales =
+      '$apiPrefix/cotizaciones/materiales';
   static const String cotizacionesKit = '$apiPrefix/cotizaciones/kit';
   static String cotizacionPdf(int id) => '$apiPrefix/cotizaciones/$id/pdf';
   static const String cotizacionesPdfs = '$apiPrefix/cotizaciones/pdfs';
   static const String cotizacionesBorrador = '$apiPrefix/cotizaciones/borrador';
+  static const String cotizacionesUso = '$apiPrefix/cotizaciones/uso';
 
   // --- Recomendaciones (modelo de kits) ---
   static const String recomendacionesEntrenar =
@@ -88,10 +98,15 @@ class ApiConfig {
       '$apiPrefix/pagos-ms/conekta/subscriptions/cancel';
   static const String conektaPaymentMethod =
       '$apiPrefix/pagos-ms/conekta/payment-method';
+  // Checkout hospedado de Conekta (no recurrente): tarjeta, OXXO (efectivo)
+  // o SPEI (transferencia), según `allowed_payment_methods` en el body.
+  static const String conektaCheckout = '$apiPrefix/pagos-ms/conekta/checkout';
+  static String conektaCheckoutStatus(String checkoutDbId) =>
+      '$apiPrefix/pagos-ms/conekta/checkout/$checkoutDbId';
   static const String paypalSubscriptions =
       '$apiPrefix/pagos-ms/paypal/subscriptions';
   static String paypalSubscriptionCancel(String subscriptionId) =>
-      '$apiPrefix/paypal/subscriptions/$subscriptionId/cancel';
+      '$apiPrefix/pagos-ms/paypal/subscriptions/$subscriptionId/cancel';
 
   /// Public/Publishable Key de Conekta (segura para el cliente, a propósito:
   /// solo puede tokenizar tarjetas, nunca cobrar ni consultar cuentas — por

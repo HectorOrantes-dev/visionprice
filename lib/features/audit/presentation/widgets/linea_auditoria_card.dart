@@ -30,7 +30,8 @@ class _LineaAuditoriaCardState extends State<LineaAuditoriaCard> {
         _ => context.colors.textSecondary,
       };
 
-  Color _colorClaro(BuildContext context, String severidad) => switch (severidad) {
+  Color _colorClaro(BuildContext context, String severidad) =>
+      switch (severidad) {
         'critico' => context.colors.errorLight,
         'revisar' => context.colors.warningLight,
         'normal' => context.colors.successLight,
@@ -91,7 +92,9 @@ class _LineaAuditoriaCardState extends State<LineaAuditoriaCard> {
                     child: Text(
                       _severidadLabel[a.severidad] ?? a.severidad,
                       style: TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.w700, color: color),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: color),
                     ),
                   ),
                 ],
@@ -101,7 +104,8 @@ class _LineaAuditoriaCardState extends State<LineaAuditoriaCard> {
                 Text(
                   'Mediana de la zona: \$${a.mediana!.toStringAsFixed(2)}'
                   '${a.limiteInferior != null && a.limiteSuperior != null ? ' · rango [\$${a.limiteInferior!.toStringAsFixed(2)} – \$${a.limiteSuperior!.toStringAsFixed(2)}]' : ''}',
-                  style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
+                  style: TextStyle(
+                      fontSize: 12, color: context.colors.textSecondary),
                 ),
               ],
               if (_expandido) ...[
@@ -112,13 +116,14 @@ class _LineaAuditoriaCardState extends State<LineaAuditoriaCard> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text('• $r',
-                        style:
-                            TextStyle(fontSize: 12, color: context.colors.textPrimary)),
+                        style: TextStyle(
+                            fontSize: 12, color: context.colors.textPrimary)),
                   ),
               ] else if (a.razones.isNotEmpty) ...[
                 const SizedBox(height: 4),
                 Text('Toca para ver el detalle',
-                    style: TextStyle(fontSize: 11, color: context.colors.textHint)),
+                    style: TextStyle(
+                        fontSize: 11, color: context.colors.textHint)),
               ],
             ],
           ),

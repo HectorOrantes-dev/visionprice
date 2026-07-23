@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_palette.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../services/google_sign_in_service.dart';
 import '../providers/login_provider.dart';
@@ -63,15 +64,34 @@ class _SocialButtonsState extends ConsumerState<SocialButtons> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    // `loginWithGoogle` guarda cualquier falla que NO sea "usuario no
+    // registrado" (404 → onNeedsRegister) en `errorMessage` sin relanzarla:
+    // si nadie observa el provider aquí, un 401/402/500 deja el botón
+    // reseteado a "Google" SIN ningún aviso visible (se sentía como que "se
+    // quedó cargando" sin pasar a nada). Mostrarlo, igual que ya hace
+    // RegisterGoogleButton en la pantalla de registro.
+    final loginState = ref.watch(loginProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: SocialButton(
-            icon: Icons.g_mobiledata,
-            label: _cargando ? 'Conectando…' : 'Google',
-            onTap: _cargando ? () {} : _iniciarConGoogle,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: SocialButton(
+                icon: Icons.g_mobiledata,
+                label: _cargando ? 'Conectando…' : 'Google',
+                onTap: _cargando ? () {} : _iniciarConGoogle,
+              ),
+            ),
+          ],
         ),
+        if (loginState.errorMessage != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            loginState.errorMessage!,
+            style: TextStyle(color: context.colors.error, fontSize: 13),
+          ),
+        ],
       ],
     );
   }

@@ -38,7 +38,8 @@ class EntrenarModelosScreen extends ConsumerWidget {
             Text(
               'Junta tus obras reales (las que tienen ubicación) con las obras '
               'sintéticas y entrena el árbol Gini y el K-NN que recomiendan el kit.',
-              style: TextStyle(fontSize: 13, color: c.textSecondary, height: 1.5),
+              style:
+                  TextStyle(fontSize: 13, color: c.textSecondary, height: 1.5),
             ),
             const SizedBox(height: 20),
             estado.when(
@@ -73,4 +74,3 @@ class EntrenarModelosScreen extends ConsumerWidget {
     );
   }
 }
-

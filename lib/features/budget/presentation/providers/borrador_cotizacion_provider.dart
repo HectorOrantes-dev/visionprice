@@ -53,8 +53,7 @@ class BorradorCotizacion extends _$BorradorCotizacion {
     final cuerpo = actual.cuerpoConfirmacion;
     final nuevoCuerpo = sup.esKit
         ? cuerpo.copyWith(kit: _actualizarKit(cuerpo.kit, sup, ref_.rol, nuevo))
-        : cuerpo.copyWith(
-            simple: _actualizarSimple(cuerpo.simple, sup, nuevo));
+        : cuerpo.copyWith(simple: _actualizarSimple(cuerpo.simple, sup, nuevo));
 
     state = AsyncData(BorradorCotizacionEntity(
       proyectoId: actual.proyectoId,
@@ -78,16 +77,15 @@ class BorradorCotizacion extends _$BorradorCotizacion {
     ProductoEntity nuevo,
   ) {
     final actual = state.value!;
-    final kitIndex = actual.superficies
-        .where((s) => s.esKit)
-        .toList()
-        .indexOf(sup);
+    final kitIndex =
+        actual.superficies.where((s) => s.esKit).toList().indexOf(sup);
     if (kitIndex < 0 || kitIndex >= kit.length) return kit;
     return [
       for (var i = 0; i < kit.length; i++)
         if (i == kitIndex)
           switch (rol) {
-            'principal' => kit[i].copyWith(principalProductoId: nuevo.productoId),
+            'principal' =>
+              kit[i].copyWith(principalProductoId: nuevo.productoId),
             'adhesivo' => kit[i].copyWith(adhesivoProductoId: nuevo.productoId),
             'cruceta' => kit[i].copyWith(cruecetaProductoId: nuevo.productoId),
             'boquilla' => kit[i].copyWith(boquillaProductoId: nuevo.productoId),
@@ -104,10 +102,8 @@ class BorradorCotizacion extends _$BorradorCotizacion {
     ProductoEntity nuevo,
   ) {
     final actual = state.value!;
-    final simpleIndex = actual.superficies
-        .where((s) => !s.esKit)
-        .toList()
-        .indexOf(sup);
+    final simpleIndex =
+        actual.superficies.where((s) => !s.esKit).toList().indexOf(sup);
     if (simpleIndex < 0 || simpleIndex >= simple.length) return simple;
     return [
       for (var i = 0; i < simple.length; i++)
@@ -148,7 +144,8 @@ class BorradorCotizacion extends _$BorradorCotizacion {
 /// Traduce el `rol` de una línea al `categoria` con el que se consulta
 /// `GET /cotizaciones/productos?categoria=` al elegir otro producto — igual
 /// mapeo que ya usa `KitBody` para los complementos del wizard manual.
-String categoriaParaRol(String rol, String categoriaSuperficie) => switch (rol) {
+String categoriaParaRol(String rol, String categoriaSuperficie) =>
+    switch (rol) {
       'adhesivo' => 'pegazulejo',
       'cruceta' => 'cruceta',
       'boquilla' => 'emboquillado',

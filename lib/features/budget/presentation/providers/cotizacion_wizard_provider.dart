@@ -26,7 +26,8 @@ class CotizacionWizard extends _$CotizacionWizard {
   /// Carga las superficies detectadas y las reglas por categoría
   /// (`GET /cotizaciones/materiales`), una sola vez al entrar al flujo.
   Future<void> cargar(List<SuperficieEntity> superficies) async {
-    state = state.copyWith(superficies: superficies, loading: true, clearError: true);
+    state = state.copyWith(
+        superficies: superficies, loading: true, clearError: true);
     try {
       final reglas = await ref.read(obtenerMaterialesUseCaseProvider)();
       state = state.copyWith(
@@ -36,7 +37,9 @@ class CotizacionWizard extends _$CotizacionWizard {
     } catch (e) {
       state = state.copyWith(
         loading: false,
-        errorMessage: e is ApiException ? e.message : 'No se pudieron cargar las reglas de materiales.',
+        errorMessage: e is ApiException
+            ? e.message
+            : 'No se pudieron cargar las reglas de materiales.',
       );
     }
   }
@@ -160,11 +163,15 @@ class CotizacionWizard extends _$CotizacionWizard {
         ));
       }
       state = state.copyWith(creando: false, cotizacionesCreadas: creadas);
+      // El contador de cuota gratis (banner "N/20") cambió: refresca.
+      ref.invalidate(usoCotizacionesProvider);
       return creadas;
     } catch (e) {
       state = state.copyWith(
         creando: false,
-        errorMessage: e is ApiException ? e.message : 'No se pudo crear la cotización.',
+        errorMessage:
+            e is ApiException ? e.message : 'No se pudo crear la cotización.',
+        errorCode: e is ApiException ? e.code : null,
       );
       return const [];
     }

@@ -17,10 +17,13 @@ class MiembroEntity {
 
   factory MiembroEntity.fromJson(Map<String, dynamic> json) {
     return MiembroEntity(
-      usuarioId: json['usuario_id'] is int ? json['usuario_id'] as int : int.tryParse('${json['usuario_id']}') ?? 0,
+      usuarioId: json['usuario_id'] is int
+          ? json['usuario_id'] as int
+          : int.tryParse('${json['usuario_id']}') ?? 0,
       nombre: (json['nombre'] ?? '').toString(),
       correo: (json['correo'] ?? '').toString(),
-      rolEnProyecto: ProjectRole.fromApi((json['rol_en_proyecto'] ?? '').toString()),
+      rolEnProyecto:
+          ProjectRole.fromApi((json['rol_en_proyecto'] ?? '').toString()),
       esDueno: json['es_dueno'] == true,
     );
   }

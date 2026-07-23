@@ -62,8 +62,8 @@ class ProductoEntity {
     }
 
     final productoObj = json['producto'] is Map ? json['producto'] : null;
-    final imagen = firstUrl(json) ??
-        (productoObj != null ? firstUrl(productoObj) : null);
+    final imagen =
+        firstUrl(json) ?? (productoObj != null ? firstUrl(productoObj) : null);
 
     return ProductoEntity(
       productoId: (json['producto_id'] ?? '').toString(),
@@ -75,9 +75,13 @@ class ProductoEntity {
       piezaLargoM: d(json['pieza_largo_m']),
       piezaAnchoM: d(json['pieza_ancho_m']),
       piezasPorCaja: i(json['piezas_por_caja']),
-      proveedorId: prov != null ? i(prov['proveedor_id']) : i(json['proveedor_id']),
-      proveedorNombre: prov != null ? prov['nombre']?.toString() : json['proveedor_nombre']?.toString(),
-      distanciaKm: prov != null ? d(prov['distancia_km']) : d(json['distancia_km']),
+      proveedorId:
+          prov != null ? i(prov['proveedor_id']) : i(json['proveedor_id']),
+      proveedorNombre: prov != null
+          ? prov['nombre']?.toString()
+          : json['proveedor_nombre']?.toString(),
+      distanciaKm:
+          prov != null ? d(prov['distancia_km']) : d(json['distancia_km']),
       proveedorLat: prov != null ? d(prov['lat']) : d(json['proveedor_lat']),
       proveedorLng: prov != null ? d(prov['lng']) : d(json['proveedor_lng']),
       imageUrl: imagen,

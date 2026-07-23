@@ -10,11 +10,54 @@
   body {
     font-family: -apple-system, Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
-    padding: 20px 16px 32px;
+    padding: 0 0 32px;
     color: #0F172A;
-    background: #FFFFFF;
+    background: #F8FAFC;
   }
-  h1 { font-size: 17px; margin: 0 0 20px; }
+  .brand-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 20px;
+    background: #14142B;
+  }
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #635BFF, #4338CA);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+  }
+  .brand-name {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .card {
+    margin: 16px;
+    padding: 20px;
+    background: #FFFFFF;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  }
+  .method-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #EEF2FF;
+    color: #4338CA;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
   label {
     display: block;
     font-size: 12px;
@@ -30,6 +73,11 @@
     border-radius: 8px;
     background: #F8FAFC;
   }
+  input:focus {
+    outline: none;
+    border-color: #635BFF;
+    background: #fff;
+  }
   .row { display: flex; gap: 12px; }
   .row > div { flex: 1; }
   button {
@@ -39,7 +87,7 @@
     font-size: 15px;
     font-weight: 700;
     color: #fff;
-    background: #1E3A8A;
+    background: #14142B;
     border: none;
     border-radius: 10px;
   }
@@ -50,35 +98,52 @@
     margin-top: 10px;
     min-height: 16px;
   }
+  .secure-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 16px;
+    color: #94A3B8;
+    font-size: 11px;
+  }
 </style>
 </head>
 <body>
-  <h1>Datos de tu tarjeta</h1>
-  <form id="card-form" onsubmit="return false;">
-    <label>Número de tarjeta</label>
-    <input id="card_number" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="0000 0000 0000 0000">
+  <div class="brand-bar">
+    <div class="brand-mark">c</div>
+    <div class="brand-name">conekta</div>
+  </div>
 
-    <label>Nombre en la tarjeta</label>
-    <input id="card_name" autocomplete="cc-name" placeholder="Como aparece en la tarjeta">
+  <div class="card">
+    <div class="method-badge">💳 Pago con tarjeta</div>
+    <form id="card-form" onsubmit="return false;">
+      <label>Número de tarjeta</label>
+      <input id="card_number" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="0000 0000 0000 0000">
 
-    <div class="row">
-      <div>
-        <label>Mes</label>
-        <input id="exp_month" inputmode="numeric" maxlength="2" placeholder="MM">
-      </div>
-      <div>
-        <label>Año</label>
-        <input id="exp_year" inputmode="numeric" maxlength="2" placeholder="AA">
-      </div>
-      <div>
-        <label>CVC</label>
-        <input id="cvc" inputmode="numeric" maxlength="4" placeholder="123">
-      </div>
-    </div>
+      <label>Nombre en la tarjeta</label>
+      <input id="card_name" autocomplete="cc-name" placeholder="Como aparece en la tarjeta">
 
-    <div id="error"></div>
-    <button id="submit-btn" onclick="tokenize()">Continuar</button>
-  </form>
+      <div class="row">
+        <div>
+          <label>Mes</label>
+          <input id="exp_month" inputmode="numeric" maxlength="2" placeholder="MM">
+        </div>
+        <div>
+          <label>Año</label>
+          <input id="exp_year" inputmode="numeric" maxlength="2" placeholder="AA">
+        </div>
+        <div>
+          <label>CVC</label>
+          <input id="cvc" inputmode="numeric" maxlength="4" placeholder="123">
+        </div>
+      </div>
+
+      <div id="error"></div>
+      <button id="submit-btn" onclick="tokenize()">Continuar</button>
+      <div class="secure-note">🔒 Tus datos viajan directo y cifrados a Conekta</div>
+    </form>
+  </div>
 
 <script>
   Conekta.setPublicKey("{{CONEKTA_PUBLIC_KEY}}");

@@ -11,7 +11,11 @@ class KitSection extends StatelessWidget {
   final String titulo;
   final ProductoEntity? producto;
   final VoidCallback onTap;
-  const KitSection({super.key, required this.titulo, required this.producto, required this.onTap});
+  const KitSection(
+      {super.key,
+      required this.titulo,
+      required this.producto,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +24,10 @@ class KitSection extends StatelessWidget {
       children: [
         Text(titulo.toUpperCase(),
             style: TextStyle(
-                fontSize: 11, fontWeight: FontWeight.w700, color: context.colors.textSecondary, letterSpacing: 0.5)),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: context.colors.textSecondary,
+                letterSpacing: 0.5)),
         const SizedBox(height: 8),
         InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -30,7 +37,8 @@ class KitSection extends StatelessWidget {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: context.colors.border, width: 1.5),
+                    border:
+                        Border.all(color: context.colors.border, width: 1.5),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -39,12 +47,15 @@ class KitSection extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text('Elegir producto',
                           style: TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.w700, color: context.colors.primary)),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: context.colors.primary)),
                     ],
                   ),
                 )
               : Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: context.colors.surface,
                     borderRadius: BorderRadius.circular(14),
@@ -52,7 +63,8 @@ class KitSection extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      MaterialImage(url: producto!.imageUrl, size: 40, radius: 10),
+                      MaterialImage(
+                          url: producto!.imageUrl, size: 40, radius: 10),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -62,11 +74,15 @@ class KitSection extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTextStyles.heading(
-                                    size: 13, weight: FontWeight.w700, color: context.colors.textPrimary)),
+                                    size: 13,
+                                    weight: FontWeight.w700,
+                                    color: context.colors.textPrimary)),
                             Text(
                               '\$${producto!.precioUnitario.toStringAsFixed(0)} / ${producto!.unidad}'
                               '${producto!.proveedorNombre != null ? ' · ${producto!.proveedorNombre}' : ''}',
-                              style: TextStyle(fontSize: 12, color: context.colors.textSecondary),
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: context.colors.textSecondary),
                             ),
                           ],
                         ),

@@ -23,6 +23,10 @@ class NewBudgetButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // El contratista no cotiza (el back-end lo rechaza con 403): su pantalla
+    // es el equipo del proyecto, no grabar audio.
+    final rol = ref.watch(perfilProvider).asData?.value.rol;
+    if (rol == 'contratista') return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GradientButton(

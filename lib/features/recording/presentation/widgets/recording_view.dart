@@ -63,8 +63,7 @@ class RecordingView extends ConsumerWidget {
                         children: [
                           const SizedBox(height: 24),
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 40),
+                            padding: const EdgeInsets.symmetric(horizontal: 40),
                             child: Text(
                               'Describe el espacio y los trabajos a realizar,\ncomo si le explicaras a un compañero',
                               textAlign: TextAlign.center,

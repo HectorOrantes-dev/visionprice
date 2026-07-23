@@ -34,7 +34,8 @@ class GoogleSignInService {
       return idToken;
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
-      throw Exception('No se pudo iniciar sesión con Google: ${e.description ?? e.code}');
+      throw Exception(
+          'No se pudo iniciar sesión con Google: ${e.description ?? e.code}');
     }
   }
 

@@ -10,7 +10,8 @@ import 'project_card.dart';
 class ProjectsSliver extends StatelessWidget {
   final HomeState state;
   final Home notifier;
-  const ProjectsSliver({super.key, required this.state, required this.notifier});
+  const ProjectsSliver(
+      {super.key, required this.state, required this.notifier});
 
   @override
   Widget build(BuildContext context) {

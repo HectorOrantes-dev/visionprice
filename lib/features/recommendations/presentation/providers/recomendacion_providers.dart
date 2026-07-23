@@ -18,7 +18,8 @@ RecomendacionRemoteDataSource recomendacionRemoteDataSource(Ref ref) =>
 
 @Riverpod(keepAlive: true)
 RecomendacionRepository recomendacionRepository(Ref ref) =>
-    RecomendacionRepositoryImpl(ref.watch(recomendacionRemoteDataSourceProvider));
+    RecomendacionRepositoryImpl(
+        ref.watch(recomendacionRemoteDataSourceProvider));
 
 @riverpod
 EntrenarModelosUseCase entrenarModelosUseCase(Ref ref) =>

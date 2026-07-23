@@ -105,8 +105,9 @@ class NotificationsScreen extends ConsumerWidget {
               child: Icon(
                 _iconFor(notif.tipo),
                 size: 18,
-                color:
-                    leida ? context.colors.textSecondary : context.colors.primary,
+                color: leida
+                    ? context.colors.textSecondary
+                    : context.colors.primary,
               ),
             ),
             const SizedBox(width: 12),

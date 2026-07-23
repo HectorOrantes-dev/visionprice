@@ -70,7 +70,8 @@ class _NearbyStoresScreenState extends ConsumerState<NearbyStoresScreen> {
                             backgroundColor: context.colors.primary,
                             foregroundColor: Colors.white,
                             elevation: 4,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),

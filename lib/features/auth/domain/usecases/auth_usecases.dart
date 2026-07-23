@@ -1,4 +1,3 @@
-
 import '../entities/auth_session_entity.dart';
 import '../entities/perfil_entity.dart';
 import '../entities/register_result_entity.dart';

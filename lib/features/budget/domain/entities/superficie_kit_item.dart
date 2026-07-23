@@ -23,7 +23,8 @@ class SuperficieKitItem {
   /// ya en el mismo shape que espera `POST /cotizaciones/kit`.
   factory SuperficieKitItem.fromJson(Map<String, dynamic> json) {
     return SuperficieKitItem(
-      areaM2: (json['area_m2'] is num) ? (json['area_m2'] as num).toDouble() : 0,
+      areaM2:
+          (json['area_m2'] is num) ? (json['area_m2'] as num).toDouble() : 0,
       principalProductoId: (json['principal_producto_id'] ?? '').toString(),
       descripcion: json['descripcion']?.toString(),
       metodoCrucetas: (json['metodo_crucetas'] ?? 'tradicional').toString(),
@@ -55,8 +56,11 @@ class SuperficieKitItem {
         'principal_producto_id': principalProductoId,
         if (descripcion != null) 'descripcion': descripcion,
         'metodo_crucetas': metodoCrucetas,
-        if (adhesivoProductoId != null) 'adhesivo_producto_id': adhesivoProductoId,
-        if (cruecetaProductoId != null) 'cruceta_producto_id': cruecetaProductoId,
-        if (boquillaProductoId != null) 'boquilla_producto_id': boquillaProductoId,
+        if (adhesivoProductoId != null)
+          'adhesivo_producto_id': adhesivoProductoId,
+        if (cruecetaProductoId != null)
+          'cruceta_producto_id': cruecetaProductoId,
+        if (boquillaProductoId != null)
+          'boquilla_producto_id': boquillaProductoId,
       };
 }

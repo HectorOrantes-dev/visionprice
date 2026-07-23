@@ -47,8 +47,7 @@ class NearbyStores extends _$NearbyStores {
       loading: true,
       errorMessage: null,
     );
-    await _fetchProductos(
-        onError: 'No se pudieron cargar las ferreterías.');
+    await _fetchProductos(onError: 'No se pudieron cargar las ferreterías.');
     _listenLocation();
   }
 
@@ -143,8 +142,7 @@ class NearbyStores extends _$NearbyStores {
     } else {
       if (state.seleccionLegacy.isEmpty) {
         state = state.copyWith(
-            errorMessage:
-                'Selecciona al menos un producto (piso o paredes).');
+            errorMessage: 'Selecciona al menos un producto (piso o paredes).');
         return;
       }
       items = state.seleccionLegacy.entries

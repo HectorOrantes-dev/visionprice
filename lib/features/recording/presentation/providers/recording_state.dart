@@ -14,6 +14,10 @@ class RecordingState {
   final Duration elapsed;
   final String? errorMessage;
 
+  /// `error.code` del back-end cuando la subida falló (p. ej.
+  /// `"plan_required"` — audio exige suscripción activa, sin cuota gratis).
+  final String? errorCode;
+
   /// `null` mientras verifica, luego `true`/`false` según conectividad real.
   final bool? online;
   final List<ProyectoEntity> proyectos;
@@ -25,6 +29,7 @@ class RecordingState {
     this.status = RecordStatus.idle,
     this.elapsed = Duration.zero,
     this.errorMessage,
+    this.errorCode,
     this.online,
     this.proyectos = const [],
     this.selectedProyecto,
@@ -39,6 +44,8 @@ class RecordingState {
   /// Solo se puede subir si hay grabación Y un proyecto elegido (obligatorio).
   bool get canUpload => hasRecording && selectedProyecto != null;
   bool get isOffline => online == false;
+  bool get esPagoRequerido =>
+      errorCode == 'plan_limit_reached' || errorCode == 'plan_required';
 
   String get elapsedFormatted {
     final m = elapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
@@ -52,6 +59,7 @@ class RecordingState {
     RecordStatus? status,
     Duration? elapsed,
     Object? errorMessage = _keep,
+    Object? errorCode = _keep,
     Object? online = _keep,
     List<ProyectoEntity>? proyectos,
     Object? selectedProyecto = _keep,
@@ -63,6 +71,7 @@ class RecordingState {
       elapsed: elapsed ?? this.elapsed,
       errorMessage:
           errorMessage == _keep ? this.errorMessage : errorMessage as String?,
+      errorCode: errorCode == _keep ? this.errorCode : errorCode as String?,
       online: online == _keep ? this.online : online as bool?,
       proyectos: proyectos ?? this.proyectos,
       selectedProyecto: selectedProyecto == _keep

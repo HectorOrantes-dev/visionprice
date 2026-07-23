@@ -30,8 +30,8 @@ class Login extends _$Login with ValidationMixin {
       state = state.copyWith(obscurePassword: !state.obscurePassword);
 
   void onEmailChanged(String value) {
-    state = state.copyWith(
-        emailError: value.isEmpty ? null : validateEmail(value));
+    state =
+        state.copyWith(emailError: value.isEmpty ? null : validateEmail(value));
   }
 
   void onPasswordChanged(String value) {
@@ -50,8 +50,8 @@ class Login extends _$Login with ValidationMixin {
     final emailError = validateEmail(email);
     final passwordError = validatePassword(password);
     if (emailError != null || passwordError != null) {
-      state = state.copyWith(
-          emailError: emailError, passwordError: passwordError);
+      state =
+          state.copyWith(emailError: emailError, passwordError: passwordError);
       return;
     }
 

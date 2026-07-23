@@ -64,7 +64,8 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen> {
     } catch (e) {
       setState(() {
         _guardando = false;
-        _error = e is ApiException ? e.message : 'No se pudieron guardar los datos.';
+        _error =
+            e is ApiException ? e.message : 'No se pudieron guardar los datos.';
       });
     }
   }
@@ -92,7 +93,8 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen> {
             children: [
               Text(
                 'Te hace falta llenar algunos datos antes de grabar.',
-                style: TextStyle(fontSize: 14, color: context.colors.textSecondary),
+                style: TextStyle(
+                    fontSize: 14, color: context.colors.textSecondary),
               ),
               const SizedBox(height: 24),
               const FieldLabel('NOMBRE'),
@@ -120,7 +122,9 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen> {
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
-                Text(_error!, style: TextStyle(color: context.colors.error, fontSize: 13)),
+                Text(_error!,
+                    style:
+                        TextStyle(color: context.colors.error, fontSize: 13)),
               ],
               const SizedBox(height: 28),
               GradientButton(

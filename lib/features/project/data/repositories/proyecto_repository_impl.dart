@@ -9,7 +9,7 @@ import '../datasources/proyecto_remote_datasource.dart';
 class ProyectoRepositoryImpl implements ProyectoRepository {
   final ProyectoRemoteDataSource _remote;
   final LocalDatabase _localDatabase;
-  
+
   ProyectoRepositoryImpl(this._remote, this._localDatabase);
 
   @override
@@ -28,7 +28,7 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
     if (locales.isNotEmpty) {
       return locales;
     }
-    
+
     try {
       final proyectos = await _remote.listar();
       // Guardar en la base de datos local
@@ -36,10 +36,11 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
       for (var p in proyectos) {
         final map = p.toJson();
         map['is_synced'] = 1;
-        batch.insert('proyectos', map, conflictAlgorithm: ConflictAlgorithm.replace);
+        batch.insert('proyectos', map,
+            conflictAlgorithm: ConflictAlgorithm.replace);
       }
       await batch.commit(noResult: true);
-      
+
       // Leer todo de local (esto incluirá los offline que no se hayan sincronizado)
       return await _leerProyectosLocales(db);
     } catch (e) {
@@ -48,7 +49,7 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
       return locales;
     }
   }
-  
+
   Future<List<ProyectoEntity>> _leerProyectosLocales(Database db) async {
     final maps = await db.query('proyectos', orderBy: 'id DESC');
     return maps.map(ProyectoEntity.fromJson).toList();
@@ -71,7 +72,8 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
       final db = await _localDatabase.database;
       final map = proyecto.toJson();
       map['is_synced'] = 1;
-      await db.insert('proyectos', map, conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.insert('proyectos', map,
+          conflictAlgorithm: ConflictAlgorithm.replace);
       return proyecto;
     } catch (e) {
       // Creación offline

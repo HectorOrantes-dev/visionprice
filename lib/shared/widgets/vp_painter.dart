@@ -40,7 +40,9 @@ class VpPainter extends CustomPainter {
 
     // La "P": asta vertical + lóbulo superior.
     final pX = w * 0.60;
-    final pPath = Path()..moveTo(pX, vBottom)..lineTo(pX, vTop);
+    final pPath = Path()
+      ..moveTo(pX, vBottom)
+      ..lineTo(pX, vTop);
     canvas.drawPath(pPath, paint);
 
     final lobe = Path()

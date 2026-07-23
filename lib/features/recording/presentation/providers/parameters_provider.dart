@@ -29,7 +29,8 @@ class Parameters extends _$Parameters {
     state = state.copyWith(
         loading: true, errorMessage: null, requiereAltura: false);
     try {
-      final grabacion = await ref.read(obtenerGrabacionUseCaseProvider)(grabacionId);
+      final grabacion =
+          await ref.read(obtenerGrabacionUseCaseProvider)(grabacionId);
       // Se fija la grabación de inmediato: aunque el cálculo falle abajo (p.ej.
       // "no se detectó la altura"), la transcripción queda visible/editable.
       state = state.copyWith(grabacion: grabacion);
@@ -67,7 +68,8 @@ class Parameters extends _$Parameters {
     // Si el texto NO cambió (el usuario solo capturó la altura), se manda
     // `grabacion_id` para que el back-end reuse el largo/ancho ya detectados y
     // combine el override de altura, sin re-correr el regex sobre el mismo texto.
-    final editado = texto.trim() != (state.grabacion?.transcripcion ?? '').trim();
+    final editado =
+        texto.trim() != (state.grabacion?.transcripcion ?? '').trim();
     try {
       final calculo = await ref.read(calcularMetrosUseCaseProvider)(
         grabacionId: editado ? null : grabacionId,
@@ -140,7 +142,8 @@ class Parameters extends _$Parameters {
     final texto = state.textoEditado;
     if (texto != null && texto != state.grabacion?.transcripcion) {
       try {
-        await ref.read(actualizarTranscripcionUseCaseProvider)(grabacionId, texto);
+        await ref.read(actualizarTranscripcionUseCaseProvider)(
+            grabacionId, texto);
       } catch (e) {
         // Falla silenciosa al guardar: solo se registra.
         debugPrint('Error al guardar edición: $e');

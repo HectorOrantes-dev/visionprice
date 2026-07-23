@@ -35,7 +35,14 @@ class CategoriaMaterial {
       'impermeabilizacion',
       'sellador',
     ],
-    'piso': ['piso', 'loseta', 'losa', 'ceramica', 'porcelanato', 'porcelanico'],
+    'piso': [
+      'piso',
+      'loseta',
+      'losa',
+      'ceramica',
+      'porcelanato',
+      'porcelanico'
+    ],
     'azulejo': ['azulejo', 'mosaico', 'revestimiento', 'talavera'],
     'zoclo': ['zoclo', 'zocalo', 'rodapie'],
   };

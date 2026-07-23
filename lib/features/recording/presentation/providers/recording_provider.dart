@@ -147,6 +147,7 @@ class Recording extends _$Recording {
         status: RecordStatus.error,
         errorMessage:
             e is ApiException ? e.message : 'No se pudo subir la grabación.',
+        errorCode: e is ApiException ? e.code : null,
       );
       // Si fue error de red, refresca el estado de conexión del chip.
       if (e is ApiException && e.isNetwork) checkConnectivity();

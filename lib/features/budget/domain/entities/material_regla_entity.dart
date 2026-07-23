@@ -20,7 +20,8 @@ class MaterialReglaEntity {
       categoria: (json['categoria'] ?? '').toString(),
       metodoCalculo: (json['metodo_calculo'] ?? '').toString(),
       requiereKit: json['requiere_kit'] == true,
-      complementos: comp is List ? comp.map((e) => e.toString()).toList() : const [],
+      complementos:
+          comp is List ? comp.map((e) => e.toString()).toList() : const [],
     );
   }
 }

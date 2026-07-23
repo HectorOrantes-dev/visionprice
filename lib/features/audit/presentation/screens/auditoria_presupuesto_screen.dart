@@ -62,7 +62,8 @@ class AuditoriaPresupuestoScreen extends ConsumerWidget {
                     children: [
                       Text('${resultado.total} líneas analizadas',
                           style: TextStyle(
-                              fontSize: 13, color: context.colors.textSecondary)),
+                              fontSize: 13,
+                              color: context.colors.textSecondary)),
                       Text(
                         resultado.anomalias == 0
                             ? 'Sin anomalías'

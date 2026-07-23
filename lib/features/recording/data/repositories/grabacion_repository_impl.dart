@@ -1,4 +1,3 @@
-
 import '../../domain/entities/calculo_entity.dart';
 import '../../domain/entities/grabacion_entity.dart';
 import '../../domain/repositories/grabacion_repository.dart';
@@ -30,7 +29,10 @@ class GrabacionRepositoryImpl implements GrabacionRepository {
 
   @override
   Future<CalculoEntity> calcular(
-          {int? grabacionId, String? texto, double? altura, double? paredesM2}) =>
+          {int? grabacionId,
+          String? texto,
+          double? altura,
+          double? paredesM2}) =>
       _remote.calcular(
           grabacionId: grabacionId,
           texto: texto,

@@ -28,7 +28,9 @@ class ProjectMembersScreen extends ConsumerWidget {
         leading: BackButton(color: c.textPrimary),
         title: Text('Miembros del proyecto',
             style: TextStyle(
-                color: c.textPrimary, fontSize: 17, fontWeight: FontWeight.w700)),
+                color: c.textPrimary,
+                fontSize: 17,
+                fontWeight: FontWeight.w700)),
       ),
       body: SafeArea(
         child: async.when(
@@ -60,7 +62,8 @@ class ProjectMembersScreen extends ConsumerWidget {
                                       proyectoId: proyectoId),
                                 ),
                               ),
-                              icon: const Icon(Icons.person_add_alt_1, size: 18),
+                              icon:
+                                  const Icon(Icons.person_add_alt_1, size: 18),
                               label: const Text('Invitar'),
                             ),
                           ),
@@ -87,8 +90,9 @@ class ProjectMembersScreen extends ConsumerWidget {
                   ),
                 Expanded(
                   child: RefreshIndicator(
-                    onRefresh: () =>
-                        ref.read(miembrosProvider(proyectoId).notifier).recargar(),
+                    onRefresh: () => ref
+                        .read(miembrosProvider(proyectoId).notifier)
+                        .recargar(),
                     child: ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: miembros.length,
@@ -134,7 +138,9 @@ class ProjectMembersScreen extends ConsumerWidget {
     );
     if (ok != true) return;
     try {
-      await ref.read(miembrosProvider(proyectoId).notifier).quitarMiembro(m.usuarioId);
+      await ref
+          .read(miembrosProvider(proyectoId).notifier)
+          .quitarMiembro(m.usuarioId);
       if (context.mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Miembro quitado')));
@@ -206,8 +212,8 @@ class _MiembroTile extends StatelessWidget {
                     if (miembro.esDueno) ...[
                       const SizedBox(width: 8),
                       Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: c.primaryLight,
                           borderRadius: BorderRadius.circular(999),
@@ -228,7 +234,8 @@ class _MiembroTile extends StatelessWidget {
                     style: TextStyle(fontSize: 12, color: c.textSecondary)),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                   decoration: BoxDecoration(
                     color: c.surfaceVariant,
                     borderRadius: BorderRadius.circular(999),
@@ -245,7 +252,8 @@ class _MiembroTile extends StatelessWidget {
           if (onQuitar != null)
             IconButton(
               tooltip: 'Quitar',
-              icon: Icon(Icons.person_remove_outlined, size: 20, color: c.error),
+              icon:
+                  Icon(Icons.person_remove_outlined, size: 20, color: c.error),
               onPressed: onQuitar,
             ),
         ],

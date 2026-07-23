@@ -14,8 +14,7 @@ part 'device_providers.g.dart';
 /// push): datasource → repositorio → use cases → [DeviceRegistrar].
 
 @Riverpod(keepAlive: true)
-DispositivoRemoteDataSource dispositivoRemoteDataSource(
-        Ref ref) =>
+DispositivoRemoteDataSource dispositivoRemoteDataSource(Ref ref) =>
     DispositivoRemoteDataSourceImpl(ref.watch(apiClientProvider));
 
 @Riverpod(keepAlive: true)

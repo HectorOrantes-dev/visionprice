@@ -83,7 +83,7 @@ final class PaymentMethodNotifierProvider
 }
 
 String _$paymentMethodNotifierHash() =>
-    r'fa6b3d4d91879a0e294086a19b4008c8d2128f41';
+    r'20cc0c3163ef185e98b84046d1af2dde1ef1bb68';
 
 /// Notifier de "Método de Pago", uno por `planKey` (el plan que se está por
 /// contratar). Carga la suscripción activa para el resumen (envuelta en

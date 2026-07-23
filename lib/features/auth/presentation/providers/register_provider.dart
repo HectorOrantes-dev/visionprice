@@ -46,8 +46,8 @@ class Register extends _$Register with ValidationMixin {
       state = state.copyWith(selectedRole: role, roleError: null);
 
   void onEmailChanged(String value) {
-    state = state.copyWith(
-        emailError: value.isEmpty ? null : validateEmail(value));
+    state =
+        state.copyWith(emailError: value.isEmpty ? null : validateEmail(value));
   }
 
   void onPasswordChanged(String value) {
@@ -108,7 +108,8 @@ class Register extends _$Register with ValidationMixin {
 
     state = state.copyWith(status: RegisterStatus.loading, errorMessage: null);
     try {
-      await ref.read(verifyTwoFactorUseCaseProvider)(correo: _correo, code: code);
+      await ref.read(verifyTwoFactorUseCaseProvider)(
+          correo: _correo, code: code);
       state = state.copyWith(status: RegisterStatus.success);
       ref.read(deviceRegistrarProvider).register();
       onSuccess();

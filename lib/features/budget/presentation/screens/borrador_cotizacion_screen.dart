@@ -114,7 +114,8 @@ class _BorradorCotizacionScreenState
                       children: [
                         Text('Total estimado',
                             style: TextStyle(
-                                fontSize: 14, color: context.colors.textSecondary)),
+                                fontSize: 14,
+                                color: context.colors.textSecondary)),
                         Text(
                           '\$${borrador.totalEstimado.toStringAsFixed(2)}',
                           style: TextStyle(
@@ -193,7 +194,8 @@ class _AdvertenciasBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.warningLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.colors.warning.withValues(alpha: 0.4)),
+        border:
+            Border.all(color: context.colors.warning.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +216,8 @@ class _AdvertenciasBanner extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text('• $a',
-                  style: TextStyle(fontSize: 13, color: context.colors.textPrimary)),
+                  style: TextStyle(
+                      fontSize: 13, color: context.colors.textPrimary)),
             ),
         ],
       ),
@@ -278,7 +281,8 @@ class _SuperficieBorradorCard extends StatelessWidget {
                 ),
               ),
               Text('${_fmtArea(superficie.areaM2)} m²',
-                  style: TextStyle(fontSize: 13, color: context.colors.textSecondary)),
+                  style: TextStyle(
+                      fontSize: 13, color: context.colors.textSecondary)),
             ],
           ),
           const SizedBox(height: 10),
@@ -376,7 +380,8 @@ class _LineaBorradorTile extends StatelessWidget {
                       if (linea.distanciaKm != null)
                         '${linea.distanciaKm!.toStringAsFixed(1)} km',
                     ].join(' · '),
-                    style: TextStyle(fontSize: 11, color: context.colors.textHint),
+                    style:
+                        TextStyle(fontSize: 11, color: context.colors.textHint),
                   ),
                 ],
               ),
@@ -392,14 +397,16 @@ class _LineaBorradorTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    fontStyle: linea.editado ? FontStyle.italic : FontStyle.normal,
+                    fontStyle:
+                        linea.editado ? FontStyle.italic : FontStyle.normal,
                     color: linea.editado
                         ? context.colors.textSecondary
                         : context.colors.textPrimary,
                   ),
                 ),
                 Text('${linea.cantidad.toStringAsFixed(0)} ${linea.unidad}',
-                    style: TextStyle(fontSize: 11, color: context.colors.textHint)),
+                    style: TextStyle(
+                        fontSize: 11, color: context.colors.textHint)),
               ],
             ),
             const SizedBox(width: 4),

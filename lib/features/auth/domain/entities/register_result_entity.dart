@@ -17,9 +17,8 @@ class RegisterResultEntity {
   factory RegisterResultEntity.fromJson(Map<String, dynamic> json) {
     final usuario = json['usuario'] ?? json['user'];
     return RegisterResultEntity(
-      user: usuario is Map<String, dynamic>
-          ? UserEntity.fromJson(usuario)
-          : null,
+      user:
+          usuario is Map<String, dynamic> ? UserEntity.fromJson(usuario) : null,
       twoFactorSent: json['two_factor_sent'] == true,
       message: (json['message'] ?? '').toString(),
     );
