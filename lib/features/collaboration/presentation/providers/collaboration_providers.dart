@@ -69,7 +69,12 @@ class MiembrosNotifier extends _$MiembrosNotifier {
 
   Future<void> recargar() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(_fetch);
+    final resultado = await AsyncValue.guard(_fetch);
+    // El widget que observaba este provider pudo desmontarse mientras el
+    // fetch estaba en vuelo (autoDispose): si ya no está montado, el
+    // provider ya se destruyó y asignar `state` truena.
+    if (!ref.mounted) return;
+    state = resultado;
   }
 
   /// Quita un miembro y refresca la lista. Lanza si falla (la UI lo captura).
@@ -91,7 +96,11 @@ class InvitacionesNotifier extends _$InvitacionesNotifier {
 
   Future<void> recargar() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(_fetch);
+    final resultado = await AsyncValue.guard(_fetch);
+    // Ver comentario equivalente en MiembrosNotifier.recargar — mismo
+    // patrón, mismo bug de autoDispose + await en vuelo.
+    if (!ref.mounted) return;
+    state = resultado;
   }
 
   /// Revoca un código y refresca la lista. Lanza si falla (la UI lo captura).
@@ -110,9 +119,11 @@ class UnirseAProyectoNotifier extends _$UnirseAProyectoNotifier {
   /// error del back-end (código inválido/expirado) al subtipo de `AsyncValue`.
   Future<void> unirse(String codigo) async {
     state = const AsyncLoading<UnirseResultEntity?>();
-    state = await AsyncValue.guard<UnirseResultEntity?>(
+    final resultado = await AsyncValue.guard<UnirseResultEntity?>(
       () => ref.read(unirseAProyectoUseCaseProvider)(codigo),
     );
+    if (!ref.mounted) return;
+    state = resultado;
   }
 }
 
@@ -123,11 +134,13 @@ class GenerarInvitacionNotifier extends _$GenerarInvitacionNotifier {
 
   Future<void> generar(int proyectoId, {List<String>? correos}) async {
     state = const AsyncLoading<InvitacionEntity?>();
-    state = await AsyncValue.guard<InvitacionEntity?>(
+    final resultado = await AsyncValue.guard<InvitacionEntity?>(
       () => ref.read(generarInvitacionUseCaseProvider)(
         proyectoId,
         correos: correos,
       ),
     );
+    if (!ref.mounted) return;
+    state = resultado;
   }
 }
