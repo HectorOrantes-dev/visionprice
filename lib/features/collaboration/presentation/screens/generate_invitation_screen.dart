@@ -46,8 +46,13 @@ class _GenerateInvitationScreenState
     await ref
         .read(generarInvitacionProvider.notifier)
         .generar(widget.proyectoId, correos: correos);
-    // Refresca los códigos activos para que aparezca el nuevo al volver.
-    ref.read(invitacionesProvider(widget.proyectoId).notifier).recargar();
+    // Marca la lista de códigos activos como obsoleta (no la recarga aquí:
+    // esta pantalla no la observa, así que el provider quedaría sin
+    // listeners y Riverpod lo destruiría en pleno fetch — ver
+    // active_invitations_screen.dart, que sí la observa y va a refetchear
+    // sola en cuanto se vuelva a mostrar).
+    if (!mounted) return;
+    ref.invalidate(invitacionesProvider(widget.proyectoId));
   }
 
   @override
