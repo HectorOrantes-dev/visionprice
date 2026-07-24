@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
+import '../../../budget/presentation/widgets/uso_cotizaciones_banner.dart';
 import '../providers/recording_provider.dart';
 import 'audio_visualizer.dart';
 import 'bottom_actions.dart';
@@ -51,6 +52,11 @@ class RecordingView extends ConsumerWidget {
           child: Column(
             children: [
               const RecordingAppBar(),
+              // El audio ahora consume la MISMA cuota gratis que las
+              // cotizaciones (20 usos compartidos) — sin esto, alguien podía
+              // grabar varios audios sin ver cuánto le quedaba y sorprenderse
+              // con el paywall.
+              const UsoCotizacionesBanner(),
               ProjectSelector(state: state),
               Expanded(
                 child: LayoutBuilder(

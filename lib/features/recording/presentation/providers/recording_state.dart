@@ -14,8 +14,9 @@ class RecordingState {
   final Duration elapsed;
   final String? errorMessage;
 
-  /// `error.code` del back-end cuando la subida falló (p. ej.
-  /// `"plan_required"` — audio exige suscripción activa, sin cuota gratis).
+  /// `error.code` del back-end cuando la subida falló — hoy solo puede ser
+  /// `"plan_limit_reached"`: audio comparte la misma cuota gratis de 20 usos
+  /// que las cotizaciones (`plan_required` ya no lo devuelve `/grabaciones`).
   final String? errorCode;
 
   /// `null` mientras verifica, luego `true`/`false` según conectividad real.

@@ -5,9 +5,10 @@ import '../../../../core/theme/app_palette.dart';
 import 'subscriptions_screen.dart';
 
 /// Paywall mostrado cuando cualquier request responde 402: llegaste al
-/// límite de cotizaciones gratis (`plan_limit_reached`) o la función exige
-/// suscripción activa (`plan_required`, p. ej. audio). Un solo botón manda a
-/// [SubscriptionsScreen] para elegir plan y pagar.
+/// límite de cotizaciones gratis (`plan_limit_reached` — cotizaciones y
+/// audios comparten la misma cuota de 20 usos) o la función exige
+/// suscripción activa sin cuota gratis (`plan_required`). Un solo botón
+/// manda a [SubscriptionsScreen] para elegir plan y pagar.
 class PlanPaywallScreen extends StatelessWidget {
   final String? code;
   final String message;
