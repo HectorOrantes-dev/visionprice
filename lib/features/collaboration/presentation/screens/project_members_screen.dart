@@ -9,11 +9,18 @@ import '../providers/collaboration_providers.dart';
 import 'active_invitations_screen.dart';
 import 'generate_invitation_screen.dart';
 
-/// Miembros del proyecto (`GET /proyectos/{id}/miembros`). Si el usuario es
-/// dueño puede invitar, ver códigos activos y quitar colaboradores.
+/// Miembros del proyecto (`GET /proyectos/{id}/miembros` — devuelve los
+/// COLABORADORES, sin incluir al dueño). Si el usuario es dueño puede
+/// invitar, ver códigos activos y quitar colaboradores.
+///
+/// [esDueno] viene de `GET /proyectos` (campo `es_dueno` por proyecto) — esa
+/// respuesta de miembros NO trae esa bandera en ningún lado, así que hay que
+/// pasarla desde donde ya se conoce (la tarjeta de "Mis proyectos").
 class ProjectMembersScreen extends ConsumerWidget {
   final int proyectoId;
-  const ProjectMembersScreen({super.key, required this.proyectoId});
+  final bool esDueno;
+  const ProjectMembersScreen(
+      {super.key, required this.proyectoId, required this.esDueno});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,9 +48,7 @@ class ProjectMembersScreen extends ConsumerWidget {
                 : 'No se pudieron cargar los miembros.',
             onReintentar: () => ref.invalidate(miembrosProvider(proyectoId)),
           ),
-          data: (result) {
-            final miembros = result.miembros;
-            final esDueno = result.esDueno;
+          data: (miembros) {
             return Column(
               children: [
                 if (esDueno)
@@ -87,6 +92,26 @@ class ProjectMembersScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
+                  )
+                else
+                  // Sin esto, un no-dueño ve la lista y nada más — parece que
+                  // "no hay nada" en vez de "esto no te toca a ti".
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline,
+                            size: 16, color: c.textSecondary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Solo el dueño del proyecto puede invitar o generar códigos.',
+                            style:
+                                TextStyle(fontSize: 12, color: c.textSecondary),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 Expanded(
                   child: RefreshIndicator(
@@ -101,7 +126,7 @@ class ProjectMembersScreen extends ConsumerWidget {
                         final m = miembros[i];
                         return _MiembroTile(
                           miembro: m,
-                          onQuitar: (esDueno && !m.esDueno)
+                          onQuitar: esDueno
                               ? () => _confirmarQuitar(context, ref, m)
                               : null,
                         );
@@ -198,35 +223,13 @@ class _MiembroTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(miembro.nombre,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.heading(
-                              size: 15,
-                              weight: FontWeight.w700,
-                              color: c.textPrimary)),
-                    ),
-                    if (miembro.esDueno) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: c.primaryLight,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text('Dueño',
-                            style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: c.primary)),
-                      ),
-                    ],
-                  ],
-                ),
+                Text(miembro.nombre,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.heading(
+                        size: 15,
+                        weight: FontWeight.w700,
+                        color: c.textPrimary)),
                 const SizedBox(height: 2),
                 Text(miembro.correo,
                     maxLines: 1,

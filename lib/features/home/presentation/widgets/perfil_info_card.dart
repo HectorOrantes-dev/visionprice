@@ -35,7 +35,7 @@ class PerfilInfoCard extends StatelessWidget {
           InfoRow(
             icon: Icons.workspace_premium_outlined,
             label: 'Plan',
-            value: perfil.tienePlan ? perfil.planActivo! : 'Sin plan activo',
+            value: perfil.tienePlan ? _nombrePlan(perfil) : 'Sin plan activo',
             valueColor: perfil.tienePlan
                 ? context.colors.primary
                 : context.colors.textSecondary,
@@ -63,6 +63,16 @@ class PerfilInfoCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// "Pro ($349 MXN/mes)" si el back-end mandó nombre/precio legibles;
+  /// si no, el slug crudo (`plan_activo`) como último recurso.
+  static String _nombrePlan(PerfilEntity perfil) {
+    final nombre = perfil.planNombre ?? perfil.planActivo!;
+    final precio = perfil.planPrecioMxn;
+    return precio != null
+        ? '$nombre (\$${precio.toStringAsFixed(0)} MXN/mes)'
+        : nombre;
   }
 
   static String _fmtDate(DateTime d) => DateFormat('dd/MM/yyyy').format(d);

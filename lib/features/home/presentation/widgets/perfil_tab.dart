@@ -6,6 +6,7 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../account/presentation/screens/subscriptions_screen.dart';
 import '../../../audit/presentation/screens/anomalias_zona_screen.dart';
+import '../../../account/presentation/providers/plan_status_poller.dart';
 import '../../../auth/presentation/providers/perfil_provider.dart';
 import '../../../recommendations/presentation/screens/entrenar_modelos_screen.dart';
 import 'perfil_error.dart';
@@ -22,96 +23,104 @@ class PerfilTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Mientras esta pantalla esté montada, sondea el estado real del plan
+    // (activación/cancelación puede llegar por webhook segundos después).
+    ref.watch(planStatusPollerProvider);
     // El perfil llega como AsyncValue<PerfilEntity> desde perfilProvider.
     final perfilAsync = ref.watch(perfilProvider);
     final perfil = perfilAsync.asData?.value;
     return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const SizedBox(height: 8),
-          Center(
-            child: CircleAvatar(
-              radius: 36,
-              backgroundColor: context.colors.primaryLight,
-              child:
-                  Icon(Icons.person, size: 40, color: context.colors.primary),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Center(
-            child: Text(
-              perfil?.nombre.isNotEmpty == true
-                  ? perfil!.nombre
-                  : (perfilAsync.isLoading ? 'Cargando…' : 'Mi perfil'),
-              style: AppTextStyles.heading(
-                size: 18,
-                weight: FontWeight.w700,
-                color: context.colors.textPrimary,
+      child: RefreshIndicator(
+        onRefresh: () => ref.read(perfilProvider.notifier).refresh(),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const SizedBox(height: 8),
+            Center(
+              child: CircleAvatar(
+                radius: 36,
+                backgroundColor: context.colors.primaryLight,
+                child:
+                    Icon(Icons.person, size: 40, color: context.colors.primary),
               ),
             ),
-          ),
-          if (perfil?.correo.isNotEmpty == true)
+            const SizedBox(height: 12),
             Center(
               child: Text(
-                perfil!.correo,
-                style: TextStyle(
-                    fontSize: 13, color: context.colors.textSecondary),
+                perfil?.nombre.isNotEmpty == true
+                    ? perfil!.nombre
+                    : (perfilAsync.isLoading ? 'Cargando…' : 'Mi perfil'),
+                style: AppTextStyles.heading(
+                  size: 18,
+                  weight: FontWeight.w700,
+                  color: context.colors.textPrimary,
+                ),
               ),
             ),
-          const SizedBox(height: 28),
-          perfilAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Center(child: CircularProgressIndicator()),
+            if (perfil?.correo.isNotEmpty == true)
+              Center(
+                child: Text(
+                  perfil!.correo,
+                  style: TextStyle(
+                      fontSize: 13, color: context.colors.textSecondary),
+                ),
+              ),
+            const SizedBox(height: 28),
+            perfilAsync.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => PerfilError(
+                message: e is ApiException
+                    ? e.message
+                    : 'No se pudo cargar el perfil',
+                onRetry: () => ref.read(perfilProvider.notifier).refresh(),
+              ),
+              data: (p) => PerfilInfoCard(perfil: p),
             ),
-            error: (e, _) => PerfilError(
-              message:
-                  e is ApiException ? e.message : 'No se pudo cargar el perfil',
-              onRetry: () => ref.invalidate(perfilProvider),
-            ),
-            data: (p) => PerfilInfoCard(perfil: p),
-          ),
-          const SizedBox(height: 20),
-          ProfileItem(
-            icon: Icons.workspace_premium_outlined,
-            label: 'Mis suscripciones',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SubscriptionsScreen()),
-            ),
-          ),
-          // Entrenar los modelos de recomendación: el back-end solo lo permite
-          // al rol `ingeniero_civil`, así que solo a él se le muestra la opción.
-          if (perfil?.rol == 'ingeniero_civil') ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             ProfileItem(
-              icon: Icons.model_training_outlined,
-              label: 'Entrenar modelos',
+              icon: Icons.workspace_premium_outlined,
+              label: 'Mis suscripciones',
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (_) => const EntrenarModelosScreen()),
+                MaterialPageRoute(builder: (_) => const SubscriptionsScreen()),
               ),
             ),
+            // Entrenar los modelos de recomendación: el back-end solo lo permite
+            // al rol `ingeniero_civil`, así que solo a él se le muestra la opción.
+            if (perfil?.rol == 'ingeniero_civil') ...[
+              const SizedBox(height: 10),
+              ProfileItem(
+                icon: Icons.model_training_outlined,
+                label: 'Entrenar modelos',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const EntrenarModelosScreen()),
+                ),
+              ),
+              const SizedBox(height: 10),
+              ProfileItem(
+                icon: Icons.fact_check_outlined,
+                label: 'Auditoría de precios',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const AnomaliasZonaScreen()),
+                ),
+              ),
+            ],
             const SizedBox(height: 10),
             ProfileItem(
-              icon: Icons.fact_check_outlined,
-              label: 'Auditoría de precios',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AnomaliasZonaScreen()),
-              ),
+              icon: Icons.logout,
+              label: 'Cerrar sesión',
+              danger: true,
+              onTap: onLogout,
             ),
           ],
-          const SizedBox(height: 10),
-          ProfileItem(
-            icon: Icons.logout,
-            label: 'Cerrar sesión',
-            danger: true,
-            onTap: onLogout,
-          ),
-        ],
+        ),
       ),
     );
   }

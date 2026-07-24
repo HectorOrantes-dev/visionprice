@@ -84,6 +84,7 @@ class Recording extends _$Recording {
       status: RecordStatus.recording,
       elapsed: Duration.zero,
       errorMessage: null,
+      errorCode: null,
     );
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       state =
@@ -162,6 +163,7 @@ class Recording extends _$Recording {
       status: RecordStatus.idle,
       elapsed: Duration.zero,
       errorMessage: null,
+      errorCode: null,
     );
   }
 }

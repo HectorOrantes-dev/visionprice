@@ -23,7 +23,16 @@ class LocalDatabase {
       // v5: agrega `latitud`/`longitud` a `proyectos` (ubicación de la obra).
       // v6: agrega `numero` a `cotizaciones_pdf` (número de cotización para
       // mostrar al usuario; `id` se sigue usando solo para la URL del PDF).
-      version: 6,
+      // v7: agrega `plan_nombre`/`plan_precio_mxn` a `perfil` (nombre/precio
+      // legibles del plan, calculados por el back-end a partir del slug).
+      // v8: agrega `usuario_id` a `proyectos` y `cotizaciones_pdf` — estas
+      // cachés son "del dispositivo", no de la cuenta, así que sin esto
+      // cualquier cuenta que entre en el mismo teléfono ve los proyectos y
+      // cotizaciones de la cuenta anterior. Ahora cada fila queda marcada
+      // con el dueño y las lecturas se filtran por el usuario actual.
+      // v9: agrega `es_dueno` a `proyectos` (viene de `GET /proyectos`) — lo
+      // necesita `ProjectMembersScreen` para saber si mostrar "Invitar".
+      version: 9,
       onCreate: (db, version) => _createAllTables(db),
       onUpgrade: (db, oldVersion, newVersion) async {
         await _createAllTables(db);
@@ -32,6 +41,17 @@ class LocalDatabase {
         await _addColumnIfMissing(db, 'proyectos', 'latitud', 'REAL');
         await _addColumnIfMissing(db, 'proyectos', 'longitud', 'REAL');
         await _addColumnIfMissing(db, 'cotizaciones_pdf', 'numero', 'INTEGER');
+        await _addColumnIfMissing(db, 'perfil', 'plan_nombre', 'TEXT');
+        await _addColumnIfMissing(db, 'perfil', 'plan_precio_mxn', 'REAL');
+        await _addColumnIfMissing(db, 'proyectos', 'usuario_id', 'INTEGER');
+        await _addColumnIfMissing(
+            db, 'cotizaciones_pdf', 'usuario_id', 'INTEGER');
+        await _addColumnIfMissing(db, 'proyectos', 'es_dueno', 'INTEGER');
+        // Filas de antes de v8 no tienen dueño conocido: se borran en vez de
+        // dejarlas huérfanas mostrándose a cualquier cuenta (mismo criterio
+        // que ya se usaba al cambiar de cuenta, pero de una vez por todas).
+        await db.delete('proyectos', where: 'usuario_id IS NULL');
+        await db.delete('cotizaciones_pdf', where: 'usuario_id IS NULL');
       },
     );
   }
@@ -79,7 +99,9 @@ class LocalDatabase {
         proveedor_auth TEXT NOT NULL,
         fecha_registro TEXT,
         plan_activo TEXT,
-        vigencia_hasta TEXT
+        vigencia_hasta TEXT,
+        plan_nombre TEXT,
+        plan_precio_mxn REAL
       );
     ''');
 
@@ -92,7 +114,9 @@ class LocalDatabase {
         total_presupuestos INTEGER NOT NULL DEFAULT 0,
         is_synced INTEGER NOT NULL DEFAULT 1,
         latitud REAL,
-        longitud REAL
+        longitud REAL,
+        usuario_id INTEGER,
+        es_dueno INTEGER
       );
     ''');
 
@@ -106,7 +130,8 @@ class LocalDatabase {
         estado TEXT NOT NULL,
         total REAL NOT NULL DEFAULT 0,
         fecha TEXT NOT NULL,
-        url_pdf TEXT NOT NULL
+        url_pdf TEXT NOT NULL,
+        usuario_id INTEGER
       );
     ''');
   }

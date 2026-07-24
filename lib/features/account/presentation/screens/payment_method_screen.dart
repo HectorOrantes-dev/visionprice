@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../providers/payment_method_provider.dart';
+import '../providers/plan_status_poller.dart';
 import '../widgets/metodo_tab.dart';
 import '../widgets/payment_method.dart';
 import '../widgets/payment_method_panel.dart';
@@ -29,9 +32,28 @@ class PaymentMethodScreen extends ConsumerStatefulWidget {
 
 class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
   late PaymentMethod _metodo = widget.metodoInicial;
+  Timer? _poll;
+
+  @override
+  void initState() {
+    super.initState();
+    // El estado de ESTE plan (resumen de suscripción) vive en un provider
+    // `.family` por `planKey` — el poller global no lo alcanza, así que
+    // sondea directo aquí mientras la pantalla esté abierta.
+    _poll = Timer.periodic(const Duration(seconds: 20), (_) {
+      ref.read(paymentMethodProvider(widget.planKey).notifier).load();
+    });
+  }
+
+  @override
+  void dispose() {
+    _poll?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(planStatusPollerProvider);
     final provider = paymentMethodProvider(widget.planKey);
     final vm = ref.watch(provider);
     return Scaffold(

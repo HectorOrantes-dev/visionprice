@@ -4,6 +4,7 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/plan_catalogo_entity.dart';
 import '../providers/payment_method_provider.dart';
+import '../providers/plan_status_poller.dart';
 import '../providers/subscriptions_provider.dart';
 import '../widgets/account_message.dart';
 import '../widgets/metodo_tab.dart';
@@ -26,6 +27,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(planStatusPollerProvider);
     final subsAsync = ref.watch(subscriptionsProvider);
     return Scaffold(
       backgroundColor: context.colors.background,

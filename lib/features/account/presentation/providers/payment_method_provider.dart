@@ -1,9 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../auth/presentation/providers/perfil_provider.dart';
+import '../../../budget/presentation/providers/budget_providers.dart';
 import '../../domain/entities/subscription_entity.dart';
 import '../widgets/payment_method.dart';
 import 'account_providers.dart';
+import 'subscriptions_provider.dart';
 
 part 'payment_method_provider.g.dart';
 
@@ -76,8 +79,11 @@ class PaymentMethodNotifier extends _$PaymentMethodNotifier {
     final resultado = await AsyncValue.guard<SubscriptionEntity?>(() async {
       final subs = await ref.read(obtenerSuscripcionesUseCaseProvider)();
       final activa = subs.where((s) => s.activa);
-      if (activa.isNotEmpty) return activa.first;
-      return subs.isNotEmpty ? subs.first : null;
+      // OJO: NO caer de vuelta a `subs.first` cuando no hay ninguna activa —
+      // `GET /subscriptions` es el historial completo, así que eso mostraba
+      // la última suscripción CANCELADA en la tarjeta de resumen como si
+      // siguiera vigente (plan y precio, sin ningún aviso de "cancelada").
+      return activa.isEmpty ? null : activa.first;
     });
     state = state.copyWith(subscription: resultado);
   }
@@ -97,12 +103,30 @@ class PaymentMethodNotifier extends _$PaymentMethodNotifier {
         cardToken: cardToken,
       );
       await load();
+      _refrescarEstadoDePlan();
       state = state.copyWith(
         procesando: false,
         exitoso: true,
         confirmMessage: '¡Listo! Tu suscripción está activa.',
       );
     } catch (e) {
+      // Reintentar tras un timeout (que sí se procesó del lado del
+      // servidor) hace que Pagos rechace un segundo `subscribe()` con 400
+      // "ya tiene una suscripción activa". Eso NO es un fallo real: la
+      // suscripción del primer intento sí quedó — se resincroniza el estado
+      // real en vez de dejar al usuario reintentando a ciegas.
+      final yaSuscrito = e is ApiException &&
+          e.message.toLowerCase().contains('ya tiene una suscripción activa');
+      await load();
+      if (yaSuscrito) {
+        _refrescarEstadoDePlan();
+        state = state.copyWith(
+          procesando: false,
+          exitoso: true,
+          confirmMessage: 'Ya tenías una suscripción activa — todo en orden.',
+        );
+        return;
+      }
       state = state.copyWith(
         procesando: false,
         confirmMessage:
@@ -165,10 +189,27 @@ class PaymentMethodNotifier extends _$PaymentMethodNotifier {
       return;
     }
     await load();
+    _refrescarEstadoDePlan();
     state = state.copyWith(
       exitoso: true,
       confirmMessage:
           'Aprobaste el pago en PayPal. Puede tardar unos segundos en activarse.',
     );
+  }
+
+  /// Tras confirmar un pago, el "Plan" del perfil, el banner de cuota gratis
+  /// y "Mis suscripciones" quedan con datos viejos (cada uno es un provider
+  /// separado que no se entera solo) — se refrescan para la próxima vez que
+  /// se muestren.
+  ///
+  /// OJO: `perfilProvider` NO se puede refrescar con `ref.invalidate` —
+  /// `AuthRepositoryImpl.getPerfil` cachea el perfil en memoria y solo la
+  /// ignora con `forceRefresh: true` (que solo manda `Perfil.refresh()`);
+  /// invalidar el provider solo vuelve a llamar a `build()` con el default
+  /// `forceRefresh: false`, que devuelve el mismo perfil viejo cacheado.
+  void _refrescarEstadoDePlan() {
+    ref.read(perfilProvider.notifier).refresh();
+    ref.invalidate(usoCotizacionesProvider);
+    ref.invalidate(subscriptionsProvider);
   }
 }

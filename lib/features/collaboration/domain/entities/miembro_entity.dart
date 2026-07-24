@@ -1,18 +1,19 @@
 import 'project_role.dart';
 
+/// Un colaborador del proyecto (`GET /proyectos/{id}/miembros`). Esta lista
+/// son los COLABORADORES, no incluye al dueño (el dueño se identifica aparte,
+/// vía `es_dueno` de `GET /proyectos` — ver `ProyectoEntity.esDueno`).
 class MiembroEntity {
   final int usuarioId;
   final String nombre;
   final String correo;
   final ProjectRole rolEnProyecto;
-  final bool esDueno;
 
   const MiembroEntity({
     required this.usuarioId,
     required this.nombre,
     required this.correo,
     required this.rolEnProyecto,
-    required this.esDueno,
   });
 
   factory MiembroEntity.fromJson(Map<String, dynamic> json) {
@@ -24,7 +25,6 @@ class MiembroEntity {
       correo: (json['correo'] ?? '').toString(),
       rolEnProyecto:
           ProjectRole.fromApi((json['rol_en_proyecto'] ?? '').toString()),
-      esDueno: json['es_dueno'] == true,
     );
   }
 }

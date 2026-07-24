@@ -156,6 +156,18 @@ class PaymentMethodPanel extends ConsumerWidget {
   ) async {
     if (metodo == PaymentMethod.conekta) {
       if (vm.conektaMetodo == ConektaMetodo.tarjeta) {
+        // Ya hay una suscripción activa/pendiente (p. ej. un intento previo
+        // que sí se procesó del lado del servidor pese a que acá pareció
+        // fallar por timeout): ni siquiera abre el tokenizador, evita el
+        // 400 "ya tiene una suscripción activa" de Pagos.
+        if (vm.subscription.value?.activa == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ya tienes una suscripción activa.'),
+            ),
+          );
+          return;
+        }
         final cardToken = await Navigator.push<String>(
           context,
           MaterialPageRoute(builder: (_) => const ConektaCardTokenScreen()),

@@ -19,7 +19,11 @@ class ProjectCard extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (_) => ProjectMembersScreen(proyectoId: proyecto.id)),
+          builder: (_) => ProjectMembersScreen(
+            proyectoId: proyecto.id,
+            esDueno: proyecto.esDueno,
+          ),
+        ),
       ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -73,20 +77,42 @@ class ProjectCard extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: estadoColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                _capitalize(proyecto.estado),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: estadoColor,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: estadoColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    _capitalize(proyecto.estado),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: estadoColor,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 4),
+                // Pista visual: tocar la tarjeta abre miembros/invitar, no
+                // es obvio solo con el ícono de carpeta.
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.group_outlined,
+                        size: 12, color: context.colors.textSecondary),
+                    const SizedBox(width: 3),
+                    Text('Equipo',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: context.colors.textSecondary,
+                        )),
+                  ],
+                ),
+              ],
             ),
           ],
         ),

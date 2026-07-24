@@ -5,7 +5,6 @@ class GenerarInvitacionUseCase {
   final CollaborationRepository _repo;
   GenerarInvitacionUseCase(this._repo);
 
-  Future<InvitacionEntity> call(int proyectoId, String rol,
-          {List<String>? correos}) =>
-      _repo.generarInvitacion(proyectoId, rol, correos);
+  Future<InvitacionEntity> call(int proyectoId, {List<String>? correos}) =>
+      _repo.generarInvitacion(proyectoId, correos);
 }

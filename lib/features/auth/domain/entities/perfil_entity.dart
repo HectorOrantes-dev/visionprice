@@ -19,6 +19,14 @@ class PerfilEntity {
   final String? planActivo;
   final DateTime? vigenciaHasta;
 
+  /// Nombre legible del plan (p. ej. "Pro"), calculado por el back-end a
+  /// partir de [planActivo] — mostrar esto en vez del slug crudo.
+  final String? planNombre;
+
+  /// Precio del plan en MXN (p. ej. `349`), también calculado por el
+  /// back-end — evita duplicar el catálogo de precios en el móvil.
+  final num? planPrecioMxn;
+
   const PerfilEntity({
     required this.id,
     required this.nombre,
@@ -30,6 +38,8 @@ class PerfilEntity {
     this.fechaRegistro,
     this.planActivo,
     this.vigenciaHasta,
+    this.planNombre,
+    this.planPrecioMxn,
   });
 
   bool get tienePlan => (planActivo ?? '').isNotEmpty;
@@ -48,6 +58,12 @@ class PerfilEntity {
           ? json['plan_activo'].toString()
           : null,
       vigenciaHasta: _parseDate(json['vigencia_hasta']),
+      planNombre: (json['plan_nombre']?.toString().isNotEmpty ?? false)
+          ? json['plan_nombre'].toString()
+          : null,
+      planPrecioMxn: json['plan_precio_mxn'] is num
+          ? json['plan_precio_mxn'] as num
+          : null,
     );
   }
 
@@ -64,6 +80,8 @@ class PerfilEntity {
         'fecha_registro': fechaRegistro?.toIso8601String(),
         'plan_activo': planActivo,
         'vigencia_hasta': vigenciaHasta?.toIso8601String(),
+        'plan_nombre': planNombre,
+        'plan_precio_mxn': planPrecioMxn,
       };
 
   static DateTime? _parseDate(dynamic value) {

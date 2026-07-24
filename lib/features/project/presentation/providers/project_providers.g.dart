@@ -99,7 +99,7 @@ final class ProyectoRepositoryProvider extends $FunctionalProvider<
 }
 
 String _$proyectoRepositoryHash() =>
-    r'56b26793577d7e2c5e0a6acdebe2123e65ad4426';
+    r'402e4368762fc694bc414cc94e97eb20b6c96e71';
 
 @ProviderFor(obtenerProyectosUseCase)
 final obtenerProyectosUseCaseProvider = ObtenerProyectosUseCaseProvider._();

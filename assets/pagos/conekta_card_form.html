@@ -148,6 +148,22 @@
 <script>
   Conekta.setPublicKey("{{CONEKTA_PUBLIC_KEY}}");
 
+  // Auto-formatea "4242 4242 4242 4242" mientras se escribe (máx. 16 dígitos
+  // + 3 espacios = 19 caracteres, ya cubierto por el maxlength del input).
+  document.getElementById('card_number').addEventListener('input', function (e) {
+    var digits = e.target.value.replace(/\D/g, '').slice(0, 16);
+    var conEspacios = digits.replace(/(.{4})/g, '$1 ').trim();
+    e.target.value = conEspacios;
+  });
+
+  // Mes/Año/CVC: solo dígitos (evita que el usuario escriba letras/símbolos
+  // que Conekta.js rechazaría igual, pero de forma menos clara).
+  ['exp_month', 'exp_year', 'cvc'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function (e) {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+  });
+
   function tokenize() {
     var btn = document.getElementById('submit-btn');
     var err = document.getElementById('error');

@@ -7,11 +7,13 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/field_label.dart';
 import '../../../../shared/widgets/gradient_button.dart';
-import '../../domain/entities/project_role.dart';
 import '../providers/collaboration_providers.dart';
 
 /// Generar un código de invitación (`POST /proyectos/{id}/invitaciones`).
-/// Elige rol + correos opcionales; al generar muestra el código real.
+/// El rol de quien se una ya NO se elige aquí: el back-end lo infiere según
+/// el rol de quien invita (contratista invita maestro_obra; arquitecto/
+/// ingeniero_civil invita contratista) — solo hace falta el correo
+/// (opcional; el código sirve igual como fallback para compartir a mano).
 class GenerateInvitationScreen extends ConsumerStatefulWidget {
   final int proyectoId;
   const GenerateInvitationScreen({super.key, required this.proyectoId});
@@ -23,7 +25,6 @@ class GenerateInvitationScreen extends ConsumerStatefulWidget {
 
 class _GenerateInvitationScreenState
     extends ConsumerState<GenerateInvitationScreen> {
-  ProjectRole _rol = ProjectRole.colaborador;
   final _emailController = TextEditingController();
 
   @override
@@ -44,7 +45,7 @@ class _GenerateInvitationScreenState
     }
     await ref
         .read(generarInvitacionProvider.notifier)
-        .generar(widget.proyectoId, _rol.apiValue, correos: correos);
+        .generar(widget.proyectoId, correos: correos);
     // Refresca los códigos activos para que aparezca el nuevo al volver.
     ref.read(invitacionesProvider(widget.proyectoId).notifier).recargar();
   }
@@ -72,21 +73,6 @@ class _GenerateInvitationScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const FieldLabel('ROL EN EL PROYECTO'),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (final rol in ProjectRole.values)
-                    _RolChip(
-                      label: rol.label,
-                      selected: rol == _rol,
-                      onTap: () => setState(() => _rol = rol),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 22),
               const FieldLabel('CORREOS (OPCIONAL)'),
               const SizedBox(height: 10),
               TextField(
@@ -118,7 +104,11 @@ class _GenerateInvitationScreenState
                         onPressed: _generar,
                         child: const Text('Generar código'),
                       )
-                    : _CodigoCard(codigo: inv.codigo, expiraEn: inv.expiraEn),
+                    : _CodigoCard(
+                        codigo: inv.codigo,
+                        expiraEn: inv.expiraEn,
+                        rol: inv.rol.label,
+                      ),
                 loading: () => const Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
@@ -151,56 +141,14 @@ class _GenerateInvitationScreenState
   }
 }
 
-class _RolChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _RolChip(
-      {required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? c.primaryLight : c.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected ? c.primary : c.border,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              selected ? Icons.radio_button_checked : Icons.radio_button_off,
-              size: 18,
-              color: selected ? c.primary : c.textHint,
-            ),
-            const SizedBox(width: 8),
-            Text(label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: selected ? c.primary : c.textPrimary,
-                )),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Tarjeta con el código recién generado (código grande + copiar + vigencia).
+/// Tarjeta con el código recién generado (código grande + copiar + vigencia
+/// + el rol que el back-end le asignó a quien se una con él).
 class _CodigoCard extends StatelessWidget {
   final String codigo;
   final Duration expiraEn;
-  const _CodigoCard({required this.codigo, required this.expiraEn});
+  final String rol;
+  const _CodigoCard(
+      {required this.codigo, required this.expiraEn, required this.rol});
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +185,20 @@ class _CodigoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: c.primaryLight,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text('Para: $rol',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: c.primary,
+                )),
+          ),
+          const SizedBox(height: 8),
           Text('Multiuso · expira en ${_texto(expiraEn)}',
               style: TextStyle(fontSize: 12, color: c.textSecondary)),
           const SizedBox(height: 16),

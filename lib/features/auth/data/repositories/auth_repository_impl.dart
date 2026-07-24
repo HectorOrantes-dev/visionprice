@@ -32,6 +32,7 @@ class AuthRepositoryImpl implements AuthRepository {
     final session = await _remote.login(correo, contrasena);
     // Login directo (sin 2FA): persiste el token igual que verifyTwoFactor.
     if (session != null) {
+      await _limpiarPerfilDeOtraCuenta();
       await _tokenStorage.saveToken(session.accessToken);
     }
     return session;
@@ -43,6 +44,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String code,
   }) async {
     final session = await _remote.verifyTwoFactor(correo, code);
+    await _limpiarPerfilDeOtraCuenta();
     await _tokenStorage.saveToken(session.accessToken);
     return session;
   }
@@ -70,6 +72,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthSessionEntity> googleLogin({required String idToken}) async {
     final session = await _remote.googleLogin(idToken);
+    await _limpiarPerfilDeOtraCuenta();
     await _tokenStorage.saveToken(session.accessToken);
     return session;
   }
@@ -80,6 +83,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String rol,
   }) async {
     final session = await _remote.googleRegister(idToken, rol);
+    await _limpiarPerfilDeOtraCuenta();
     await _tokenStorage.saveToken(session.accessToken);
     return session;
   }
@@ -105,6 +109,7 @@ class AuthRepositoryImpl implements AuthRepository {
         await _remote.resetPassword(correo, resetToken, nuevaContrasena);
     // Auto-login tras el reset: persiste el token igual que verifyTwoFactor.
     if (session != null) {
+      await _limpiarPerfilDeOtraCuenta();
       await _tokenStorage.saveToken(session.accessToken);
     }
     return session;
@@ -125,7 +130,16 @@ class AuthRepositoryImpl implements AuthRepository {
       // Si falla la red, intentar recuperar de local (best-effort).
       try {
         final db = await _localDatabase.database;
-        final maps = await db.query('perfil', limit: 1);
+        // Filtra por el usuario actual (el JWT ya identifica quién es): sin
+        // esto, si alguna vez quedaran filas de más de una cuenta en esta
+        // tabla, se devolvía la primera que SQLite trajera, sin garantía de
+        // que fuera la de la sesión activa.
+        final maps = await db.query(
+          'perfil',
+          where: 'id = ?',
+          whereArgs: [_tokenStorage.userId],
+          limit: 1,
+        );
         if (maps.isNotEmpty) {
           final perfil = PerfilEntity.fromJson(maps.first);
           _perfilCache = perfil;
@@ -161,9 +175,35 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// Borra CUALQUIER rastro de la cuenta anterior en el dispositivo (memoria +
+  /// SQLite local) antes de guardar el token de una cuenta nueva.
+  ///
+  /// Ninguna de estas tablas locales tiene columna de usuario — son cachés
+  /// "del dispositivo", no "de la cuenta". Sin esto, cambiar de cuenta (con
+  /// o sin `logout()` explícito de por medio) deja varias fugas reales:
+  /// - `_perfilCache` en memoria sigue vivo hasta el primer `forceRefresh`.
+  /// - `perfil` en SQLite: si la primera `/me/perfil` con el token nuevo
+  ///   falla por red, `getPerfil()` cae a este fallback — de la cuenta vieja.
+  /// - `proyectos` en SQLite: peor todavía — `ProyectoRepositoryImpl.listar()`
+  ///   ni siquiera llama al back-end si la tabla local ya tiene filas, así
+  ///   que la cuenta nueva ve los proyectos de la cuenta anterior a secas,
+  ///   sin red de por medio.
+  /// - `cotizaciones_pdf`: mismo patrón de caché offline por dispositivo.
+  Future<void> _limpiarPerfilDeOtraCuenta() async {
+    _perfilCache = null;
+    try {
+      final db = await _localDatabase.database;
+      await db.delete('perfil');
+      await db.delete('proyectos');
+      await db.delete('cotizaciones_pdf');
+    } catch (e) {
+      debugPrint('_limpiarPerfilDeOtraCuenta: no se pudo borrar local ($e).');
+    }
+  }
+
   @override
   Future<void> logout() async {
-    _perfilCache = null;
+    await _limpiarPerfilDeOtraCuenta();
     await _tokenStorage.clear();
   }
 }

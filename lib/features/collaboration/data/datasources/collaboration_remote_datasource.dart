@@ -1,14 +1,18 @@
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../domain/entities/invitacion_entity.dart';
-import '../../domain/entities/miembros_result_entity.dart';
+import '../../domain/entities/miembro_entity.dart';
 import '../../domain/entities/unirse_result_entity.dart';
 
 abstract class CollaborationRemoteDataSource {
-  Future<MiembrosResultEntity> obtenerMiembros(int proyectoId);
+  /// `GET /proyectos/{id}/miembros` devuelve un array plano de miembros —
+  /// NO trae `es_dueno` en ningún lado (ni en el nivel raíz ni por miembro):
+  /// eso solo lo trae `GET /proyectos` (por proyecto), así que quien llame
+  /// esto debe traer `esDueno` de ahí, no de esta respuesta.
+  Future<List<MiembroEntity>> obtenerMiembros(int proyectoId);
   Future<void> quitarMiembro(int proyectoId, int usuarioId);
   Future<InvitacionEntity> generarInvitacion(
-      int proyectoId, String rol, List<String>? correos);
+      int proyectoId, List<String>? correos);
   Future<List<InvitacionEntity>> obtenerInvitaciones(int proyectoId);
   Future<void> revocarInvitacion(int proyectoId, int invitacionId);
   Future<UnirseResultEntity> unirseAProyecto(String codigo);
@@ -21,10 +25,13 @@ class CollaborationRemoteDataSourceImpl
   CollaborationRemoteDataSourceImpl(this._client);
 
   @override
-  Future<MiembrosResultEntity> obtenerMiembros(int proyectoId) async {
-    final data = await _client.getJson(ApiConfig.proyectoMiembros(proyectoId),
-        auth: true);
-    return MiembrosResultEntity.fromJson(data);
+  Future<List<MiembroEntity>> obtenerMiembros(int proyectoId) async {
+    final data = await _client
+        .getJsonList(ApiConfig.proyectoMiembros(proyectoId), auth: true);
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map(MiembroEntity.fromJson)
+        .toList();
   }
 
   @override
@@ -35,9 +42,8 @@ class CollaborationRemoteDataSourceImpl
 
   @override
   Future<InvitacionEntity> generarInvitacion(
-      int proyectoId, String rol, List<String>? correos) async {
+      int proyectoId, List<String>? correos) async {
     final body = <String, dynamic>{
-      'rol_en_proyecto': rol,
       if (correos != null && correos.isNotEmpty) 'correos': correos,
     };
     final data = await _client.postJson(

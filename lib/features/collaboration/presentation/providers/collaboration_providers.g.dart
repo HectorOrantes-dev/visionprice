@@ -369,7 +369,7 @@ String _$unirseAProyectoUseCaseHash() =>
 final miembrosProvider = MiembrosNotifierFamily._();
 
 final class MiembrosNotifierProvider
-    extends $AsyncNotifierProvider<MiembrosNotifier, MiembrosResultEntity> {
+    extends $AsyncNotifierProvider<MiembrosNotifier, List<MiembroEntity>> {
   MiembrosNotifierProvider._(
       {required MiembrosNotifierFamily super.from, required int super.argument})
       : super(
@@ -405,12 +405,12 @@ final class MiembrosNotifierProvider
   }
 }
 
-String _$miembrosNotifierHash() => r'60c8266e29b2ab8b2899d3ce845e833dc68011de';
+String _$miembrosNotifierHash() => r'db58082082190b1e6960bdce11051e1cb4b33689';
 
 final class MiembrosNotifierFamily extends $Family
     with
-        $ClassFamilyOverride<MiembrosNotifier, AsyncValue<MiembrosResultEntity>,
-            MiembrosResultEntity, FutureOr<MiembrosResultEntity>, int> {
+        $ClassFamilyOverride<MiembrosNotifier, AsyncValue<List<MiembroEntity>>,
+            List<MiembroEntity>, FutureOr<List<MiembroEntity>>, int> {
   MiembrosNotifierFamily._()
       : super(
           retry: null,
@@ -429,21 +429,21 @@ final class MiembrosNotifierFamily extends $Family
   String toString() => r'miembrosProvider';
 }
 
-abstract class _$MiembrosNotifier extends $AsyncNotifier<MiembrosResultEntity> {
+abstract class _$MiembrosNotifier extends $AsyncNotifier<List<MiembroEntity>> {
   late final _$args = ref.$arg as int;
   int get proyectoId => _$args;
 
-  FutureOr<MiembrosResultEntity> build(
+  FutureOr<List<MiembroEntity>> build(
     int proyectoId,
   );
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref
-        as $Ref<AsyncValue<MiembrosResultEntity>, MiembrosResultEntity>;
+    final ref =
+        this.ref as $Ref<AsyncValue<List<MiembroEntity>>, List<MiembroEntity>>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<MiembrosResultEntity>, MiembrosResultEntity>,
-        AsyncValue<MiembrosResultEntity>,
+        AnyNotifier<AsyncValue<List<MiembroEntity>>, List<MiembroEntity>>,
+        AsyncValue<List<MiembroEntity>>,
         Object?,
         Object?>;
     return element.handleCreate(
@@ -619,7 +619,7 @@ final class GenerarInvitacionNotifierProvider extends $AsyncNotifierProvider<
 }
 
 String _$generarInvitacionNotifierHash() =>
-    r'add12a1e777aec3d2f393e0c4c201f77e5ddb121';
+    r'e1872a05e3f4af435d2c92c041245b95f713ea8c';
 
 abstract class _$GenerarInvitacionNotifier
     extends $AsyncNotifier<InvitacionEntity?> {

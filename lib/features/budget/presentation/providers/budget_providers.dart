@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/api_client_provider.dart';
 import '../../../../core/di/local_database_provider.dart';
+import '../../../../core/di/token_storage_provider.dart';
 import '../../data/datasources/cotizacion_pdf_local_datasource.dart';
 import '../../data/datasources/cotizacion_remote_datasource.dart';
 import '../../data/datasources/cotizacion_remote_datasource_impl.dart';
@@ -27,7 +28,8 @@ CotizacionRemoteDataSource cotizacionRemoteDataSource(Ref ref) =>
 
 @Riverpod(keepAlive: true)
 CotizacionPdfLocalDataSource cotizacionPdfLocalDataSource(Ref ref) =>
-    CotizacionPdfLocalDataSource(ref.watch(localDatabaseProvider));
+    CotizacionPdfLocalDataSource(
+        ref.watch(localDatabaseProvider), ref.watch(tokenStorageProvider));
 
 @Riverpod(keepAlive: true)
 CotizacionRepository cotizacionRepository(Ref ref) => CotizacionRepositoryImpl(

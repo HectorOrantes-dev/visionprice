@@ -54,17 +54,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   /// Cierra la sesión y regresa al login limpiando la pila de navegación.
-  void _logout({String? reason}) {
+  ///
+  /// OJO: espera a que la limpieza real termine (token + caché de perfil,
+  /// tanto en memoria como en SQLite local) ANTES de navegar. Antes esto era
+  /// "fire and forget" (no se esperaba), así que si el usuario alcanzaba a
+  /// entrar a Login/Registro y crear una cuenta nueva mientras ese cleanup
+  /// todavía corría en segundo plano, la cuenta B podía terminar leyendo
+  /// datos de perfil de la cuenta A (carrera real, no hipotética).
+  Future<void> _logout({String? reason}) async {
     final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     // Borra el device token de push y limpia la sesión (token + caché perfil).
-    // Se hace en orden: unregister primero (necesita el JWT) y luego logout.
+    // En orden: unregister primero (necesita el JWT) y luego logout.
     final deviceRegistrar = ref.read(deviceRegistrarProvider);
     final logoutUseCase = ref.read(logoutUseCaseProvider);
-    () async {
-      await deviceRegistrar.unregister();
-      await logoutUseCase.call();
-    }();
-    Navigator.of(context).pushAndRemoveUntil(
+    await deviceRegistrar.unregister();
+    await logoutUseCase.call();
+    if (!mounted) return;
+    navigator.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,
     );

@@ -4,7 +4,7 @@ import '../../../../core/di/api_client_provider.dart';
 import '../../data/datasources/collaboration_remote_datasource.dart';
 import '../../data/repositories/collaboration_repository_impl.dart';
 import '../../domain/entities/invitacion_entity.dart';
-import '../../domain/entities/miembros_result_entity.dart';
+import '../../domain/entities/miembro_entity.dart';
 import '../../domain/entities/unirse_result_entity.dart';
 import '../../domain/repositories/collaboration_repository.dart';
 import '../../domain/usecases/generar_invitacion_usecase.dart';
@@ -60,11 +60,11 @@ UnirseAProyectoUseCase unirseAProyectoUseCase(Ref ref) =>
 @riverpod
 class MiembrosNotifier extends _$MiembrosNotifier {
   @override
-  Future<MiembrosResultEntity> build(int proyectoId) async {
+  Future<List<MiembroEntity>> build(int proyectoId) async {
     return _fetch();
   }
 
-  Future<MiembrosResultEntity> _fetch() =>
+  Future<List<MiembroEntity>> _fetch() =>
       ref.read(obtenerMiembrosUseCaseProvider)(proyectoId);
 
   Future<void> recargar() async {
@@ -121,13 +121,11 @@ class GenerarInvitacionNotifier extends _$GenerarInvitacionNotifier {
   @override
   FutureOr<InvitacionEntity?> build() => null;
 
-  Future<void> generar(int proyectoId, String rol,
-      {List<String>? correos}) async {
+  Future<void> generar(int proyectoId, {List<String>? correos}) async {
     state = const AsyncLoading<InvitacionEntity?>();
     state = await AsyncValue.guard<InvitacionEntity?>(
       () => ref.read(generarInvitacionUseCaseProvider)(
         proyectoId,
-        rol,
         correos: correos,
       ),
     );

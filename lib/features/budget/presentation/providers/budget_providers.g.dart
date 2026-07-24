@@ -101,7 +101,7 @@ final class CotizacionPdfLocalDataSourceProvider extends $FunctionalProvider<
 }
 
 String _$cotizacionPdfLocalDataSourceHash() =>
-    r'5687b5085dd07696ac809e407debfc2baef45724';
+    r'cca42c72af62671b6bf001c2070bb899ecec2071';
 
 @ProviderFor(cotizacionRepository)
 final cotizacionRepositoryProvider = CotizacionRepositoryProvider._();

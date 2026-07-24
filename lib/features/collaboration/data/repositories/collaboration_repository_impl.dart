@@ -1,5 +1,5 @@
 import '../../domain/entities/invitacion_entity.dart';
-import '../../domain/entities/miembros_result_entity.dart';
+import '../../domain/entities/miembro_entity.dart';
 import '../../domain/entities/unirse_result_entity.dart';
 import '../../domain/repositories/collaboration_repository.dart';
 import '../datasources/collaboration_remote_datasource.dart';
@@ -13,7 +13,7 @@ class CollaborationRepositoryImpl implements CollaborationRepository {
   CollaborationRepositoryImpl(this._remote);
 
   @override
-  Future<MiembrosResultEntity> obtenerMiembros(int proyectoId) =>
+  Future<List<MiembroEntity>> obtenerMiembros(int proyectoId) =>
       _remote.obtenerMiembros(proyectoId);
 
   @override
@@ -23,10 +23,9 @@ class CollaborationRepositoryImpl implements CollaborationRepository {
   @override
   Future<InvitacionEntity> generarInvitacion(
     int proyectoId,
-    String rol,
     List<String>? correos,
   ) =>
-      _remote.generarInvitacion(proyectoId, rol, correos);
+      _remote.generarInvitacion(proyectoId, correos);
 
   @override
   Future<List<InvitacionEntity>> obtenerInvitaciones(int proyectoId) =>

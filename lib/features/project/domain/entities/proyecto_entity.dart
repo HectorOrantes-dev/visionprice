@@ -11,6 +11,10 @@ class ProyectoEntity {
   final double? latitud;
   final double? longitud;
 
+  /// `true` si el usuario actual es el dueño (lo creó) — `false` si es
+  /// colaborador invitado. Determina si puede invitar/gestionar el equipo.
+  final bool esDueno;
+
   const ProyectoEntity({
     required this.id,
     required this.nombre,
@@ -19,6 +23,7 @@ class ProyectoEntity {
     this.totalPresupuestos = 0,
     this.latitud,
     this.longitud,
+    this.esDueno = true,
   });
 
   /// `true` si la obra ya tiene ubicación (sirve para entrenar).
@@ -39,6 +44,8 @@ class ProyectoEntity {
           : int.tryParse('${json['total_presupuestos']}') ?? 0,
       latitud: d(json['latitud']),
       longitud: d(json['longitud']),
+      // Tolerante a bool (JSON del back-end) o 0/1 (fila de SQLite local).
+      esDueno: json['es_dueno'] == true || json['es_dueno'] == 1,
     );
   }
 
@@ -50,5 +57,6 @@ class ProyectoEntity {
         'total_presupuestos': totalPresupuestos,
         'latitud': latitud,
         'longitud': longitud,
+        'es_dueno': esDueno ? 1 : 0,
       };
 }
