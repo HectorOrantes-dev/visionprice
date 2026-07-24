@@ -4,6 +4,7 @@ import 'core/session/auth_state_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
+import 'features/security/presentation/screens/usb_debugging_gate.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -23,6 +24,10 @@ class App extends ConsumerWidget {
       // Toda la UI usa `context.colors`, así que el modo oscuro aplica de punta
       // a punta. Sigue el ajuste del sistema; el claro queda idéntico al actual.
       themeMode: ThemeMode.system,
+      // El gateway de Depuración USB envuelve toda la navegación de la app.
+      builder: (context, child) {
+        return UsbDebuggingGate(child: child ?? const SizedBox.shrink());
+      },
       home: loggedIn ? const HomeScreen() : const LoginScreen(),
     );
   }
