@@ -8,7 +8,7 @@ import 'app.dart';
 
 // Anti-screenshot / anti-grabación de pantalla en toda la app. En `false`
 // para poder tomar capturas (pruebas/documentación); `true` para producción.
-const bool kScreenProtectionEnabled = true;
+const bool kScreenProtectionEnabled = false;
 
 // main async para las operaciones de arranque (carga de token, push).
 void main() async {
