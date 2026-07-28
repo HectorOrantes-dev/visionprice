@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/utils/validation_mixin.dart';
 import '../../../../shared/widgets/field_label.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../../domain/entities/perfil_entity.dart';
@@ -28,13 +29,16 @@ class CompletarPerfilScreen extends ConsumerStatefulWidget {
       _CompletarPerfilScreenState();
 }
 
-class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen> {
+class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen>
+    with ValidationMixin {
   late final _nombreController =
       TextEditingController(text: widget.perfilActual.nombre);
   late final _telefonoController =
       TextEditingController(text: widget.perfilActual.telefono);
   bool _guardando = false;
   String? _error;
+  String? _errorNombre;
+  String? _errorTelefono;
 
   @override
   void dispose() {
@@ -45,18 +49,26 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen> {
 
   Future<void> _guardar() async {
     final nombre = _nombreController.text.trim();
-    if (nombre.length < 2) {
-      setState(() => _error = 'El nombre debe tener al menos 2 caracteres.');
+    final telefono = _telefonoController.text.trim();
+    final errorNombre = validateName(nombre);
+    final errorTelefono = validatePhone(telefono);
+    if (errorNombre != null || errorTelefono != null) {
+      setState(() {
+        _errorNombre = errorNombre;
+        _errorTelefono = errorTelefono;
+      });
       return;
     }
     setState(() {
       _guardando = true;
       _error = null;
+      _errorNombre = null;
+      _errorTelefono = null;
     });
     try {
       await ref.read(actualizarPerfilUseCaseProvider)(
         nombre: nombre,
-        telefono: _telefonoController.text.trim(),
+        telefono: telefono,
       );
       ref.invalidate(perfilProvider);
       if (!mounted) return;
@@ -106,6 +118,7 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen> {
                   hintText: 'Tu nombre completo',
                   prefixIcon: Icon(Icons.badge_outlined,
                       color: context.colors.textSecondary, size: 20),
+                  errorText: _errorNombre,
                 ),
               ),
               const SizedBox(height: 20),
@@ -118,6 +131,7 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen> {
                   hintText: '+52 55 1234 5678',
                   prefixIcon: Icon(Icons.phone_outlined,
                       color: context.colors.textSecondary, size: 20),
+                  errorText: _errorTelefono,
                 ),
               ),
               if (_error != null) ...[

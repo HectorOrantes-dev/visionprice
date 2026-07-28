@@ -34,6 +34,7 @@ class _CreateProjectSheetState extends State<CreateProjectSheet>
   final _direccionController = TextEditingController();
   bool _creating = false;
   String? _error;
+  String? _errorDireccion;
 
   @override
   void dispose() {
@@ -44,19 +45,25 @@ class _CreateProjectSheetState extends State<CreateProjectSheet>
 
   Future<void> _crear() async {
     final nombre = _nombreController.text.trim();
+    final direccion = _direccionController.text.trim();
     final nombreError = validateProjectName(nombre);
-    if (nombreError != null) {
-      setState(() => _error = nombreError);
+    final direccionError = validateOptionalText(direccion);
+    if (nombreError != null || direccionError != null) {
+      setState(() {
+        _error = nombreError;
+        _errorDireccion = direccionError;
+      });
       return;
     }
     setState(() {
       _creating = true;
       _error = null;
+      _errorDireccion = null;
     });
     try {
       await widget.notifier.crearProyecto(
         nombre: nombre,
-        direccion: _direccionController.text.trim(),
+        direccion: direccion,
       );
       if (mounted) Navigator.pop(context);
     } catch (_) {
@@ -121,6 +128,7 @@ class _CreateProjectSheetState extends State<CreateProjectSheet>
                 hintText: 'Ej. Col. Del Valle',
                 prefixIcon: Icon(Icons.location_on_outlined,
                     size: 20, color: context.colors.textSecondary),
+                errorText: _errorDireccion,
               ),
             ),
             const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/utils/validation_mixin.dart';
 import '../../../recording/presentation/providers/parameters_provider.dart';
 import 'budget_section_label.dart';
 
@@ -29,9 +30,10 @@ class ReviewTranscriptionCard extends ConsumerStatefulWidget {
 }
 
 class _ReviewTranscriptionCardState
-    extends ConsumerState<ReviewTranscriptionCard> {
+    extends ConsumerState<ReviewTranscriptionCard> with ValidationMixin {
   late TextEditingController _controller;
   bool _showRecalcular = false;
+  String? _errorTexto;
 
   @override
   void initState() {
@@ -69,10 +71,15 @@ class _ReviewTranscriptionCardState
   }
 
   void _recalcular() {
+    final texto = _controller.text;
+    final error = validateRequiredText(texto);
+    if (error != null) {
+      setState(() => _errorTexto = error);
+      return;
+    }
+    setState(() => _errorTexto = null);
     FocusScope.of(context).unfocus();
-    ref
-        .read(parametersProvider(widget.grabacionId).notifier)
-        .recalcular(_controller.text);
+    ref.read(parametersProvider(widget.grabacionId).notifier).recalcular(texto);
   }
 
   @override
@@ -103,7 +110,7 @@ class _ReviewTranscriptionCardState
               border: InputBorder.none,
             ),
           ),
-          if (widget.errorMessage != null) ...[
+          if (widget.errorMessage != null || _errorTexto != null) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -118,7 +125,7 @@ class _ReviewTranscriptionCardState
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      widget.errorMessage!,
+                      _errorTexto ?? widget.errorMessage!,
                       style:
                           TextStyle(fontSize: 12, color: context.colors.error),
                     ),

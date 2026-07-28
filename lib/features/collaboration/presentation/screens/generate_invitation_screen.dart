@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/validation_mixin.dart';
 import '../../../../shared/widgets/field_label.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../providers/collaboration_providers.dart';
@@ -24,8 +25,9 @@ class GenerateInvitationScreen extends ConsumerStatefulWidget {
 }
 
 class _GenerateInvitationScreenState
-    extends ConsumerState<GenerateInvitationScreen> {
+    extends ConsumerState<GenerateInvitationScreen> with ValidationMixin {
   final _emailController = TextEditingController();
+  String? _errorCorreos;
 
   @override
   void dispose() {
@@ -42,7 +44,13 @@ class _GenerateInvitationScreenState
           .map((e) => e.trim())
           .where((e) => e.isNotEmpty)
           .toList();
+      final error = validateEmailList(correos);
+      if (error != null) {
+        setState(() => _errorCorreos = error);
+        return;
+      }
     }
+    setState(() => _errorCorreos = null);
     await ref
         .read(generarInvitacionProvider.notifier)
         .generar(widget.proyectoId, correos: correos);
@@ -99,6 +107,8 @@ class _GenerateInvitationScreenState
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(color: c.border),
                   ),
+                  errorText: _errorCorreos,
+                  errorMaxLines: 2,
                 ),
               ),
               const SizedBox(height: 24),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/validation_mixin.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../../../home/presentation/providers/home_provider.dart';
 import '../providers/collaboration_providers.dart';
@@ -16,8 +17,10 @@ class JoinProjectScreen extends ConsumerStatefulWidget {
   ConsumerState<JoinProjectScreen> createState() => _JoinProjectScreenState();
 }
 
-class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen> {
+class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen>
+    with ValidationMixin {
   final _codeController = TextEditingController();
+  String? _errorCodigo;
 
   @override
   void dispose() {
@@ -27,7 +30,12 @@ class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen> {
 
   Future<void> _unirse() async {
     final code = _codeController.text.trim().toUpperCase();
-    if (code.isEmpty) return;
+    final error = validateCode(code);
+    if (error != null) {
+      setState(() => _errorCodigo = error);
+      return;
+    }
+    setState(() => _errorCodigo = null);
     await ref.read(unirseAProyectoProvider.notifier).unirse(code);
     // El proyecto nuevo debe aparecer en "Mis proyectos" al volver a la home.
     final unido = ref.read(unirseAProyectoProvider).value;
@@ -111,6 +119,7 @@ class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen> {
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(color: c.border),
                   ),
+                  errorText: _errorCodigo,
                 ),
               ),
               const SizedBox(height: 20),
