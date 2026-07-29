@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/utils/text_formatters.dart';
 import '../../../../core/utils/validation_mixin.dart';
 import '../../../../shared/widgets/field_label.dart';
 import '../../../../shared/widgets/gradient_button.dart';
@@ -39,6 +41,15 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen>
   String? _error;
   String? _errorNombre;
   String? _errorTelefono;
+  bool _nombreTocado = false;
+  bool _telefonoTocado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nombreController.addListener(_onNombreChanged);
+    _telefonoController.addListener(_onTelefonoChanged);
+  }
 
   @override
   void dispose() {
@@ -47,23 +58,26 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen>
     super.dispose();
   }
 
+  void _onNombreChanged() {
+    _nombreTocado = true;
+    setState(() => _errorNombre = validateName(_nombreController.text));
+  }
+
+  void _onTelefonoChanged() {
+    _telefonoTocado = true;
+    setState(() => _errorTelefono = validatePhone(_telefonoController.text));
+  }
+
+  bool get _formularioValido =>
+      validateName(_nombreController.text) == null &&
+      validatePhone(_telefonoController.text) == null;
+
   Future<void> _guardar() async {
     final nombre = _nombreController.text.trim();
     final telefono = _telefonoController.text.trim();
-    final errorNombre = validateName(nombre);
-    final errorTelefono = validatePhone(telefono);
-    if (errorNombre != null || errorTelefono != null) {
-      setState(() {
-        _errorNombre = errorNombre;
-        _errorTelefono = errorTelefono;
-      });
-      return;
-    }
     setState(() {
       _guardando = true;
       _error = null;
-      _errorNombre = null;
-      _errorTelefono = null;
     });
     try {
       await ref.read(actualizarPerfilUseCaseProvider)(
@@ -114,11 +128,12 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen>
               TextField(
                 controller: _nombreController,
                 textCapitalization: TextCapitalization.words,
+                inputFormatters: kNoSymbolsFormatters,
                 decoration: InputDecoration(
                   hintText: 'Tu nombre completo',
                   prefixIcon: Icon(Icons.badge_outlined,
                       color: context.colors.textSecondary, size: 20),
-                  errorText: _errorNombre,
+                  errorText: _nombreTocado ? _errorNombre : null,
                 ),
               ),
               const SizedBox(height: 20),
@@ -127,11 +142,14 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen>
               TextField(
                 controller: _telefonoController,
                 keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-\s()]')),
+                ],
                 decoration: InputDecoration(
                   hintText: '+52 55 1234 5678',
                   prefixIcon: Icon(Icons.phone_outlined,
                       color: context.colors.textSecondary, size: 20),
-                  errorText: _errorTelefono,
+                  errorText: _telefonoTocado ? _errorTelefono : null,
                 ),
               ),
               if (_error != null) ...[
@@ -142,7 +160,7 @@ class _CompletarPerfilScreenState extends ConsumerState<CompletarPerfilScreen>
               ],
               const SizedBox(height: 28),
               GradientButton(
-                onPressed: _guardando ? null : _guardar,
+                onPressed: (_guardando || !_formularioValido) ? null : _guardar,
                 child: _guardando
                     ? const SizedBox(
                         width: 20,

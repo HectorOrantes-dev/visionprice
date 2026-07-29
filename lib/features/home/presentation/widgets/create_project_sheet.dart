@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/text_formatters.dart';
 import '../../../../core/utils/validation_mixin.dart';
 import '../../../../shared/widgets/gradient_button.dart';
 import '../providers/home_provider.dart';
@@ -33,8 +34,20 @@ class _CreateProjectSheetState extends State<CreateProjectSheet>
   final _nombreController = TextEditingController();
   final _direccionController = TextEditingController();
   bool _creating = false;
+  // Empiezan en `null` (campo intacto, sin tocar) para no gritarle "obligatorio"
+  // al usuario antes de que escriba nada; en cuanto escribe algo una vez, se
+  // revalida en cada tecla (ver _onNombreChanged/_onDireccionChanged).
   String? _error;
   String? _errorDireccion;
+  bool _nombreTocado = false;
+  bool _direccionTocada = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nombreController.addListener(_onNombreChanged);
+    _direccionController.addListener(_onDireccionChanged);
+  }
 
   @override
   void dispose() {
@@ -43,18 +56,26 @@ class _CreateProjectSheetState extends State<CreateProjectSheet>
     super.dispose();
   }
 
+  void _onNombreChanged() {
+    if (!_nombreTocado) _nombreTocado = true;
+    setState(() => _error = validateProjectName(_nombreController.text));
+  }
+
+  void _onDireccionChanged() {
+    if (!_direccionTocada) _direccionTocada = true;
+    setState(() =>
+        _errorDireccion = validateOptionalText(_direccionController.text));
+  }
+
+  /// Habilita "Crear proyecto" solo con datos ya válidos — la validación real
+  /// pasa mientras el usuario escribe (arriba), esto solo bloquea el botón.
+  bool get _formularioValido =>
+      validateProjectName(_nombreController.text) == null &&
+      validateOptionalText(_direccionController.text) == null;
+
   Future<void> _crear() async {
     final nombre = _nombreController.text.trim();
     final direccion = _direccionController.text.trim();
-    final nombreError = validateProjectName(nombre);
-    final direccionError = validateOptionalText(direccion);
-    if (nombreError != null || direccionError != null) {
-      setState(() {
-        _error = nombreError;
-        _errorDireccion = direccionError;
-      });
-      return;
-    }
     setState(() {
       _creating = true;
       _error = null;
@@ -111,30 +132,32 @@ class _CreateProjectSheetState extends State<CreateProjectSheet>
             TextField(
               controller: _nombreController,
               textCapitalization: TextCapitalization.words,
+              inputFormatters: kNoSymbolsFormatters,
               decoration: InputDecoration(
                 labelText: 'Nombre',
                 hintText: 'Ej. Casa Polanco',
                 prefixIcon: Icon(Icons.create_new_folder_outlined,
                     size: 20, color: context.colors.textSecondary),
-                errorText: _error,
+                errorText: _nombreTocado ? _error : null,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _direccionController,
               textCapitalization: TextCapitalization.sentences,
+              inputFormatters: kNoSymbolsFormatters,
               decoration: InputDecoration(
                 labelText: 'Dirección (opcional)',
                 hintText: 'Ej. Col. Del Valle',
                 prefixIcon: Icon(Icons.location_on_outlined,
                     size: 20, color: context.colors.textSecondary),
-                errorText: _errorDireccion,
+                errorText: _direccionTocada ? _errorDireccion : null,
               ),
             ),
             const SizedBox(height: 16),
             GradientButton(
               height: 48,
-              onPressed: _creating ? null : _crear,
+              onPressed: (_creating || !_formularioValido) ? null : _crear,
               child: _creating
                   ? const SizedBox(
                       width: 18,

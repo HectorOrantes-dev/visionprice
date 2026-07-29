@@ -21,14 +21,32 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
 
   @override
   Future<List<ProyectoEntity>> listar() async {
-    final db = await _localDatabase.database;
     final usuarioId = _usuarioId;
     // Remoto primero, SIEMPRE — antes esto se saltaba la red por completo en
     // cuanto la tabla local tenía una fila, así que una vez creado un solo
     // proyecto la lista dejaba de refrescarse para siempre. Local solo como
     // fallback si de verdad falla la red.
+    //
+    // OJO: la BD local se toca solo DENTRO de los try/catch (nunca antes) —
+    // en Flutter Web `sqflite` no tiene backend real y tronaba ahí mismo,
+    // impidiendo que se intentara siquiera la llamada de red.
+    List<ProyectoEntity> proyectos;
     try {
-      final proyectos = await _remote.listar();
+      proyectos = await _remote.listar();
+    } catch (e) {
+      debugPrint('PROYECTOS ERROR (repo.listar): $e — uso caché local.');
+      try {
+        final db = await _localDatabase.database;
+        return await _leerProyectosLocales(db, usuarioId);
+      } catch (_) {
+        rethrow; // sin red ni local → propaga el error original de red
+      }
+    }
+
+    // Cachear localmente es best-effort: si falla (p. ej. web), no debe
+    // tirar la lista recién bajada del back-end.
+    try {
+      final db = await _localDatabase.database;
       final batch = db.batch();
       for (var p in proyectos) {
         final map = p.toJson();
@@ -42,8 +60,8 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
       // Incluye los creados offline que aún no se hayan sincronizado.
       return await _leerProyectosLocales(db, usuarioId);
     } catch (e) {
-      debugPrint('PROYECTOS ERROR (repo.listar): $e — uso caché local.');
-      return await _leerProyectosLocales(db, usuarioId);
+      debugPrint('PROYECTOS: no se pudo cachear localmente ($e).');
+      return proyectos;
     }
   }
 
@@ -73,16 +91,29 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
         latitud: latitud,
         longitud: longitud,
       );
-      final db = await _localDatabase.database;
-      final map = proyecto.toJson();
-      map['is_synced'] = 1;
-      map['usuario_id'] = usuarioId;
-      await db.insert('proyectos', map,
-          conflictAlgorithm: ConflictAlgorithm.replace);
+      // Cachear localmente es best-effort: no debe tirar la creación remota
+      // que sí funcionó (p. ej. en Flutter Web, donde no hay sqflite real).
+      try {
+        final db = await _localDatabase.database;
+        final map = proyecto.toJson();
+        map['is_synced'] = 1;
+        map['usuario_id'] = usuarioId;
+        await db.insert('proyectos', map,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      } catch (e) {
+        debugPrint('PROYECTOS: no se pudo cachear el nuevo proyecto ($e).');
+      }
       return proyecto;
     } catch (e) {
-      // Creación offline
-      final db = await _localDatabase.database;
+      // Sin red: creación offline, pendiente de sincronizar. Si tampoco hay
+      // BD local (web), no hay forma de "crear offline" — se propaga el
+      // error original de red en vez de fingir éxito o tronar sin capturar.
+      final Database db;
+      try {
+        db = await _localDatabase.database;
+      } catch (_) {
+        throw e;
+      }
 
       // Generamos un ID negativo temporal basado en el tiempo
       final offlineId = -DateTime.now().millisecondsSinceEpoch;
@@ -117,12 +148,17 @@ class ProyectoRepositoryImpl implements ProyectoRepository {
       latitud: latitud,
       longitud: longitud,
     );
-    final db = await _localDatabase.database;
-    final map = proyecto.toJson();
-    map['is_synced'] = 1;
-    map['usuario_id'] = _usuarioId;
-    await db.insert('proyectos', map,
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    // Best-effort: no debe tirar la actualización remota que sí funcionó.
+    try {
+      final db = await _localDatabase.database;
+      final map = proyecto.toJson();
+      map['is_synced'] = 1;
+      map['usuario_id'] = _usuarioId;
+      await db.insert('proyectos', map,
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      debugPrint('PROYECTOS: no se pudo cachear la ubicación ($e).');
+    }
     return proyecto;
   }
 }

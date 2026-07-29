@@ -151,8 +151,11 @@ class _InvitacionTile extends StatelessWidget {
             children: [
               Icon(Icons.schedule, size: 14, color: c.textSecondary),
               const SizedBox(width: 4),
-              Text('Expira en ${_texto(inv.expiraEn)}',
-                  style: TextStyle(fontSize: 12, color: c.textSecondary)),
+              Flexible(
+                child: Text('Expira en ${_texto(inv.expiraEn)}',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12, color: c.textSecondary)),
+              ),
               const SizedBox(width: 14),
               Icon(Icons.people_outline, size: 14, color: c.textSecondary),
               const SizedBox(width: 4),

@@ -30,27 +30,30 @@ class _GenerateInvitationScreenState
   String? _errorCorreos;
 
   @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_onCorreosChanged);
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
   }
 
+  List<String> _parseCorreos() => _emailController.text
+      .trim()
+      .split(',')
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
+      .toList();
+
+  void _onCorreosChanged() {
+    setState(() => _errorCorreos = validateEmailList(_parseCorreos()));
+  }
+
   Future<void> _generar() async {
-    List<String>? correos;
-    final raw = _emailController.text.trim();
-    if (raw.isNotEmpty) {
-      correos = raw
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
-      final error = validateEmailList(correos);
-      if (error != null) {
-        setState(() => _errorCorreos = error);
-        return;
-      }
-    }
-    setState(() => _errorCorreos = null);
+    final correos = _parseCorreos();
     await ref
         .read(generarInvitacionProvider.notifier)
         .generar(widget.proyectoId, correos: correos);
@@ -116,7 +119,7 @@ class _GenerateInvitationScreenState
                 data: (inv) => inv == null
                     ? GradientButton(
                         height: 52,
-                        onPressed: _generar,
+                        onPressed: _errorCorreos == null ? _generar : null,
                         child: const Text('Generar código'),
                       )
                     : _CodigoCard(

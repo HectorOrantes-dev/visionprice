@@ -9,12 +9,22 @@ import 'package:google_sign_in/google_sign_in.dart';
 class GoogleSignInService {
   GoogleSignInService._();
 
-  static bool _initialized = false;
+  /// Se guarda el `Future` en sí (no un `bool` puesto en `true` DESPUÉS del
+  /// `await`) — con un `bool`, dos llamadas casi simultáneas (doble tap en
+  /// "Google", o reintentar rápido) ven `_initialized == false` las dos y
+  /// ambas llaman a `GoogleSignIn.instance.initialize()`, que en la segunda
+  /// vez truena con "Bad state: init() has already been called." Cacheando
+  /// el `Future`, la segunda llamada espera la MISMA inicialización en vez
+  /// de disparar una nueva.
+  static Future<void>? _initFuture;
 
-  static Future<void> initialize() async {
-    if (_initialized) return;
-    await GoogleSignIn.instance.initialize();
-    _initialized = true;
+  static Future<void> initialize() {
+    return _initFuture ??= GoogleSignIn.instance.initialize().catchError((e) {
+      // Si falla, se limpia el caché para poder reintentar en la próxima
+      // llamada en vez de quedar atascado con un Future ya fallido.
+      _initFuture = null;
+      throw e;
+    });
   }
 
   /// Abre el selector de cuenta de Google y devuelve el `idToken` (el mismo

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_config.dart';
 import '../../../../core/storage/token_storage.dart';
@@ -105,9 +106,17 @@ class SyncService extends ChangeNotifier {
   }
 
   Future<void> _syncPendingProjects() async {
-    final db = await _localDatabase.database;
-    final pendingProjects =
-        await db.query('proyectos', where: 'is_synced = ?', whereArgs: [0]);
+    final Database db;
+    final List<Map<String, dynamic>> pendingProjects;
+    try {
+      db = await _localDatabase.database;
+      pendingProjects =
+          await db.query('proyectos', where: 'is_synced = ?', whereArgs: [0]);
+    } catch (e) {
+      // Sin BD local (p. ej. Flutter Web): no hay proyectos offline que
+      // sincronizar — no debe tronar el resto del ciclo de sync.
+      return;
+    }
 
     for (var p in pendingProjects) {
       try {

@@ -40,6 +40,17 @@ class NotificationService {
 
   /// Inicializa Firebase + notificaciones locales + listeners. Nunca lanza.
   static Future<void> init() async {
+    // En Flutter Web no hay `FirebaseOptions` configuradas (no se usa push
+    // ahí) — `Firebase.initializeApp()` en `firebase_core_web` lanza un
+    // `AssertionError` en un punto que NO queda contenido por este
+    // try/catch (interop de JS), lo que llegó a inestabilizar el propio
+    // compilador de desarrollo (DDC) en `flutter run -d chrome`. Se evita
+    // el problema de raíz sin siquiera intentar la llamada en web.
+    if (kIsWeb) {
+      debugPrint('⚠️ Firebase Web no configurado — push deshabilitado.');
+      _firebaseReady = false;
+      return;
+    }
     try {
       await Firebase.initializeApp();
       _firebaseReady = true;

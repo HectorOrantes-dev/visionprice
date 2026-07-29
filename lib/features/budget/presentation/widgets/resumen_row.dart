@@ -20,23 +20,32 @@ class ResumenRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: emphasize ? 15 : 14,
-            fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
-            color: emphasize
-                ? context.colors.textPrimary
-                : context.colors.textSecondary,
+        Flexible(
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: emphasize ? 15 : 14,
+              fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
+              color: emphasize
+                  ? context.colors.textPrimary
+                  : context.colors.textSecondary,
+            ),
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: emphasize ? 18 : 14,
-            fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
-            color:
-                emphasize ? context.colors.primary : context.colors.textPrimary,
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontSize: emphasize ? 18 : 14,
+              fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
+              color: emphasize
+                  ? context.colors.primary
+                  : context.colors.textPrimary,
+            ),
           ),
         ),
       ],

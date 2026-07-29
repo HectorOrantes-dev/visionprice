@@ -18,15 +18,22 @@ class SubscriptionInfoRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Text(label,
-              style:
-                  TextStyle(fontSize: 13, color: context.colors.textSecondary)),
+          Flexible(
+            child: Text(label,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontSize: 13, color: context.colors.textSecondary)),
+          ),
           const Spacer(),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textPrimary)),
+          Flexible(
+            child: Text(value,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textPrimary)),
+          ),
         ],
       ),
     );

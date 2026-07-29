@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
@@ -21,6 +22,13 @@ class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen>
     with ValidationMixin {
   final _codeController = TextEditingController();
   String? _errorCodigo;
+  bool _codigoTocado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _codeController.addListener(_onCodeChanged);
+  }
 
   @override
   void dispose() {
@@ -28,14 +36,15 @@ class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen>
     super.dispose();
   }
 
+  void _onCodeChanged() {
+    _codigoTocado = true;
+    setState(() => _errorCodigo = validateCode(_codeController.text));
+  }
+
+  bool get _formularioValido => validateCode(_codeController.text) == null;
+
   Future<void> _unirse() async {
     final code = _codeController.text.trim().toUpperCase();
-    final error = validateCode(code);
-    if (error != null) {
-      setState(() => _errorCodigo = error);
-      return;
-    }
-    setState(() => _errorCodigo = null);
     await ref.read(unirseAProyectoProvider.notifier).unirse(code);
     // El proyecto nuevo debe aparecer en "Mis proyectos" al volver a la home.
     final unido = ref.read(unirseAProyectoProvider).value;
@@ -101,6 +110,9 @@ class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen>
                 controller: _codeController,
                 textAlign: TextAlign.center,
                 textCapitalization: TextCapitalization.characters,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                ],
                 style: TextStyle(
                     fontSize: 22,
                     letterSpacing: 3,
@@ -119,7 +131,7 @@ class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen>
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(color: c.border),
                   ),
-                  errorText: _errorCodigo,
+                  errorText: _codigoTocado ? _errorCodigo : null,
                 ),
               ),
               const SizedBox(height: 20),
@@ -127,7 +139,7 @@ class _JoinProjectScreenState extends ConsumerState<JoinProjectScreen>
                 data: (result) => result == null
                     ? GradientButton(
                         height: 52,
-                        onPressed: _unirse,
+                        onPressed: _formularioValido ? _unirse : null,
                         child: const Text('Unirme'),
                       )
                     : _Exito(
