@@ -1,3 +1,4 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/session/auth_state_provider.dart';
@@ -25,15 +26,19 @@ class App extends ConsumerWidget {
       // Toda la UI usa `context.colors`, así que el modo oscuro aplica de punta
       // a punta. Sigue el ajuste del sistema; el claro queda idéntico al actual.
       themeMode: ThemeMode.system,
+      // Locale que DevicePreview (ver main.dart) deja elegir desde su panel.
+      locale: DevicePreview.locale(context),
       // El gateway de Depuración USB envuelve toda la navegación de la app;
       // ResponsiveAppWrapper centra el contenido en pantallas anchas
       // (tablet/escritorio/web) en vez de estirarlo de borde a borde — un
       // solo lugar para que TODAS las pantallas queden responsive, sin tener
-      // que tocar cada una por separado.
+      // que tocar cada una por separado. DevicePreview.appBuilder agrega el
+      // marco/toolbar del dispositivo simulado alrededor de todo eso.
       builder: (context, child) {
-        return ResponsiveAppWrapper(
+        final content = ResponsiveAppWrapper(
           child: UsbDebuggingGate(child: child ?? const SizedBox.shrink()),
         );
+        return DevicePreview.appBuilder(context, content);
       },
       home: loggedIn ? const HomeScreen() : const LoginScreen(),
     );

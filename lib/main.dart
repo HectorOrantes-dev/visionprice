@@ -1,3 +1,5 @@
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/di/token_storage_provider.dart';
@@ -33,10 +35,17 @@ void main() async {
     container.read(deviceRegistrarProvider).register();
   }
 
+  // DevicePreview: simula distintos tamaños de pantalla (celular/tablet/
+  // escritorio) dentro de una sola ventana, para probar el layout responsive
+  // sin tener que abrir cada dispositivo real. Solo en debug — nunca en
+  // release, para no meter la barra de herramientas de preview a producción.
   runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const App(),
+    DevicePreview(
+      enabled: kDebugMode,
+      builder: (context) => UncontrolledProviderScope(
+        container: container,
+        child: const App(),
+      ),
     ),
   );
 }
